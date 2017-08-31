@@ -1,0 +1,81 @@
+@import '../../../node_modules/bourbon/app/assets/stylesheets/bourbon';
+
+// Colors.
+
+$bg-color-1: #1b1d1f;
+$bg-color-2: #1d1f21;
+$box-shadow-color: #282828;
+
+$tab-title-color: #fff;
+$tab-close-color: #cfcfcf;
+
+$tab-background-svg-bg-color: #373737;
+$tab-background-svg-current-bg-color: #505050;
+$tab-background-svg-shadow-color: rgba(0, 0, 0, 0.5);
+
+$bottom-line-bg-color: #505050;
+$bottom-line-box-shadow-color: rgba(0, 0, 0, 0.5);
+
+$views-bg-color: #151515;
+
+// Styles.
+
+.chrome-tabs.-dark-theme {
+  > .-bar {
+    box-shadow:               0 0.05em $box-shadow-color;
+    background:               linear-gradient($bg-color-1, $bg-color-2);
+
+    > .-content {
+      > .-tab {
+        .-favicon {
+          &[data-favicon='loading'] {
+            background-image: url('../images/loading-favicon-dark.gif');
+          }
+
+          &[data-favicon='default'] {
+            background-image: url('../images/default-favicon-dark.svg');
+          }
+        }
+
+        > .-title {
+          color:              $tab-title-color;
+        }
+
+        > .-close:not(:hover) {
+          color:              $tab-close-color;
+        }
+
+        > .-background {
+          > svg {
+            .-background {
+              fill:           $tab-background-svg-bg-color;
+            }
+
+            .-shadow {
+              stroke:         $tab-background-svg-shadow-color;
+            }
+          }
+        }
+
+        &.-current {
+          > .-background {
+            > svg {
+              .-background {
+                fill:         $tab-background-svg-current-bg-color;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    > .-bottom-line {
+      background:             $bottom-line-bg-color;
+      box-shadow:             0 -0.05em $bottom-line-box-shadow-color;
+    }
+  }
+
+  > .-views {
+    background-color:         $views-bg-color;
+  }
+}

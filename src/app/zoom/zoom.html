@@ -1,0 +1,16 @@
+<div class="form-group zoom" style="width: 0px;">
+	<div class="input-group">
+		<div class="input-group-btn">
+			<button class="btn btn-default btnMinus" type="button" ng-click="zoomCtrl.zoomOut()">-</button>
+		</div>
+		<div class="position:relative;">
+			<input name="zoom" type="text"
+				ng-model-options="{updateOn: 'change blur'}" update-model-on-enter-pressed 
+				ng-model="zoomCtrl.zoom" ng-change="zoomCtrl.zoomChange(zoomCtrl.zoom)" numeric precision="2" min="0"> <span
+				class="percentSuffix">%</span>
+		</div>
+		<div class="input-group-btn">
+			<button class="btn btn-default btnPlus" type="button" ng-click="zoomCtrl.zoomIn()">+</button>
+		</div>
+	</div>
+</div>

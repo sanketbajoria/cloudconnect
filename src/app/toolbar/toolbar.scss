@@ -1,0 +1,10 @@
+.floating-toolbar {
+    position: absolute;
+    top: 50px;
+    z-index: 9999;
+}
+
+
+.floating-toolbar.collapsed .heading{
+    border-radius: 64px !important;
+}
