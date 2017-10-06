@@ -1,0 +1,53 @@
+<div class="modal-header modal-header-galaxy">
+    <button type="button" class="close" data-dismiss="modal" ng-click="profileCtrl.no()">&times;</button>
+    <h5>{{!profileCtrl.editMode?'Add':'Edit'}} Profile</h5>
+</div>
+<div class="modal-body">
+    <form name="profile" novalidate class="form-horizontal">
+        <div class="form-group form-group-sm">
+            <label for="name" class="control-label col-sm-3">Name:</label>
+            <div class="col-sm-9">
+                <input type="text" class="form-control input-sm" id="name" ng-model="profileCtrl.profile.name" required>
+            </div>
+        </div>
+        <div class="form-group form-group-sm">
+            <label for="type" class="control-label col-sm-3">Type:</label>
+            <div class="col-sm-9">
+                <select class="form-control input-sm" id="type" ng-model="profileCtrl.profile.type" ng-options="k as v.label for (k,v) in profileCtrl.config.profile.types"
+                    required>
+                    <option value="">--Select--</option>
+                </select>
+            </div>
+        </div>
+        <div ng-if="profileCtrl.profile.type == 'aws'">
+            <div class="form-group form-group-sm">
+                <label for="accessKey" class="control-label col-sm-3">Access Key:</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control input-sm" id="accessKey" ng-model="profileCtrl.profile.aws.accessKey" required>
+                </div>
+            </div>
+            <div class="form-group form-group-sm has-feedback">
+                <label for="secretKey" class="control-label col-sm-3">Secret Key:</label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <input type="{{profileCtrl.showSecret?'text':'password'}}" class="form-control input-sm" id="secretKey" ng-model="profileCtrl.profile.aws.secretKey" required>
+                        <span class="input-group-addon" ng-click="profileCtrl.showSecret=!profileCtrl.showSecret">
+                            <i class="fa" ng-class="profileCtrl.showSecret?'fa-eye':'fa-eye-slash'"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group form-group-sm">
+                <label for="region" class="control-label col-sm-3">Region:</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control input-sm" id="region" ng-model="profileCtrl.profile.aws.region" required>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="modal-footer modal-footer-galaxy">
+    <button type="button" class="btn btn-default btn-sm pull-left" ng-if="profileCtrl.profile.type && profileCtrl.profile.type != 'generic'" ng-disabled="profile.$invalid" ng-click="profileCtrl.testConnection()">Test Connection</button>
+    <button type="button" class="btn btn-default btn-sm" ng-click="profileCtrl.no()">Cancel</button>
+    <button type="button" class="btn btn-primary btn-sm" ng-disabled="profile.$invalid" ng-click="profileCtrl.saveProfile()">Save</button>
+</div>

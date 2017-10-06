@@ -1,27 +1,54 @@
 module.exports = {
-    createUrl: function(s){
-        if(this.getPort(s)){
-            return `${s.protocol}://${this.getHost(s)}:${this.getPort(s)}`; 
-        }else{
-            return `${s.protocol}://${this.getHost(s)}`; 
+    createUrl: function (s) {
+        if (this.getPort(s)) {
+            return `${this.getProtocol(s)}://${this.getHost(s)}:${this.getPort(s)}`;
+        } else {
+            return `${this.getProtocol(s)}://${this.getHost(s)}`;
         }
     },
-    getPort: function(s){
-        if(s._tunnel && s.tunnel)
+    getPort: function (s) {
+        if (s._tunnel && this.isForwardConnection(s))
             return s._tunnel.localPort;
         return s.port;
     },
-    getHost: function(s){
-        if(s.protocol === "file://"){
-            return __dirname + "/../" + s.host;
-        }else{
-            return (s._tunnel && s.tunnel)?"localhost":s.host;
+    getHost: function (s) {
+        if (this.isTerminalType(s)) {
+            return __dirname + "/../term/index.html";
+        } else {
+            return (s._tunnel && this.isForwardConnection(s)) ? "localhost" : s.host;
         }
     },
-    createCouchUrl: function(s){
-        return `${s.protocol}://localhost:${s._couch.port}`; 
+    getProtocol: function (s) {
+        if (this.isTerminalType(s)) {
+            return "file";
+        }
+        return s.protocol || "http";
     },
-    createProxyUrl: function(port){
+    createCouchUrl: function (s) {
+        return `${s.protocol}://localhost:${s._couch.port}`;
+    },
+    createScullogUrl: function (s) {
+        return `http://localhost:${s._scullog.port}`;
+    },
+    createProxyUrl: function (port) {
         return `socks5://localhost:${port}`;
+    },
+    isCouchDBType: function (s) {
+        return s.type === "couchdb"
+    },
+    isTerminalType: function (s) {
+        return s.type === "terminal"
+    },
+    isScullogType: function (s) {
+        return s.type === "scullog"
+    },
+    isForwardConnection: function (s) {
+        return s.connection && s.connection.type === "forward";
+    },
+    isSocksConnection: function (s) {
+        return s.connection && s.connection.type === "socks";
+    },
+    isDirectConnection: function (s) {
+        return s.connection && s.connection.type === "direct";
     }
 }

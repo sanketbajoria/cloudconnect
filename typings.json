@@ -2,6 +2,7 @@
   "globalDependencies": {
     "bootstrap": "registry:dt/bootstrap#3.3.5+20160726204056",
     "cli-color": "registry:dt/cli-color#0.3.2+20161128184045",
-    "get-port": "registry:dt/get-port#0.0.0+20161005184000"
+    "get-port": "registry:dt/get-port#0.0.0+20161005184000",
+    "lokijs": "registry:dt/lokijs#1.2.5+20161128184045"
   }
 }

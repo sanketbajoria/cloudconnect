@@ -26,7 +26,7 @@ a {
 .container-fluid.content {
   position: absolute;
   left: 0px;
-  top: 50px;
+  top: 0px;
   width: 100%;
   height: 100%;
 }
@@ -39,7 +39,8 @@ a {
 }
 .mainview {
   padding: 0px;
-  padding-left: 2px;
+  padding-left: 1px;
+  background: linear-gradient(#dad9da, #d9d8d9);
 }
 
 .top-navview.navbar.navbar-inverse{
@@ -53,6 +54,14 @@ a {
   color:#e1ffff;
   float: left;
   margin-right: 18px;
+}
+
+.sidebarBtn{
+  position: absolute;
+  z-index: 100;
+  left: 0px;
+  top: -4px;
+  padding: 15px 12px 6px 12px;
 }
 
 .toolbar {
@@ -91,8 +100,8 @@ a {
   display: none;
 }
 
-.navview ul,
-.navview li {
+.navview ul.item,
+.navview li.item {
   list-style: none;
   padding: 0px;
   margin: 0px;
@@ -100,32 +109,31 @@ a {
   cursor: pointer;
 }
 
-.navview ul .arrow,
-.navview li .arrow {
-  padding-left: 10px;
-  padding-right: 10px;
+.navview ul.item .arrow,
+.navview li.item .arrow {
   vertical-align: middle;
   float: right;
+  margin-right: 12px;
 }
 
-.navview ul .active,
-.navview li .active {
+.navview ul.item .active,
+.navview li.item .active {
   border-left: 3px solid #d19b3d;
   background-color: #4f5b69;
 }
 
-.navview ul .sub-menu li.active,
-.navview li .sub-menu li.active {
+.navview ul.item .sub-menu li.active,
+.navview li.item .sub-menu li.active {
   color: #d19b3d;
 }
 
-.navview ul .sub-menu li.active a,
-.navview li .sub-menu li.active a {
+.navview ul.item .sub-menu li.active a,
+.navview li.item .sub-menu li.active a {
   color: #d19b3d;
 }
 
-.navview ul .sub-menu li,
-.navview li .sub-menu li {
+.navview ul.item .sub-menu li,
+.navview li.item .sub-menu li {
   background-color: #181c20;
   border: none;
   line-height: 28px;
@@ -133,13 +141,13 @@ a {
   margin-left: 0px;
 }
 
-.navview ul .sub-menu li:hover,
-.navview li .sub-menu li:hover {
+.navview ul.item .sub-menu li:hover,
+.navview li.item .sub-menu li:hover {
   background-color: #020203;
 }
 
-.navview ul .sub-menu li:before,
-.navview li .sub-menu li:before {
+.navview ul.item .sub-menu li:before,
+.navview li.item .sub-menu li:before {
   font-family: FontAwesome;
   content: "\f105";
   display: inline-block;
@@ -148,24 +156,26 @@ a {
   vertical-align: middle;
 } 
 
-.navview li {
+.navview li.item {
   padding-left: 0px;
   border-left: 3px solid #2e353d;
   border-bottom: 1px solid #23282e;
 }
 
-.navview li a {
+.navview li.item > a {
   text-decoration: none;
   color: #e1ffff;
+  outline: 0px;
+  outline-offset: 0px;
 }
 
-.navview li a i {
+.navview li.item > a i {
   padding-left: 10px;
   width: 20px;
   padding-right: 24px;
 }
 
-.navview li:hover {
+.navview li.item:hover {
   border-left: 3px solid #d19b3d;
   background-color: #4f5b69;
   -webkit-transition: all 1s ease;
@@ -173,6 +183,10 @@ a {
   -o-transition: all 1s ease;
   -ms-transition: all 1s ease;
   transition: all 1s ease;
+}
+
+.navview .dropdown-menu{
+  font-size: 12px;
 }
 
 @media (max-width: 767px) {
@@ -220,3 +234,85 @@ a {
 .sshTerminal .terminal{
   color: limegreen;
 }
+
+.addProfile{
+  text-align: center;
+  margin-bottom: 8px;
+  margin-top: 8px;
+}
+
+.addProfile a{
+  width: 90%;
+}
+
+.flexColumn{
+  display: flex;
+  flex-direction: column;
+}
+
+.flexRow{
+  display: flex;
+  flex-direction: row;
+}
+
+.modal-header-galaxy {
+  color:#fff;
+  padding:6px 15px;
+  border-bottom:1px solid #eee;
+  background-color: #2e353d;
+  -webkit-border-top-left-radius: 5px;
+  -webkit-border-top-right-radius: 5px;
+  -moz-border-radius-topleft: 5px;
+  -moz-border-radius-topright: 5px;
+   border-top-left-radius: 5px;
+   border-top-right-radius: 5px;
+}
+
+.modal-header-galaxy .close{
+  color: white;
+}
+
+.modal-footer-galaxy{
+  padding: 6px 15px;
+}
+
+.fullScreen {
+  .modal-dialog {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .modal-content {
+    height: auto;
+    min-height: 100%;
+    border-radius: 0;
+  }
+
+  .modal-header-galaxy{
+    -webkit-border-top-left-radius: 0px;
+    -webkit-border-top-right-radius: 0px;
+    -moz-border-radius-topleft: 0px;
+    -moz-border-radius-topright: 0px;
+     border-top-left-radius: 0px;
+     border-top-right-radius: 0px;
+  }
+   
+  .modal-header .fa{
+    padding-right: 5px;
+    margin-right: 16px;
+  } 
+
+  .modal-header > button{
+    margin-left: 12px;
+    margin-top: 2px;
+  }
+  
+}
+
+
+/* .fullScreen .modal-body{
+  width: 40%;
+  margin: auto;
+} */

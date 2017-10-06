@@ -6,6 +6,7 @@ module.exports = function($terminal, devTunnel){
     term.open($terminal[0], {
         focus: true
     });
+    $terminal.data('terminal', term);
     term.writeln("Welcome to SSH Tunnel");
     setTimeout(function(){
         term.fit();
@@ -21,6 +22,9 @@ module.exports = function($terminal, devTunnel){
             term.on('data', function(data){
                 socket.write(data)
             }).on('close', function(){
+                socket.end('\x03');
+                socket.signal('INT');
+                socket.signal('KILL');
                 socket.close();
             });
         })

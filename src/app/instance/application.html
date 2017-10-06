@@ -1,0 +1,61 @@
+<div class="modal-header modal-header-galaxy">
+    <button type="button" class="close" data-dismiss="modal" ng-click="vm.no()">&times;</button>
+    <h5>{{!vm.data.editMode?'Add':'Edit'}} Application</h5>
+</div>
+<div class="modal-body">
+    <form name="application" novalidate class="form-horizontal">
+        <div class="form-group form-group-sm">
+            <label for="applicationType" class="control-label col-sm-3">Type:</label>
+            <div class="col-sm-9">
+                <select class="form-control input-sm" id="applicationType" ng-model="vm.data.app.type" ng-options="k as v.label for (k,v) in vm.data.applicationTypes"
+                    required>
+                                <option value="">--Select--</option>
+                            </select>
+            </div>
+        </div>
+        <div class="form-group form-group-sm">
+            <label for="port" class="control-label col-sm-3">Port:</label>
+            <div class="col-sm-9">
+                <input type="number" class="form-control input-sm" id="port" ng-model="vm.data.app.port" placeholder="Port range (0 to 65535)" min="0"
+                    max="65535" required />
+            </div>
+        </div>
+        <div ng-if="vm.data.app.type=='ssh'">
+            <div class="form-group form-group-sm">
+                <label for="userName" class="control-label col-sm-3">User Name:</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control input-sm" id="userName" ng-model="vm.data.app.config.userName" placeholder="User Name" required
+                    />
+                </div>
+            </div>
+
+            <div class="form-group form-group-sm">
+                <div class="col-sm-offset-3 col-sm-2">
+                    <div class="radio">
+                        <label><input type="radio" name="secret" ng-model="vm.data.app.config.secret.key" value="password" required>Password</label>
+                    </div>
+                </div>
+                <div class="col-sm-7">
+                    <input ng-if="vm.data.app.config.secret.key=='password'" type="text" class="form-control input-sm" id="password" ng-model="vm.data.app.config.secret.password"
+                        placeholder="Password" required />
+                </div>
+            </div>
+            <div class="form-group form-group-sm">
+                <div class="col-sm-offset-3 col-sm-2">
+                    <div class="radio">
+                        <label><input type="radio" name="secret" ng-model="vm.data.app.config.secret.key" value="pem" required>PEM</label>
+                    </div>
+                </div>
+                <div class="col-sm-7">
+                    <input ng-if="vm.data.app.config.secret.key=='pem'" type="file" class="form-control input-sm" file-read="vm.data.app.config.secret.pem.file"
+                        required />
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+<div class="modal-footer modal-footer-galaxy">
+    <button type="button" class="btn btn-default btn-sm" ng-click="vm.no()">Cancel</button>
+    <button type="button" class="btn btn-primary btn-sm" ng-disabled="(vm.data.app.config.secret.key=='pem' && !vm.data.app.config.secret.pem.file) || application.$invalid" ng-click="vm.yes(vm.data)">Save</button>
+</div>

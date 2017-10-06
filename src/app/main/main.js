@@ -1,23 +1,32 @@
-var app = angular.module('galaxy', []);
-app.controller('MainController', function ($scope, $q) {
+var app = angular.module('galaxy');
+var AWS = require('./cloud/aws.js');
+
+app.controller('MainController', function ($scope, $q, db, galaxyModal) {
     var vm = this;
+    vm.chromeTabs = null;
+    vm.tabCount = 0;
+    vm.db = db;
+    vm.config = JSON.parse(require('fs').readFileSync(__dirname + "/config.json", 'utf-8'));
+    var tunnels =/*  Object.keys(vm.server.tunnels).reduce(function(r, k){
+        r[k] = new SSHTunnel(vm.server.tunnels[k]);
+        r[k].connect();
+        return r;
+    }, {}) */{};
 
-
-    var $chromeTabs = $('.chrome-tabs').chromeTabs({ views: 'webviews', allowDoubleClick: false  });
-
-    $chromeTabs._ = $chromeTabs.data('chromeTabs');
     
-    var $chromeTabViews = $chromeTabs._.$views; // jQuery wrapper for `.chrome-tabs > .-views`.
-    $chromeTabViews._ = $chromeTabViews.data('chromeTabViews'); // ChromeTabViews class instance.
-    
-    $chromeTabViews.on('viewAdded', function (event, view, instance){
-        var $terminal = view.find('.sshTerminal'); 
-        if($terminal.length>0){
-           require('./term')($terminal, devTunnel);
+    $scope.$on('viewAdded', function (event, view, instance, props){
+        var s = props.__server;
+        if(utils.isTerminalType(s)){
+           require('./term')(view.find('.sshTerminal'), tunnels[s.connection.tunnel]);
         } 
-    }); 
-    
-    devTunnel.on(SSHTunnel.CHANNEL.SSH, function () {
+    });
+
+    $scope.$on('tabRemoved', function(){
+        --vm.tabCount;
+        vm.chromeTabs.toggle(vm.tabCount!= 0);
+    });
+
+    /* devTunnel.on(SSHTunnel.CHANNEL.SSH, function () {
         if (!$scope.$$phase) {
             $scope.$apply(function () {
                 console.log("SSH - " + arguments);
@@ -35,28 +44,76 @@ app.controller('MainController', function ($scope, $q) {
         } else {
             console.log("Tunnel - " + arguments);
         }
-       
-    });
-
-
-    vm.server = JSON.parse(require('fs').readFileSync(__dirname + "/config.json", 'utf-8'));
+    }); */
+    vm.getInstanceName = function(i){
+        if(i.type == 'generic'){
+            return i.generic.name;
+        }else if(i.type == 'aws'){
+            return AWS.getName(i.aws.instance);
+        }
+    }
+    
     vm.openServer = function (s) {
-        $q.when(s.tunnel ? devTunnel.addTunnel({name: s.name, remoteAddr: s.host, remotePort: s.port}) : '').then(function (t) {
+        $q.when(utils.isForwardConnection(s) ? tunnels[s.connection.tunnel].addTunnel({name: s.name, remoteAddr: s.host, remotePort: s.port}) : '').then(function (t) {
             s._tunnel = t;
-            if (s.type == 'scullog' || !s.type) {
-                devTunnel.getSocksPort().then(function(port){
-                    addTab(s, utils.createUrl(s), utils.createProxyUrl(port));    
-                })
-            } else if (s.type == 'couchdb') {
+            if (utils.isCouchDBType(s)) {
                 couchDb.addIfNotExist(s).then(function (c) {
                     s._couch = c;
                     addTab(s, utils.createCouchUrl(s));
                 });
-            }
+            } else if(utils.isScullogType(s)){
+                scullog(tunnels[s.connection.tunnel]).then(function (p) {
+                    s._scullog = {port: p};
+                    addTab(s, utils.createScullogUrl(s));
+                });         
+            } else {
+                addTab(s, utils.createUrl(s));
+            } 
         });
     }
 
-    function addTab(s, url, proxyUrl) {
+    vm.updateProfile = function(profile){
+        galaxyModal.open({
+            templateUrl: 'profile/profile.html',
+            controller: 'ProfileController',
+            controllerAs: 'profileCtrl',
+            resolve: {
+                db: db,
+                profile: profile,
+                editMode: !!profile
+            }
+        })
+    }
+
+    vm.addInstance = function(profile){
+        galaxyModal.open({
+            templateUrl: 'instance/instance.html',
+            controller: 'InstanceController',
+            controllerAs: 'instanceCtrl',
+            windowClass: 'fullScreen',
+            resolve: {
+                db: db,
+                profile: profile
+            }
+        })
+    }
+
+    vm.removeProfile = function(p){
+        galaxyModal.open({
+           data: {
+               heading: `Delete '${p.name}' Profile`,
+               body: "Do you really want to delete profile and all associated instances detail?"
+           }
+        }).result.then(function(){
+            db.removeProfile(p);
+        });
+    }
+
+
+    function addTab(s, url) {
+        ++vm.tabCount;
+        vm.chromeTabs.toggle(true);
+
         var tabConfig = {
             url: url,
             favicon: 'default',
@@ -67,12 +124,14 @@ app.controller('MainController', function ($scope, $q) {
                 webpreferences: 'allowDisplayingInsecureContent, zoomFactor=1, webSecurity=false',
                 allowpopups: true,
                 partition: url
-            }
+            },
+            __server: s
         }
-        if(s.socks){
-            tabConfig["proxyUrl"] = proxyUrl;
-        }
-        $chromeTabs._.addTab(tabConfig);
+        
+        $q.when(utils.isSocksConnection(s)?tunnels[s.connection.tunnel].getSocksPort():null).then(function(port){
+            tabConfig["proxyUrl"] = port?utils.createProxyUrl(port):null;
+            vm.chromeTabs.addTab(tabConfig);
+        });
     }
 
 });

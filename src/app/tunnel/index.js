@@ -20,8 +20,8 @@ var defaultOptions = {
 
 
 class SSHTunnel extends EventEmitter {
-    
-    static get CHANNEL(){
+
+    static get CHANNEL() {
         return {
             SSH: "ssh",
             TUNNEL: "tunnel"
@@ -29,12 +29,18 @@ class SSHTunnel extends EventEmitter {
     }
 
     constructor(options) {
-      super();
-      this.config = Object.assign({}, defaultOptions, options);
-      this.activeTunnels = {};
-      this.__$connectPromise = null;
-      this.__retries = 0;
-      this.__err = null; 
+        super();
+        this.config = Object.assign({}, defaultOptions, options);
+        this.activeTunnels = {};
+        this.__$connectPromise = null;
+        this.__retries = 0;
+        this.__err = null;
+        this.__sftp = null;
+    }
+
+    emit(){
+        super.emit(...arguments);
+        console.log(arguments);
     }
 
     /**
@@ -44,7 +50,8 @@ class SSHTunnel extends EventEmitter {
         return this.connect().then(() => {
             return Q.Promise((resolve, reject) => {
                 this.sshConnection.shell(options, (err, stream) => {
-                    if (err) throw err;
+                    if (err)
+                        return reject(err);
                     resolve(stream);
                 });
             });
@@ -52,10 +59,70 @@ class SSHTunnel extends EventEmitter {
     }
 
     /**
+     * Get a sftp session
+     */
+    sftp() {
+        return this.connect().then(() => {
+            return this.__sftp;
+            /* return Q.Promise((resolve, reject) => {
+                this.sshConnection.sftp((err, sftp) => {
+                    if (err)
+                        return reject(err);
+                    resolve(sftp);
+                })
+            }) */
+        });
+    }
+
+    /**
+     * Spawn a command
+     */
+    spawnCmd(cmd, params) {
+        cmd += Array.isArray(params)?" " + params.join(" "):"";
+        return this.connect().then(() => {
+            return Q.Promise((resolve, reject) => {
+                this.sshConnection.exec(cmd, { pty: true }, (err, stream) => {
+                    if (err)
+                        return reject(err);
+                    stream.kill = function(){
+                        stream.end('\x03');
+                        stream.signal('INT');
+                        stream.signal('KILL');
+                    }
+                    resolve(stream);
+                })
+            })
+        })
+    }
+
+    /**
+     * Exec a command
+     */
+    execCmd(cmd, params) {
+        cmd += Array.isArray(params)?" " + params.join(" "):"";
+        return this.connect().then(() => {
+            return Q.Promise((resolve, reject) => {
+                this.sshConnection.exec(cmd, (err, stream) => {
+                    if (err)
+                        return reject(err);
+                    var buffer = "";
+                    stream.on('close', function () {
+                        resolve(buffer);
+                    }).on('data', function (data) {
+                        buffer += data;
+                    }).stderr.on('data', function (data) {
+                        reject(data);
+                    });
+                })
+            })
+        })
+    }
+
+    /**
      * Get a Socks Port
      */
     getSocksPort() {
-        return this.addTunnel({name:"__socksServer", socks: true}).then((tunnel) => {
+        return this.addTunnel({ name: "__socksServer", socks: true }).then((tunnel) => {
             return tunnel.localPort;
         });
     }
@@ -65,7 +132,7 @@ class SSHTunnel extends EventEmitter {
      */
     close() {
         return this.closeTunnel().then(() => {
-            if(this.sshConnection)
+            if (this.sshConnection)
                 this.sshConnection.end();
         });
     }
@@ -75,6 +142,7 @@ class SSHTunnel extends EventEmitter {
      */
     connect() {
         ++this.__retries;
+        
         if (this.__$connectPromise != null)
             return this.__$connectPromise;
 
@@ -96,6 +164,10 @@ class SSHTunnel extends EventEmitter {
                 delete this.config.identity;
             }
 
+            /* this.config.debug = function(arg){
+                console.log(arg);
+            } */
+
             //Start ssh server connection
             this.sshConnection = new SSH2();
             this.sshConnection.on('keyboard-interactive', (name, instructions, lang, prompts, finish) => {
@@ -105,18 +177,26 @@ class SSHTunnel extends EventEmitter {
                     });
                 });
             }).on('ready', (err) => {
-                this.emit(SSHTunnel.CHANNEL.SSH, {connected: true}, this);
-                this.__retries = 0;
-                this.__err = null;
-                resolve(this);
+                this.sshConnection.sftp((err, sftp) => {
+                    if (err){
+                        this.emit(SSHTunnel.CHANNEL.SSH, { connected: false, err: err }, this);
+                        this.__$connectPromise = null;
+                        return reject(err);
+                    }
+                    this.emit(SSHTunnel.CHANNEL.SSH, { connected: true }, this);
+                    this.__retries = 0;
+                    this.__err = null;
+                    this.__sftp = sftp;
+                    resolve(this);
+                });
             }).on('error', (err) => {
-                this.emit(SSHTunnel.CHANNEL.SSH, {connected: false, err: err}, this);
+                this.emit(SSHTunnel.CHANNEL.SSH, { connected: false, err: err }, this);
                 this.__err = err;
             }).on('close', (hadError) => {
-                this.emit(SSHTunnel.CHANNEL.SSH, {connected: false, err: this.__err}, this);
+                this.emit(SSHTunnel.CHANNEL.SSH, { connected: false, err: this.__err }, this);
                 reject();
                 this.__$connectPromise = null;
-                if(this.__err != null && this.__err.level != "client-authentication" && this.__err.code != 'ENOTFOUND'){
+                if (this.__err != null && this.__err.level != "client-authentication" && this.__err.code != 'ENOTFOUND') {
                     if (this.config.reconnect && this.__retries <= this.config.reconnectTries) {
                         setTimeout(() => {
                             this.connect();
@@ -139,9 +219,9 @@ class SSHTunnel extends EventEmitter {
      * Add new tunnel if not exist
      */
     addTunnel(tunnelConfig) {
-        if(this.getTunnel(tunnelConfig.name)){
+        if (this.getTunnel(tunnelConfig.name)) {
             return Q.when(this.getTunnel(tunnelConfig.name))
-        }else{
+        } else {
             return Q.Promise((resolve, reject) => {
                 var server;
                 if (tunnelConfig.socks) {
@@ -181,7 +261,7 @@ class SSHTunnel extends EventEmitter {
                             });
                         });
                 }
-                
+
                 Q.when(tunnelConfig.localPort || getPort()).then((port) => {
                     tunnelConfig.localPort = port;
                     server.on('listening', () => {
@@ -207,14 +287,14 @@ class SSHTunnel extends EventEmitter {
             if (name && this.activeTunnels[name]) {
                 var tunnel = this.activeTunnels[name];
                 tunnel.server.close(() => {
-                    this.emit(SSHTunnel.CHANNEL.TUNNEL, {connected: false}, this.activeTunnels[name]);
+                    this.emit(SSHTunnel.CHANNEL.TUNNEL, { connected: false }, this.activeTunnels[name]);
                     delete this.activeTunnels[name];
                     resolve();
                 });
             } else if (!name) {
                 var tunnels = Object.keys(this.activeTunnels).map((key) => this.closeTunnel(key));
                 resolve(Q.all(tunnels));
-            } 
+            }
         });
     }
 }
