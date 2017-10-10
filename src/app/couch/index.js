@@ -6,8 +6,8 @@ var couchdb = require('galaxyfauxton'),
 var connections = {};
 
 module.exports = {
-    add: function(s){
-        var url = utils.createUrl(s);
+    add: function(s, app){
+        var url = utils.createUrl(s, app);
         return getPort().then(localPort => {
             var config = {port: localPort, couchdb: url};
             config.server = new couchdb(config);
@@ -21,14 +21,14 @@ module.exports = {
             delete connections[url];
         }
     },
-    get: function(s){
-        return connections[utils.createUrl(s)];
+    get: function(s, app){
+        return connections[utils.createUrl(s, app)];
     },
-    addIfNotExist: function (s) {
-        if (this.get(s)) {
-            return Q.when(this.get(s));
+    addIfNotExist: function (s, app) {
+        if (this.get(s, app)) {
+            return Q.when(this.get(s, app));
         } else {
-            return this.add(s);
+            return this.add(s, app);
         }
     }
 }

@@ -87,7 +87,7 @@ class ShellFileManager extends NodeFileManger{
   }
 
   spawnCmd(){
-    return this.tunnel.spawnCmd.apply(this.tunnel, arguments);
+    return this.tunnel.spawnCmd.apply(this.tunnel, [...arguments].concat([true]));
   }
 
   zipFolder(p) {

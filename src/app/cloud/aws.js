@@ -24,7 +24,7 @@ class AWS {
     }
 
     static getHostName(instance){
-        return instance.PublicDNSName || instance.PrivateDNSName
+        return instance.PublicDnsName || instance.PrivateDnsName
     }
 
     static getUniqueId(instance){

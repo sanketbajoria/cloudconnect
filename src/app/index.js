@@ -4,7 +4,7 @@ angular.module('galaxy', ['ngRoute', 'ngAnimate', 'ui.bootstrap', 'toastr']).con
         controllerAs: 'vm',
         templateUrl: 'main/main.html',
         resolve: { "db": function(){
-            return db;
+            return new db();
         }}
     })
 }).run(function(){

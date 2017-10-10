@@ -1,37 +1,57 @@
 <div class="container-fluid content">
     <!-- Example row of columns -->
     <div class="row">
-      <div class="col-sm-2 navview flexColumn" ng-hide="vm.collapsed">
-        <div style="flex: 1 1 100%">
-          <ul class="menu-content item">
-            <li class="item" ng-repeat-start="p in vm.db.findProfiles() track by vm.db.getUniqueId(p)" ng-init="collapsed=true" ng-click="$event.originalEvent.removeProfile || (collapsed=!collapsed)" ng-class="collapsed?'collapsed':''">
-                <a href="#"><i class="fa fa-{{vm.config.profile.types[p.type].icon}} fa-lg"></i> {{p.name}} </a>
-                <span class="arrow">
-                    <i class="fa" ng-class="collapsed?'fa-angle-up':'fa-angle-down'"></i>  
-                </span>
-                <span uib-dropdown ng-click="$event.originalEvent.removeProfile=true;">
-                  <span class="arrow" uib-dropdown-toggle>
-                      <i class="fa fa-cog"></i>  
-                  </span>
-                  <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                    <li role="menuitem" ng-click="$event.originalEvent.removeProfile=true;vm.addInstance(p)"><a href="#"><i class="fa fa-plus"></i> Add New Instance</a></li>
-                    <li class="divider"></li>
-                    <li role="menuitem" ng-click="$event.originalEvent.removeProfile=true;vm.updateProfile(p)"><a href="#"><i class="fa fa-edit"></i> Edit Profile</a></li>
-                    <li role="menuitem" ng-click="$event.originalEvent.removeProfile=true;vm.removeProfile(p);"><a href="#"><i class="fa fa-trash"></i> Delete Profile</a></li>
-                  </ul>
-              </span>
-            
-                
-            </li>
-            <div ng-repeat-end class="sub-menu" ng-hide="collapsed">
-              <ul class="item">
-                  <li class="item" ng-repeat="s in vm.db.findInstances({}, p)" ng-click="vm.openServer(s)"><a href="#">{{vm.getInstanceName(s)}} </a>
-              </ul>
-              <div class="addProfile"><a href="#" class="btn btn-primary btn-xs" ng-click="vm.addInstance(p)">
-                  <i class="fa fa-plus"></i> Add New Instance
+        <div class="col-sm-3 navview flexColumn" ng-hide="vm.collapsed">
+            <div style="flex: 1 1 100%">
+                <ul class="menu-content item">
+                    <li class="item" ng-repeat-start="p in vm.db.findProfiles() track by vm.db.getUniqueId(p)" ng-init="collapsed=true" ng-click="$event.originalEvent.removeProfile || (collapsed=!collapsed)"
+                        ng-class="collapsed?'collapsed':''">
+                        <a href="#"><i class="fa fa-{{vm.config.profile.types[p.type].icon}} fa-lg"></i> {{p.name}} </a>
+                        <span class="arrow">
+                            <i class="fa" ng-class="collapsed?'fa-angle-up':'fa-angle-down'"></i>  
+                        </span>
+                        <span uib-dropdown class="arrow" ng-click="$event.originalEvent.removeProfile=true;">
+                            <span uib-dropdown-toggle>
+                                <i class="fa fa-cog"></i>  
+                            </span>
+                            <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                                <li role="menuitem" ng-click="vm.updateInstance(p)"><a href="#"><i class="fa fa-plus"></i> Add New Instance Detail</a></li>
+                                <li class="divider"></li>
+                                <li role="menuitem" ng-click="vm.updateProfile(p)"><a href="#"><i class="fa fa-edit"></i> Edit Profile</a></li>
+                                <li role="menuitem" ng-click="vm.removeProfile(p);"><a href="#"><i class="fa fa-trash"></i> Delete Profile</a></li>
+                            </ul>
+                        </span>
+
+
+                    </li>
+                    <div ng-repeat-end class="sub-menu" ng-hide="collapsed">
+                        <ul class="item">
+                            <li class="item" ng-repeat="s in vm.db.findInstances({}, p)" ng-click="$event.originalEvent.settings"><a href="#">{{vm.getInstanceName(s)}} </a>
+                                <span uib-dropdown class="arrow">
+                                    <span uib-dropdown-toggle>
+                                        <i class="fa fa-plug"></i>  
+                                    </span>
+                                    <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                                        <li role="menuitem" ng-repeat-start="app in s.applications" ng-click="vm.openApp(s, app)"><a href="#">{{vm.config.instance.application.types[app.type].label}}</a></li>
+                                        <li role="menuitem" ng-repeat-end ng-if="app.type=='ssh'" ng-click="vm.openApp(s, vm.scullog(app))"><a href="#">{{vm.config.instance.application.types[app.type].label}} via Scullog</a></li>
+                                    </ul>
+                                </span>
+                                <span uib-dropdown class="arrow" ng-click="$event.originalEvent.settings=true;">
+                                    <span uib-dropdown-toggle>
+                                        <i class="fa fa-cog"></i>  
+                                    </span>
+                                    <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                                        <li role="menuitem" ng-click="vm.updateInstance(p, s)"><a href="#"><i class="fa fa-edit"></i> Edit Instance Detail</a></li>
+                                        <li role="menuitem" ng-click="vm.removeInstance(p, s);"><a href="#"><i class="fa fa-trash"></i> Delete Instance Detail</a></li>
+                                    </ul>
+                                </span>
+                            </li>
+                        </ul>
+                        <div class="addProfile"><a href="#" class="btn btn-primary btn-xs" ng-click="vm.updateInstance(p)">
+                  <i class="fa fa-plus"></i> Add New Instance Detail
               </a></div>
-            </div>
-            <!-- <li ng-repeat-start="m in vm.server.machines" ng-init="collapsed=true" ng-click="collapsed=!collapsed" ng-class="collapsed?'collapsed':''">
+                    </div>
+                    <!-- <li ng-repeat-start="m in vm.server.machines" ng-init="collapsed=true" ng-click="collapsed=!collapsed" ng-class="collapsed?'collapsed':''">
               <a href="#"><i class="fa fa-{{vm.server.icons[m.type].value}} fa-lg"></i> {{m.name}} <span class="arrow">
                       <i class="fa" ng-class="collapsed?'fa-plus':'fa-minus'"></i>  
                     </span></a>
@@ -40,16 +60,16 @@
               <li ng-repeat="s in m.items" ng-click="vm.openServer(s)"><a href="#">{{s.name}}</a>
               </li>
             </ul> -->
-          </ul>
-        </div>
-        <div class="addProfile"><a href="#" class="btn btn-primary btn-sm" ng-click="vm.updateProfile()">
+                </ul>
+            </div>
+            <div class="addProfile"><a href="#" class="btn btn-primary btn-sm" ng-click="vm.updateProfile()">
             <i class="fa fa-plus"></i> Add new profile
         </a></div>
-      </div>
-      <div class="col-sm-10 mainview" ng-class="vm.collapsed?'col-sm-12':'col-sm-10'">
-        <chrome-tabs api="vm.chromeTabs" style="display:none"></chrome-tabs>
-        <a href="#" class="btn sidebarBtn" ng-class="vm.collapsed?'collapsed':''" ng-click="vm.collapsed=!vm.collapsed">
+        </div>
+        <div class="col-sm-9 mainview" ng-class="vm.collapsed?'col-sm-12':'col-sm-9'">
+            <chrome-tabs api="vm.chromeTabs" style="display:none"></chrome-tabs>
+            <a href="#" class="btn sidebarBtn" ng-class="vm.collapsed?'collapsed':''" ng-click="vm.collapsed=!vm.collapsed">
             <i class="fa fa-navicon fa-lg"></i>
         </a>
+        </div>
     </div>
-</div>

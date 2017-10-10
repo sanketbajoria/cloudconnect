@@ -25,7 +25,11 @@
         }
         vm.saveProfile = function () {
             try{
-                db.addProfile(vm.profile);
+                if(vm.editMode){
+                    db.updateProfile(vm.profile);
+                }else{
+                    db.addProfile(vm.profile);
+                }
                 toastr.success("Profile saved", "Success");
                 $uibModalInstance.close(vm.profile);
             }catch(err){

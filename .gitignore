@@ -9,4 +9,5 @@ typings
 config/aws.json
 config/config.json
 Untitled-1.txt
-database/*
+database
+test.js

@@ -1,31 +1,88 @@
+var AWS = require('../cloud/aws.js');
+var tunnels ={};
+var Q = require('q');
+
 module.exports = {
-    createUrl: function (s) {
-        if (this.getPort(s)) {
-            return `${this.getProtocol(s)}://${this.getHost(s)}:${this.getPort(s)}`;
+    createUrl: function (s, app) {
+        if (this.getPort(s, app)) {
+            return `${this.getProtocol(s, app)}://${this.getHost(s, app)}:${this.getPort(s, app)}`;
         } else {
-            return `${this.getProtocol(s)}://${this.getHost(s)}`;
+            return `${this.getProtocol(s, app)}://${this.getHost(s, app)}`;
         }
     },
-    getPort: function (s) {
+    getPort: function (s, app) {
         if (s._tunnel && this.isForwardConnection(s))
             return s._tunnel.localPort;
-        return s.port;
+        return app.port;
     },
-    getHost: function (s) {
-        if (this.isTerminalType(s)) {
+    getHost: function (s, app) {
+        if (this.isTerminalType(app)) {
             return __dirname + "/../term/index.html";
         } else {
-            return (s._tunnel && this.isForwardConnection(s)) ? "localhost" : s.host;
+            return (s._tunnel && this.isForwardConnection(s)) ? "localhost" : this.getRemoteAddr(s);
         }
     },
-    getProtocol: function (s) {
-        if (this.isTerminalType(s)) {
+    getRemoteAddr: function(s){
+        if(s.type=='generic'){
+            return s.generic.host;
+        }else if(s.type == 'aws'){
+            return AWS.getHostName(s.aws.instance);
+        }
+    },
+    getProtocol: function (s, app) {
+        if (this.isTerminalType(app)) {
             return "file";
         }
-        return s.protocol || "http";
+        return app.protocol || "http";
     },
-    createCouchUrl: function (s) {
-        return `${s.protocol}://localhost:${s._couch.port}`;
+    getInstanceName: function(i){
+        if(i.type == 'generic'){
+            return i.generic.name;
+        }else if(i.type == 'aws'){
+            return AWS.getName(i.aws.instance);
+        }
+    },
+    getSSH: function(i, db, sshConfig){
+        var id = db.getUniqueId(i);
+        if(tunnels[id])
+            return tunnels[id];
+        if(sshConfig){
+            return tunnels[id] = new SSHTunnel(sshConfig);
+        }
+    },
+    initSSH: function(s, app, db){
+        var lastSSH, i = s;
+        var instances = (this.isTerminalType(app) || this.isScullogType(app))?[s]:[];
+        while(i = i.connection.ref){
+            i = db.getInstance(i);
+            instances.push(i);
+        }
+        while(i=instances.pop()){
+            var instance = i;
+            var sshApp = instance.applications.filter(function(a){
+                return utils.isTerminalType(a);
+            })[0];
+            var sshConfig = {username:sshApp.config.userName, host: this.getRemoteAddr(instance), port: sshApp.port};
+            if(sshApp.config.secret.key == 'password'){
+                sshConfig.password = sshApp.config.secret.password
+            }else{
+                sshConfig.identity = sshApp.config.secret.pem.file.path;
+            }
+            if(!lastSSH){
+                lastSSH = this.getSSH(instance, db, sshConfig).connect(sshConfig);
+            }else {
+                lastSSH = lastSSH.then((ssh) => {
+                    return ssh.spawnCmd(`nc ${this.getRemoteAddr(instance)} ${sshApp.port}`);
+                }).then((stream) => {
+                    sshConfig.sock = stream;
+                    return this.getSSH(instance, db, sshConfig).connect(sshConfig);
+                })
+            }
+        }
+        return Q.when(lastSSH);
+    },
+    createCouchUrl: function (s, app) {
+        return `${app.protocol}://localhost:${s._couch.port}`;
     },
     createScullogUrl: function (s) {
         return `http://localhost:${s._scullog.port}`;
@@ -33,14 +90,14 @@ module.exports = {
     createProxyUrl: function (port) {
         return `socks5://localhost:${port}`;
     },
-    isCouchDBType: function (s) {
-        return s.type === "couchdb"
+    isCouchDBType: function (app) {
+        return app.type === "couchdb"
     },
-    isTerminalType: function (s) {
-        return s.type === "terminal"
+    isTerminalType: function (app) {
+        return app.type === "ssh"
     },
-    isScullogType: function (s) {
-        return s.type === "scullog"
+    isScullogType: function (app) {
+        return app.type === "scullog"
     },
     isForwardConnection: function (s) {
         return s.connection && s.connection.type === "forward";

@@ -40,7 +40,7 @@ class SSHTunnel extends EventEmitter {
 
     emit(){
         super.emit(...arguments);
-        console.log(arguments);
+        //console.log(arguments);
     }
 
     /**
@@ -77,11 +77,11 @@ class SSHTunnel extends EventEmitter {
     /**
      * Spawn a command
      */
-    spawnCmd(cmd, params) {
-        cmd += Array.isArray(params)?" " + params.join(" "):"";
+    spawnCmd(cmd, params, pty) {
+        cmd += (Array.isArray(params)?(" " + params.join(" ")):"");
         return this.connect().then(() => {
             return Q.Promise((resolve, reject) => {
-                this.sshConnection.exec(cmd, { pty: true }, (err, stream) => {
+                this.sshConnection.exec(cmd, { pty: pty }, (err, stream) => {
                     if (err)
                         return reject(err);
                     stream.kill = function(){
@@ -99,7 +99,7 @@ class SSHTunnel extends EventEmitter {
      * Exec a command
      */
     execCmd(cmd, params) {
-        cmd += Array.isArray(params)?" " + params.join(" "):"";
+        cmd += (Array.isArray(params)?(" " + params.join(" ")):"");
         return this.connect().then(() => {
             return Q.Promise((resolve, reject) => {
                 this.sshConnection.exec(cmd, (err, stream) => {
@@ -140,7 +140,8 @@ class SSHTunnel extends EventEmitter {
     /**
      * Connect the SSH Connection
      */
-    connect() {
+    connect(c) {
+        this.config = Object.assign(this.config, c);
         ++this.__retries;
         
         if (this.__$connectPromise != null)
@@ -164,9 +165,9 @@ class SSHTunnel extends EventEmitter {
                 delete this.config.identity;
             }
 
-            /* this.config.debug = function(arg){
+             this.config.debug = function(arg){
                 console.log(arg);
-            } */
+            } 
 
             //Start ssh server connection
             this.sshConnection = new SSH2();
@@ -192,6 +193,8 @@ class SSHTunnel extends EventEmitter {
             }).on('error', (err) => {
                 this.emit(SSHTunnel.CHANNEL.SSH, { connected: false, err: err }, this);
                 this.__err = err;
+                reject();
+                this.__$connectPromise = null;
             }).on('close', (hadError) => {
                 this.emit(SSHTunnel.CHANNEL.SSH, { connected: false, err: this.__err }, this);
                 reject();

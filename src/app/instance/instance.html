@@ -1,7 +1,7 @@
 <div class="modal-header modal-header-galaxy modal-header-fullscreen">
-    <h5 style="display:inline-block;"><i class="fa fa-arrow-left" data-dismiss="modal" ng-click="instanceCtrl.no()"></i> {{!instanceCtrl.data.editMode?'Add':'Edit'}}
+    <h5 style="display:inline-block;"><i class="fa fa-arrow-left" data-dismiss="modal" ng-click="instanceCtrl.no()"></i> {{!instanceCtrl.editMode?'Add':'Edit'}}
         Profile</h5>
-    <button type="button" class="btn btn-primary pull-right btn-sm" ng-disabled="vm.isInvalid()" ng-click="instanceCtrl.saveInstance()">Save</button>
+    <button type="button" class="btn btn-primary pull-right btn-sm" ng-disabled="instanceCtrl.isInvalid()" ng-click="instanceCtrl.saveInstance()">Save</button>
     <button type="button" class="btn btn-default pull-right btn-sm" ng-click="instanceCtrl.testConnection()">Test Connection</button>
 </div>
 <div class="modal-body" style="width:50%">
@@ -39,11 +39,15 @@
                             ng-change="instanceCtrl.changeAWSProfile()" placeholder="Choose existing AWS profile" required></select>
                     </div>
                 </div>
-                <div class="form-group form-group-sm">
+                <div class="form-group form-group-sm has-feedback">
                     <label for="name" class="control-label col-sm-3">AWS Name:</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control input-sm" id="name" ng-model="instanceCtrl.instance.aws.instance" uib-typeahead="instance as instanceCtrl.getInstanceLabel(instance) for instance in instanceCtrl.awsInstances | filter:$viewValue | limitTo:12" ng-disabled="!instanceCtrl.instance.aws.profile" placeholder="Type AWS instance detail such as instanceId, name etc"
+                        <input type="text" class="form-control input-sm" id="name" ng-model="instanceCtrl.instance.aws.instance" uib-typeahead="instance as instanceCtrl.getInstanceLabel(instance) for instance in instanceCtrl.getAWSInstances($viewValue, 12)" typeahead-loading="loadingInstances" typeahead-no-results="noResults" ng-disabled="!instanceCtrl.instance.aws.profile" placeholder="Type AWS instance detail such as instanceId, name etc"
                             required />
+                        <span class="form-control-feedback" style="margin-top: -2px" ng-show="loadingInstances"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
+                        <div ng-show="noResults">
+                            <i class="glyphicon glyphicon-remove"></i> No Results Found
+                        </div>
                     </div>
                 </div>
             </div>
@@ -62,7 +66,7 @@
                     <div class="col-sm-9">
                         <div class="row">
                             <div class="col-sm-6">
-                                <select class="form-control input-sm" ng-options="instanceCtrl.db.getUniqueId(i) as i.name for i in instanceCtrl.sshInstances"
+                                <select class="form-control input-sm" ng-options="instanceCtrl.db.getUniqueId(i) as instanceCtrl.utils.getInstanceName(i) for i in instanceCtrl.sshInstances"
                                     ng-model="instanceCtrl.instance.connection.ref" required>
                                             <option value="">--Select--</option>
                                         </select>
@@ -83,6 +87,7 @@
                 <tr>
                     <th>Type</th>
                     <th>Port</th>
+                    <th>Protocol</th>
                     <th>Config</th>
                     <th></th>
                 </tr>
@@ -91,6 +96,7 @@
                 <tr ng-repeat="a in instanceCtrl.instance.applications">
                     <td>{{a.type}}</td>
                     <td>{{a.port}}</td>
+                    <td>{{a.protocol}}</td>
                     <td>{{instanceCtrl.getConfiguration(a)}}</td>
                     <td><i class="fa fa-edit" style="margin-right: 8px;" ng-click="instanceCtrl.editApplication(a, $index)"></i><i class="fa fa-trash" ng-click="instanceCtrl.instance.applications.splice($index, 1)"></i></td>
                 </tr>

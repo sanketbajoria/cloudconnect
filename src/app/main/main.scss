@@ -78,7 +78,7 @@ a {
 }
 
 .navview {
-  overflow: auto;
+  overflow: initial;
   font-family: verdana;
   font-size: 12px;
   font-weight: 200;
@@ -122,18 +122,18 @@ a {
   background-color: #4f5b69;
 }
 
-.navview ul.item .sub-menu li.active,
-.navview li.item .sub-menu li.active {
+.navview ul.item .sub-menu li.item.active,
+.navview li.item .sub-menu li.item.active {
   color: #d19b3d;
 }
 
-.navview ul.item .sub-menu li.active a,
-.navview li.item .sub-menu li.active a {
+.navview ul.item .sub-menu li.item.active a,
+.navview li.item .sub-menu li.item.active a {
   color: #d19b3d;
 }
 
-.navview ul.item .sub-menu li,
-.navview li.item .sub-menu li {
+.navview ul.item .sub-menu li.item,
+.navview li.item .sub-menu li.item {
   background-color: #181c20;
   border: none;
   line-height: 28px;
@@ -141,13 +141,13 @@ a {
   margin-left: 0px;
 }
 
-.navview ul.item .sub-menu li:hover,
-.navview li.item .sub-menu li:hover {
+.navview ul.item .sub-menu li.item:hover,
+.navview li.item .sub-menu li.item:hover {
   background-color: #020203;
 }
 
-.navview ul.item .sub-menu li:before,
-.navview li.item .sub-menu li:before {
+.navview ul.item .sub-menu li.item:before,
+.navview li.item .sub-menu li.item:before {
   font-family: FontAwesome;
   content: "\f105";
   display: inline-block;
