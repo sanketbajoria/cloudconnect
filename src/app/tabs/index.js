@@ -1,18 +1,63 @@
-angular.module('galaxy').directive('chromeTabs', function () {
+'use strict';
+angular.module('galaxy').directive('chromeTabs', function ($compile) {
   return {
     restrict: 'E',
     scope: {
       'api': '='
     },
     replace: true,
-    template: "<div class='chrome-tabs'></div>",
+    templateUrl: 'tabs/tabs.html',
+    controllerAs: 'tabCtrl',
     controller: function ($scope, $element, $attrs) {
-      (function (root, factory) {
+      var vm = this;
+      vm.findText = function(findNext, backward){
+        if(vm.getCurrentWebContent() && vm.searchText){
+            vm.getCurrentWebContent().findInPage(vm.searchText, {forward: !backward, findNext: findNext});
+        }
+      }
+
+      vm.getCurrentWebContent = function(){
+        var view = $scope.api.$views.data('chromeTabViews').$currentView;
+        if(view.is('webview')){
+          return view[0].getWebContents();
+        }
+      }
+
+      $($element.find('.search-window input')).bind("keydown keypress", function (event) {
+        if (event.which === 13) {
+          vm.findText(true, true);
+        }
+      });
+
+      $scope.$watch("api.showSearch", function(newVal, oldVal){
+        if(newVal && newVal != oldVal){
+          setTimeout(function(){
+            $element.find('.search-window input').focus();
+          }, 100);
+        }
+      })
+
+      vm.init = function(root, factory){
         $.fn.chromeTabs = factory(root, jQuery, Draggabilly);
         var $chromeTabs = $element.chromeTabs({ views: 'webviews', allowDoubleClick: false });
         $scope.api = $chromeTabs.data('chromeTabs');
-      })(window, (window, jQuery, Draggabilly) => {
-        'use strict';
+      
+
+        $scope.$on('viewAdded', function (event, $view, instance) {
+          if($view.is('webview')){
+            $view[0].addEventListener('dom-ready', () => {
+              $view[0].getWebContents().on('found-in-page', (event, result) => {
+                $scope.$apply(function(){
+                  vm.currentMatch = result.activeMatchOrdinal;
+                  vm.totalMatch = result.matches;
+                })
+              })
+            })
+          }
+        });
+      }
+
+      vm.init(window, (window, jQuery, Draggabilly) => {
 
         // jQuery.
 
@@ -220,6 +265,7 @@ angular.module('galaxy').directive('chromeTabs', function () {
             this.$zoomMinusBtn = $('<a href="#" class="-minus-zoom-btn btn">-</a>');
             this.$zoom = $('<input type="text" name="zoom" class="-zoom form-control input-sm" readonly />');
             this.$zoomPlusBtn = $('<a href="#" class="-plus-zoom-btn btn">+</a>');
+            this.$searchBtn = $compile('<a href="#" class="-search-btn btn" ng-click="api.showSearch=!api.showSearch"><i class="fa fa-search"></i></a>')($scope);
 
             this.$views = $('<div class="-views"></div>');
             this.$styles = $('<style></style>');
@@ -342,10 +388,10 @@ angular.module('galaxy').directive('chromeTabs', function () {
             this.$bottomLine.append(this.$forwardBtn);
             this.$bottomLine.append(this.$reloadBtn);
             this.$bottomLine.append(this.$url);
+            this.$bottomLine.append(this.$searchBtn);
             this.$bottomLine.append(this.$zoomMinusBtn);
             this.$bottomLine.append(this.$zoom);
             this.$bottomLine.append(this.$zoomPlusBtn);
-
           }
 
           removeBottomLine() {
@@ -427,7 +473,11 @@ angular.module('galaxy').directive('chromeTabs', function () {
                 view.setZoomFactor(zoom);
                 this.$zoom.val(Math.round(zoom * 100));
               });
-            })
+            });
+            /* this.$searchBtn.on('click', () => {
+              var view = this.$views.data('chromeTabViews').viewAtIndex(this.$currentTab.index(), true).first()[0];
+              view.goBack();
+            }); */
 
           }
 

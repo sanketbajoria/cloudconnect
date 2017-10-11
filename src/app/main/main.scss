@@ -311,6 +311,23 @@ a {
   
 }
 
+.search-window{
+  border-radius: 0px;
+  right: 0px;
+  left: initial;
+  top: 82px;
+  padding: 9px;
+  margin: auto;
+  display:block;
+  max-width: initial;
+}
+
+.search-window .content{
+  display: inline-block;
+  vertical-align:middle;
+  margin-left: 12px;
+}
+
 
 /* .fullScreen .modal-body{
   width: 40%;

@@ -2,7 +2,6 @@ var app = angular.module('galaxy');
 
 app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr) {
     var vm = this;
-    vm.chromeTabs = null;
     vm.tabCount = 0;
     vm.db = db;
     vm.config = JSON.parse(require('fs').readFileSync(__dirname + "/config.json", 'utf-8'));
@@ -12,12 +11,25 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr) 
         return r;
     }, {}) *///;
 
+    $("body").on("keypress keydown keyup", function (e) {
+        if(e.which == 6 && (e.ctrlKey || e.metaKey)){
+            $scope.$apply(function(){
+                vm.chromeTabs.showSearch = true;
+            })
+        }
+        if(e.which == 27){
+            $scope.$apply(function(){
+                vm.chromeTabs.showSearch = false;
+            })
+        }
+    });
+
     $scope.$on('viewAdded', function (event, view, instance, props){
         var s = props.__server;
         var app = props.__app;
         if(utils.isTerminalType(app)){
            require('./term')(view.find('.sshTerminal'), utils.getSSH(s, db));
-        } 
+        }
     });
 
     $scope.$on('tabRemoved', function(){
