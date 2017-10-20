@@ -27,7 +27,7 @@
                 backdrop: 'static',
                 animation: true,
                 keyboard: true,
-                templateUrl: './modal/modal.html',
+                templateUrl: './modal/confirm.html',
                 controller: 'ModalController',
                 controllerAs: 'vm',
                 windowClass: 'galaxyModal',

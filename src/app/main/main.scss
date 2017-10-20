@@ -39,7 +39,6 @@ a {
 }
 .mainview {
   padding: 0px;
-  padding-left: 1px;
   background: linear-gradient(#dad9da, #d9d8d9);
 }
 
@@ -228,7 +227,8 @@ a {
   min-height: 100%;
   background: black;
   font-size: 13px;
-  padding-left: 5px;
+  padding-left: 10px;
+  display: block;
 }
 
 .sshTerminal .terminal{

@@ -11,21 +11,26 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
     controller: function ($scope, $element, $attrs) {
       var vm = this;
       vm.findText = function(findNext, backward){
-        if(vm.getCurrentWebContent() && vm.searchText){
+        if(vm.getCurrentWebContent()){
+          if(vm.searchText){
             vm.getCurrentWebContent().findInPage(vm.searchText, {forward: !backward, findNext: findNext});
+          }
+          else{
+            vm.getCurrentWebContent().stopFindInPage('clearSelection');
+          }
         }
       }
 
       vm.getCurrentWebContent = function(){
-        var view = $scope.api.$views.data('chromeTabViews').$currentView;
+        var view = $scope.api.$views.data('chromeTabViews').getWebview($scope.api.$views.data('chromeTabViews').$currentView);
         if(view.is('webview')){
           return view[0].getWebContents();
         }
       }
 
-      $($element.find('.search-window input')).bind("keydown keypress", function (event) {
+      $($element.find('.search-window input')).bind("keypress", function (event) {
         if (event.which === 13) {
-          vm.findText(true, true);
+          vm.findText(true, false);
         }
       });
 
@@ -44,14 +49,18 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
       
 
         $scope.$on('viewAdded', function (event, $view, instance) {
-          if($view.is('webview')){
-            $view[0].addEventListener('dom-ready', () => {
-              $view[0].getWebContents().on('found-in-page', (event, result) => {
+          var $webview = $scope.api.$views.data('chromeTabViews').getWebview($view);
+          if($webview.is('webview')){
+            $webview[0].addEventListener('dom-ready', () => {
+              $webview[0].getWebContents().on('found-in-page', (event, result) => {
                 $scope.$apply(function(){
                   vm.currentMatch = result.activeMatchOrdinal;
                   vm.totalMatch = result.matches;
                 })
               })
+            })
+            $webview[0].addEventListener('did-fail-load', (event) => {
+              $scope.api.showErrorView($view, event.errorDescription);
             })
           }
         });
@@ -72,6 +81,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
         let defaultTabUrl = '';
         let defaultLoadingTabFavicon = 'loading';
         let defaultTabFavicon = 'default';
+        let defaultSSHFavicon = 'ssh';
 
         let tabTemplate = `
     <div class="-tab">
@@ -105,14 +115,19 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
       <div class="-close"></div>
     </div>
   `;
+
+        let loaderTemplate = `<div class="-loader"><div class="middle"><i class="fa fa-spinner fa-spin fa-fw"></i><span>Connecting...</span></div>`;
+
+        let errorTemplate = `<div class="-error"><div class="middle"><p><i class="fa fa-exclamation-triangle fa"></i></p><p>This site can't be reached</p><p class="-errorDescription"></p></div></div>`
+
         let webViewTemplate = `
-    <webview class="-view"></webview>
+    <div class="-view"><webview class="-main-view"></webview></div></div>
   `;
         let iframeViewTemplate = `
     <iframe class="-view" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-presentation allow-orientation-lock allow-pointer-lock"></iframe>
   `; // Note the absence of `allow-top-navigation` in this list; i.e., do not allow frames to break the tabbed interface.
         // This attribute can be altered at runtime using `defaultProps.viewAttrs.sandbox`.
-        let divViewTemplate = `<div class="-view"><div class="sshTerminal"></div></div>`;
+        let divViewTemplate = `<div class="-view"><div class="-main-view"><div class="sshTerminal"></div></div></div>`;
 
         // Begin `ChromeTabs{}` class.
 
@@ -316,6 +331,25 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
             this.$obj.toggle(show);
           }
 
+          showMainTab($tab){
+            var view = this.$views.data('chromeTabViews').viewAtIndex($tab.index(), true);
+            this.showMainView(view);
+          }
+
+          showMainView(view){
+            view.find(".-main-view").toggle(true);
+            view.find(".-loader").toggle(false);
+            view.find(".-error").toggle(false);
+          }
+
+          showErrorView(view, err){
+            view.find(".-error .-errorDescription").text(err);
+            view.find(".-main-view").toggle(false);
+            view.find(".-loader").toggle(false);
+            view.find(".-error").toggle(true);
+          }
+
+
           updateToolbar($view, $tab) {
             if ((!($view instanceof jQuery) || !$view.length) && $tab instanceof jQuery && $tab.length) {
               $view = this.$views.data('chromeTabViews').viewAtIndex($tab.index(), true);
@@ -323,7 +357,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
             if (!($view instanceof jQuery) || !$view.length) {
               return;
             }
-            $view = $view.first()[0];
+            $view = this.$views.data('chromeTabViews').getWebview($view)[0];
             try {
               this.$backBtn.toggleClass('disabled', !$view.canGoBack());
               this.$forwardBtn.toggleClass('disabled', !$view.canGoForward());
@@ -446,38 +480,55 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                 this.removeTab($target.parent('.-tab'));
               }
             });
+            var $chromeTabViews = this.$views.data('chromeTabViews');
             this.$backBtn.on('click', () => {
-              var view = this.$views.data('chromeTabViews').viewAtIndex(this.$currentTab.index(), true).first()[0];
-              view.goBack();
+              var view = $chromeTabViews.viewAtIndex(this.$currentTab.index(), true);
+              this.showMainView(view);
+              var webview = $chromeTabViews.getWebview(view)[0];
+              setTimeout(function(){
+                webview.goBack();
+              }, 200);
             });
             this.$forwardBtn.on('click', () => {
-              var view = this.$views.data('chromeTabViews').viewAtIndex(this.$currentTab.index(), true).first()[0];
-              view.goForward();
+              var view = $chromeTabViews.viewAtIndex(this.$currentTab.index(), true);
+              this.showMainView(view);
+              var webview = $chromeTabViews.getWebview(view)[0];
+              setTimeout(function(){
+                webview.goForward();
+              }, 200);
             });
             this.$reloadBtn.on('click', () => {
-              var view = this.$views.data('chromeTabViews').viewAtIndex(this.$currentTab.index(), true).first()[0];
-              view.reload();
+              var view = $chromeTabViews.viewAtIndex(this.$currentTab.index(), true);
+              this.showMainView(view);
+              var webview = $chromeTabViews.getWebview(view)[0];
+              setTimeout(function(){
+                webview.reload();
+              }, 200);
             });
             this.$zoomMinusBtn.on('click', () => {
-              var view = this.$views.data('chromeTabViews').viewAtIndex(this.$currentTab.index(), true).first()[0];
-              view.getZoomFactor((zoom) => {
-                zoom = zoom - 0.1;
-                view.setZoomFactor(zoom);
-                this.$zoom.val(Math.round(zoom * 100));
-              });
+              var view = $chromeTabViews.viewAtIndex(this.$currentTab.index(), true);
+              this.showMainView(view);
+              var webview = $chromeTabViews.getWebview(view)[0];
+              setTimeout(() => {
+                webview.getZoomFactor((zoom) => {
+                  zoom = zoom - 0.1;
+                  webview.setZoomFactor(zoom);
+                  this.$zoom.val(Math.round(zoom * 100));
+                });
+              }, 200);
             });
             this.$zoomPlusBtn.on('click', () => {
-              var view = this.$views.data('chromeTabViews').viewAtIndex(this.$currentTab.index(), true).first()[0];
-              view.getZoomFactor((zoom) => {
-                zoom = zoom + 0.1;
-                view.setZoomFactor(zoom);
-                this.$zoom.val(Math.round(zoom * 100));
-              });
+              var view = $chromeTabViews.viewAtIndex(this.$currentTab.index(), true);
+              this.showMainView(view);
+              var webview = $chromeTabViews.getWebview(view)[0];
+              setTimeout(() => {
+                webview.getZoomFactor((zoom) => {
+                  zoom = zoom + 0.1;
+                  webview.setZoomFactor(zoom);
+                  this.$zoom.val(Math.round(zoom * 100));
+                });
+              }, 200);
             });
-            /* this.$searchBtn.on('click', () => {
-              var view = this.$views.data('chromeTabViews').viewAtIndex(this.$currentTab.index(), true).first()[0];
-              view.goBack();
-            }); */
 
           }
 
@@ -744,6 +795,8 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                 $tab.find('> .-favicon').css({ 'background-image': '' }).attr('data-favicon', defaultLoadingTabFavicon);
               } else if (props.favicon === defaultTabFavicon) {
                 $tab.find('> .-favicon').css({ 'background-image': '' }).attr('data-favicon', defaultTabFavicon);
+              } else if (props.favicon === defaultSSHFavicon) {
+                $tab.find('> .-favicon').css({ 'background-image': '' }).attr('data-favicon', defaultSSHFavicon);
               } else {
                 $tab.find('> .-favicon').css({ 'background-image': 'url(\'' + props.favicon + '\')' }).attr('data-favicon', '');
               }
@@ -891,19 +944,32 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
             $tab = $tab.first(); // One tab only.
 
             let $view = null
-            if (props.url.indexOf("file://") >= 0) {
+            if (utils.isTerminalType(props.__app)) {
               $view = $(divViewTemplate);
             } else {
               $view = $( // Template based on view type.
                 this.settings.type === 'webviews' ? webViewTemplate : iframeViewTemplate
               );
             }
+            $view.append(loaderTemplate);
+            $view.append(errorTemplate);
             $view.data('urlCounter', 0); // Initialize.
             this.$content.append($view); // Add to DOM.
 
             this.setViewIndex($view, undefined, $tab.index());
             this.$obj.trigger('viewAdded', [$view, this, props]);
 
+            return $view;
+          }
+
+          getWebview($view){
+            if (!($view instanceof jQuery) || !$view.length) {
+              throw 'Missing or invalid $view.';
+            }
+            $view = $view.first();
+            if($view.hasClass("-view") && $view.find(".-main-view").length){
+              $view = $view.find(".-main-view")
+            }
             return $view;
           }
 
@@ -999,7 +1065,11 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
             $view.data('props', props); // Update to new props after merging.
 
             $.each(props.viewAttrs, (key, value) => {
-              if (key.toLowerCase() !== 'src') $view.attr(key, value === null ? '' : value);
+              if(this.settings.type === 'webviews'){
+                if (key.toLowerCase() !== 'src') this.getWebview($view).attr(key, value === null ? '' : value);
+              }else{
+                if (key.toLowerCase() !== 'src') $view.attr(key, value === null ? '' : value);
+              }
             }); // Anything but `src`, which is handled below.
 
             if (typeof prevProps.url === 'undefined' || prevProps.url !== props.url) {
@@ -1012,27 +1082,31 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                 if (require && (!($tab instanceof jQuery) || !$tab.length)) throw 'Missing $tab.';
                 return $tab; // Otherwise, return the tab now.
               }; // Dynamically, in case it was moved by a user.
-              if (props.url.indexOf("file://") == -1) {
+              if (!utils.isTerminalType(props.__app)) {
                 if (this.settings.type === 'webviews') {
                   let _favicon = ''; // Held until loading is complete.
                   var self = this.$parentObj.data('chromeTabs');
-                  $view.off('did-start-loading.chrome-tabs')
+                  var $webview = this.getWebview($view);
+                  $webview.off('did-start-loading.chrome-tabs')
                     .on('did-start-loading.chrome-tabs', (e) => {
                       let $tab = $getTab(),
                         props = $view.data('props');
                       self.updateToolbar($view, $tab);
                       // Increment the `<webview>` URL counter.
                       $view.data('urlCounter', $view.data('urlCounter') + 1);
+                      
+                      $view.find('.-loader').hide();
+                      $view.find('.-main-view').show();
 
                       if (props && props.proxyUrl) {
-                        $view.first()[0].getWebContents().session.setProxy({ proxyRules: props.proxyUrl }, function () {
+                        $webview.first()[0].getWebContents().session.setProxy({ proxyRules: props.proxyUrl }, function () {
                           return true; //$view.loadURL(props.url);
                         });
                       }
 
                       // Use fallbacks on failure.
                       let favicon = props.loadingFavicon;
-                      let title = typeof $view.getTitle === 'function' ? $view.getTitle() : '';
+                      let title = typeof $webview[0].getTitle === 'function' ? $webview[0].getTitle() : '';
                       title = !title && isFirstUrl() ? props.url || props.title : title;
                       title = !title ? props.title : title;
 
@@ -1043,7 +1117,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                       this.$obj.trigger('viewStartedLoading', [$view, this]);
                     });
 
-                  $view.off('did-stop-loading.chrome-tabs')
+                  $webview.off('did-stop-loading.chrome-tabs')
                     .on('did-stop-loading.chrome-tabs', (e) => {
                       let $tab = $getTab(),
                         props = $view.data('props');
@@ -1059,7 +1133,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                       this.$obj.trigger('viewStoppedLoading', [$view, this]);
                     });
 
-                  $view.off('page-favicon-updated.chrome-tabs')
+                  $webview.off('page-favicon-updated.chrome-tabs')
                     .on('page-favicon-updated.chrome-tabs', (e) => {
                       let $tab = $getTab(),
                         props = $view.data('props');
@@ -1070,21 +1144,21 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                       favicon = !favicon ? this.settings.defaultProps.favicon : favicon;
 
                       // If not loading, go ahead and update favicon.
-                      if (typeof $view.isLoading === 'function' && !$view.isLoading()) {
+                      if (typeof $webview[0].isLoading === 'function' && !$webview[0].isLoading()) {
                         this.$parentObj._.updateTab($tab, { favicon }, 'view::state-change');
                       }
                       // Trigger event after updating tab.
                       this.$obj.trigger('viewFaviconUpdated', [$view, favicon, this]);
                     });
 
-                  $view.off('page-title-updated.chrome-tabs')
+                  $webview.off('page-title-updated.chrome-tabs')
                     .on('page-title-updated.chrome-tabs', (e) => {
                       let $tab = $getTab(),
                         props = $view.data('props');
 
                       // In the case of failure, use fallbacks.
                       let title = e.originalEvent.title || ''; // If not empty.
-                      title = !title && typeof $view.getURL === 'function' ? $view.getURL() : title;
+                      title = !title && typeof $webview[0].getURL === 'function' ? $webview[0].getURL() : title;
                       title = !title ? this.settings.defaultProps.unknownUrlTitle : title;
 
                       // Title can be updated immediately.
@@ -1094,7 +1168,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                       this.$obj.trigger('viewTitleUpdated', [$view, title, this]);
                     });
 
-                  $view.attr('src', props.url); // Begin loading.
+                  $webview.attr('src', props.url); // Begin loading.
 
                 } else { // Handle as `<iframe>` (more difficult to work with).
                   let $contentWindow = $($view[0].contentWindow); // jQuery wrapper.
@@ -1186,6 +1260,9 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
 
                   $view.attr('src', props.url); // Begin loading.
                 }
+              }else{
+                let props = $view.data('props');
+                this.$parentObj._.updateTab($tab, { favicon: defaultSSHFavicon, title: props.title }, 'view::state-change');
               }
 
             }

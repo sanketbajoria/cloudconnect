@@ -64,7 +64,22 @@
                     </div>
                 </div>
             </div>
-
+            <!-- <div class="form-group form-group-sm">
+                <div class="col-sm-offset-3 col-sm-2">
+                    <div class="checkbox">
+                        <label><input type="checkbox" name="sudo" ng-model="vm.data.app.config.sudo">sudo</label>
+                    </div>
+                </div>
+                <div class="col-sm-7">
+                    <div class="input-group" ng-if="vm.data.app.config.sudo'">
+                        <input type="{{vm.showSecret?'text':'password'}}" class="form-control input-sm" id="password" ng-model="vm.data.app.config.secret.password"
+                        placeholder="Password" />
+                        <span class="input-group-addon" ng-click="vm.showSecret=!vm.showSecret">
+                            <i class="fa" ng-class="vm.showSecret?'fa-eye':'fa-eye-slash'"></i>
+                        </span>
+                    </div>
+                </div>
+            </div> -->
         </div>
     </form>
 </div>

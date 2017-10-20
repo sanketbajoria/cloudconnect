@@ -6,6 +6,14 @@ function normalize(data){
     return data.match(/[^\r?\n]+/g);
 }
 
+function normalizePath(path){
+    return path.replace(/ /g, "\\ ");
+}
+
+function normalizeName(name){
+    return name.trim().split("/").pop();
+}
+
 var shell = {
     statusParser: function(data){
         return !data || normalize(data)[0].trim()=='0'
@@ -16,6 +24,55 @@ var shell = {
         }
     },
     list: {
+        cmd: function(path){
+            return `shopt -s nullglob; printf "["; c=0; for f in ${normalizePath(path)}*; do if [ $c -ne 0 ]; then printf ","; fi; printf "{"; if [ -d "$f" ]; then printf "\\\"isDir\\\":true,\\\"name\\\":\\\"%s\\\",\\\"size\\\":0,\\\"mtime\\\":%d" "$f" "$(date -r "$f" +%s)";  else printf "\\\"isDir\\\":false,\\\"name\\\":\\\"%s\\\",\\\"size\\\":%d,\\\"mtime\\\":%d" "$f" "$(wc -c < "$f")" "$(date -r "$f" +%s)"; fi; printf "}"; c=$((c+1)); done; printf "]";`
+        },
+        parser: function(res){
+            var data = JSON.parse(res);
+            return data.map(function(l){
+                return{
+                    name: normalizeName(l.name),
+                    mime: mime.lookup(normalizeName(l.name)),
+                    folder: l.isDir,
+                    size: l.size,
+                    mtime: l.mtime*1000 
+                }
+            })
+        }
+    }
+    /* list: {
+        //-rw-r--r-- 1 SA033BA 1049089 1093 2017-08-11 05:42:48.746221600 +0530 LICENSE
+        cmd: function(path){
+            return `(stat -l -t "%F %T %z" ${normalizePath(path)}* 2> /dev/null || ls -l --time-style=full-iso "${normalizePath(path)}")`
+        },
+        parser: function(data){
+            return normalize(data).map(function(l){
+                var tokens = l.split(" ");
+                if(tokens.length>8){
+                    var len = tokens.length;
+                    var zoneIdx 
+                    for(var i=len-1;i>=0;i--){
+                        if(/[\+-]\d{4}/.test(tokens[i])){
+                            zoneIdx = i;
+                        }
+                    }
+                    if(zoneIdx){
+                        var name = normalizeName(tokens.slice(zoneIdx+1).join(" "));
+                        return {
+                            name: name,
+                            mime: mime.lookup(name),
+                            folder: tokens[0][0] == 'd' ? true : false,
+                            size: tokens[len-5],
+                            mtime: Date.parse(`${tokens[zoneIdx - 2]} ${tokens[zoneIdx - 1]} ${tokens[zoneIdx]}`) 
+                        }
+                    }
+                }
+            }).filter(function (match) { 
+                return match != null; 
+            });
+        }
+    } */
+    /* list: {
         //-rw-r--r-- 1 SA033BA 1049089 1093 2017-08-11 05:42:48.746221600 +0530 LICENSE
         cmd: function(path){
             return `ls -l --time-style=full-iso "${path}"`
@@ -46,7 +103,7 @@ var shell = {
                 }
             });
         }
-    },
+    } */,
     exists: {
         cmd: function(path){
             return `test -e "${path}"; echo $?`;
@@ -75,6 +132,17 @@ var shell = {
     zipFolder: {
         cmd: function(p, tempZipPath){
             return `zip -r "${tempZipPath}" "${p}"`;
+        }
+    },
+    readFile: {
+        cmd: function(path){
+            return `cat "${path}"`;
+        }
+    },
+    writeFile: {
+        cmd: function(path, options){
+            options = options || {};
+            return `tee ${options.flags=='a'?'>':''}> "${path}"`
         }
     }
 

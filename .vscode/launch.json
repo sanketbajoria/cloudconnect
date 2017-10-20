@@ -43,6 +43,12 @@
             "request": "launch",
             "program": "${workspaceRoot}/src/app/tunnel/tunnel.js",
             "console": "externalTerminal"
+        },
+        {
+            "name": "test",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/test.js"
         }
     ]
 }

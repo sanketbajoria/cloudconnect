@@ -2,15 +2,18 @@ var Q = require('q'),
   shell = require('./shellParser'),
   path = require('path').posix,
   NodeFileManger = require('scullog').NodeFileManager;
-
+  Queue = require('../utils/queue'),
+  queue = new Queue(3, Infinity);
+  
 class ShellFileManager extends NodeFileManger{
   constructor(tunnel) {
     super();
+    this.adminMode = false;
     this.tunnel = tunnel;
   }
 
   __exec(action) {
-    return this.tunnel.execCmd(shell[action].cmd.apply(shell[action], Array.prototype.slice.call(arguments, 1)))
+    return this.execCmd(shell[action].cmd.apply(shell[action], Array.prototype.slice.call(arguments, 1)))
       .then((data) => {
         return (shell[action].parser || shell.statusParser)(data);
       })
@@ -60,7 +63,28 @@ class ShellFileManager extends NodeFileManger{
       yield this.__exec('move', srcs[i], path.join(dest, basename));
     }
   }
+  
+  * writeFile(p, content) {
+    return yield this.spawnCmd.apply(this, [shell['writeFile'].cmd(p)]).then((stream) => {
+      stream.end(content);
+    });
+  }
 
+  createReadStream() {
+    var params = arguments;
+    return this.spawnCmd.apply(this, [shell['readFile'].cmd(params[0])]).then((stream) => {
+      return stream;
+    });
+  }
+
+  createWriteStream() {
+    var params = arguments;
+    return this.spawnCmd.apply(this, [shell['writeFile'].cmd(params[0], params[1])]).then((stream) => {
+      return stream;
+    });
+  }
+
+/* 
   * writeFile(p, content) {
     return yield this.tunnel.sftp().then((sftp) => {
       var wstream = sftp.createWriteStream.apply(sftp, [p]);
@@ -80,15 +104,50 @@ class ShellFileManager extends NodeFileManger{
     return this.tunnel.sftp().then((sftp) => {
       return sftp.createWriteStream.apply(sftp, params);
     });
+  } */
+
+  __normalizeParams(params){
+    params = [...params];
+    if(this.adminMode){
+      params[0] = `sudo bash -c '${params[0]}'`;
+    }
+    return params;
   }
 
   execCmd(){
-    return this.tunnel.execCmd.apply(this.tunnel, arguments);
+    var params = this.__normalizeParams(arguments);
+    var promise = queue.add(() => {
+      return this.tunnel.execCmd.apply(this.tunnel, params);
+    });
+    return promise.then((data) => {
+      queue.remove(promise);
+      return data;
+    });
   }
 
   spawnCmd(){
-    return this.tunnel.spawnCmd.apply(this.tunnel, [...arguments].concat([true]));
+    var params = this.__normalizeParams(arguments).concat([true]);
+    var promise = queue.add(() => {
+      return this.tunnel.spawnCmd.apply(this.tunnel, params);
+    });
+
+    return promise.then((stream) => {
+      stream.on('close', () => {
+        queue.remove(promise);
+      }).on('finish', () => {
+        queue.remove(promise);
+      });
+      return stream;
+    })
   }
+
+  /* execCmd(){
+    return this.tunnel.execCmd.apply(this.tunnel, this.__normalizeParams(arguments));
+  }
+
+  spawnCmd(){
+    return this.tunnel.spawnCmd.apply(this.tunnel, this.__normalizeParams(arguments).concat([true]));
+  } */
 
   zipFolder(p) {
     var tempZipPath = `/tmp/${new Date().getTime()}-${path.basename(p)}.zip`;

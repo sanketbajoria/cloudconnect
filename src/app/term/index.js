@@ -7,10 +7,11 @@ module.exports = function($terminal, devTunnel){
         focus: true
     });
     $terminal.data('terminal', term);
-    term.writeln("Welcome to SSH Tunnel");
+    //term.writeln("Welcome to SSH Tunnel");
     setTimeout(function(){
         term.fit();
         devTunnel.getShellSocket({cols: term.cols, rows: term.rows, term: 'xterm'}).then(function(socket){
+            //socket.write("sudo su\n");
             socket.on('close', function () {
                 console.log('Stream :: close');
             }).on('data', function (data) {

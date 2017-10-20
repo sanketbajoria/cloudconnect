@@ -1,7 +1,13 @@
 var AWS = require('../cloud/aws.js');
 var tunnels ={};
 var Q = require('q');
-
+function getSSH(i, db, sshConfig){
+    var id = db.getUniqueId(i);
+    if(!tunnels[id] && sshConfig){
+        tunnels[id] = new SSHTunnel(sshConfig);
+    }
+    return tunnels[id];
+}
 module.exports = {
     createUrl: function (s, app) {
         if (this.getPort(s, app)) {
@@ -42,15 +48,7 @@ module.exports = {
             return AWS.getName(i.aws.instance);
         }
     },
-    getSSH: function(i, db, sshConfig){
-        var id = db.getUniqueId(i);
-        if(tunnels[id])
-            return tunnels[id];
-        if(sshConfig){
-            return tunnels[id] = new SSHTunnel(sshConfig);
-        }
-    },
-    initSSH: function(s, app, db){
+    getSSH: function(s, app, db){
         var lastSSH, i = s;
         var instances = (this.isTerminalType(app) || this.isScullogType(app))?[s]:[];
         while(i = i.connection.ref){
@@ -58,26 +56,30 @@ module.exports = {
             instances.push(i);
         }
         while(i=instances.pop()){
-            var instance = i;
-            var sshApp = instance.applications.filter(function(a){
-                return utils.isTerminalType(a);
-            })[0];
-            var sshConfig = {username:sshApp.config.userName, host: this.getRemoteAddr(instance), port: sshApp.port};
-            if(sshApp.config.secret.key == 'password'){
-                sshConfig.password = sshApp.config.secret.password
-            }else{
-                sshConfig.identity = sshApp.config.secret.pem.file.path;
-            }
-            if(!lastSSH){
-                lastSSH = this.getSSH(instance, db, sshConfig).connect(sshConfig);
-            }else {
-                lastSSH = lastSSH.then((ssh) => {
-                    return ssh.spawnCmd(`nc ${this.getRemoteAddr(instance)} ${sshApp.port}`);
-                }).then((stream) => {
-                    sshConfig.sock = stream;
-                    return this.getSSH(instance, db, sshConfig).connect(sshConfig);
-                })
-            }
+            (function(instance, utils){
+                var sshApp = instance.applications.filter(function(a){
+                    return utils.isTerminalType(a);
+                })[0];
+                var sshConfig = {username:sshApp.config.userName, host: utils.getRemoteAddr(instance), port: sshApp.port};
+                if(sshApp.config.secret.key == 'password'){
+                    sshConfig.password = sshApp.config.secret.password
+                }else{
+                    sshConfig.identity = sshApp.config.secret.pem.file.path;
+                }
+                if(!lastSSH){
+                    lastSSH = getSSH(instance, db, sshConfig).connect(sshConfig);
+                }else {
+                    lastSSH = lastSSH.then((ssh) => {
+                        return ssh.spawnCmd(`nc ${utils.getRemoteAddr(instance)} ${sshApp.port}`);
+                    }).then((stream) => {
+                        sshConfig.sock = stream;
+                        return getSSH(instance, db, sshConfig).connect(sshConfig);
+                    });
+                }
+                lastSSH = lastSSH.catch((err) => {
+                    return Q.reject(`Unable to connect to ${utils.getInstanceName(instance)} -- ${err}`)
+                });
+            })(i, this) 
         }
         return Q.when(lastSSH);
     },

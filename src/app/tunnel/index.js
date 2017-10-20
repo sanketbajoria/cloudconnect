@@ -84,6 +84,12 @@ class SSHTunnel extends EventEmitter {
                 this.sshConnection.exec(cmd, { pty: pty }, (err, stream) => {
                     if (err)
                         return reject(err);
+                    stream.on('close', function(){
+                        console.log(`Closed stream - ${cmd}`);
+                    })
+                    stream.on('finish', function(){
+                        console.log(`Closed stream - ${cmd}`);
+                    });
                     stream.kill = function(){
                         stream.end('\x03');
                         stream.signal('INT');
@@ -98,11 +104,11 @@ class SSHTunnel extends EventEmitter {
     /**
      * Exec a command
      */
-    execCmd(cmd, params) {
+    execCmd(cmd, params, pty) {
         cmd += (Array.isArray(params)?(" " + params.join(" ")):"");
         return this.connect().then(() => {
             return Q.Promise((resolve, reject) => {
-                this.sshConnection.exec(cmd, (err, stream) => {
+                this.sshConnection.exec(cmd, {pty: pty}, (err, stream) => {
                     if (err)
                         return reject(err);
                     var buffer = "";
@@ -147,9 +153,9 @@ class SSHTunnel extends EventEmitter {
         if (this.__$connectPromise != null)
             return this.__$connectPromise;
 
-        this.__$connectPromise = Q.promise((resolve, reject) => {
+        this.__$connectPromise = Q.promise((resolve, reject, notify) => {
             if (!this.config || typeof this.config === 'function' || !this.config.host || !this.config.username) {
-                reject('You need to specify the ssh connection config');
+                reject("Invalid SSH connection configuration host/username can't be empty");
                 this.__$connectPromise = null;
                 return;
             }
@@ -164,8 +170,8 @@ class SSHTunnel extends EventEmitter {
                 }
                 delete this.config.identity;
             }
-            /* 
-             this.config.debug = function(arg){
+             
+            /*  this.config.debug = function(arg){
                 console.log(arg);
             }  */
 
@@ -193,11 +199,11 @@ class SSHTunnel extends EventEmitter {
             }).on('error', (err) => {
                 this.emit(SSHTunnel.CHANNEL.SSH, { connected: false, err: err }, this);
                 this.__err = err;
-                reject();
+                reject(err);
                 this.__$connectPromise = null;
             }).on('close', (hadError) => {
                 this.emit(SSHTunnel.CHANNEL.SSH, { connected: false, err: this.__err }, this);
-                reject();
+                reject(this.__err);
                 this.__$connectPromise = null;
                 if (this.__err != null && this.__err.level != "client-authentication" && this.__err.code != 'ENOTFOUND') {
                     if (this.config.reconnect && this.__retries <= this.config.reconnectTries) {

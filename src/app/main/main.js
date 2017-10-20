@@ -28,7 +28,9 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr) 
         var s = props.__server;
         var app = props.__app;
         if(utils.isTerminalType(app)){
-           require('./term')(view.find('.sshTerminal'), utils.getSSH(s, db));
+            utils.getSSH(s, app, db).then((tunnel) => {
+                require('./term')(view.find('.sshTerminal'), tunnel);
+            })
         }
     });
 
@@ -69,13 +71,14 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr) 
 
 
     vm.openApp = function(s, app){
-        utils.initSSH(s, app, db).then((sshTunnel) => {
+        var $tab = addTab(s, app); 
+        utils.getSSH(s, app, db).then((sshTunnel) => {
             if(utils.isTerminalType(app)){
-                addTab(s, app, utils.createUrl(s, app));
+                updateTab($tab, s, app, utils.createUrl(s, app));
             }else if(utils.isScullogType(app)){
-                new scullog(sshTunnel).then(function (p) {
+                new scullog(sshTunnel, app).then(function (p) {
                     s._scullog = {port: p};
-                    addTab(s, app, utils.createScullogUrl(s));
+                    updateTab($tab, s, app, utils.createScullogUrl(s));
                 });
             }else {
                 $q.when(utils.isForwardConnection(s) ? sshTunnel.addTunnel({name: utils.getInstanceName(s), remoteAddr: utils.getRemoteAddr(s), remotePort: app.port}) : '').then(function (t) {
@@ -83,10 +86,10 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr) 
                     if (utils.isCouchDBType(app)) {
                         couchDb.addIfNotExist(s, app).then(function (c) {
                             s._couch = c;
-                            addTab(s, app, utils.createCouchUrl(s, app), sshTunnel);
+                            updateTab($tab, s, app, utils.createCouchUrl(s, app), sshTunnel);
                         });
                     } else {
-                        addTab(s, app, utils.createUrl(s, app), sshTunnel);
+                        updateTab($tab, s, app, utils.createUrl(s, app), sshTunnel);
                     } 
                 });
             }
@@ -98,15 +101,15 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr) 
                 if (utils.isCouchDBType(app)) {
                     couchDb.addIfNotExist(s, app).then(function (c) {
                         s._couch = c;
-                        addTab(s, utils.createCouchUrl(s));
+                        updateTab($tab, s, utils.createCouchUrl(s));
                     });
                 } else if(utils.isScullogType(s)){
                     new scullog(utils.getTunnel(s)).then(function (p) {
                         s._scullog = {port: p};
-                        addTab(s, utils.createScullogUrl(s));
+                        updateTab($tab, s, utils.createScullogUrl(s));
                     });         
                 } else {
-                    addTab(s, utils.createUrl(s, app));
+                    updateTab($tab, s, utils.createUrl(s, app));
                 } 
             }); */
         
@@ -164,16 +167,25 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr) 
         });
     }
 
-
-    function addTab(s, app, url, sshTunnel) {
+    function addTab(s, app){
         ++vm.tabCount;
         vm.chromeTabs.toggle(true);
+        var tabConfig = {
+            favicon: 'default',
+            loadingFavicon: 'loading',
+            title: utils.getInstanceName(s), 
+            __server: s,
+            __app: app
+        }
+        return vm.chromeTabs.addTab(tabConfig);
+    }
 
+    function updateTab($tab, s, app, url, sshTunnel) {
         var tabConfig = {
             url: url,
             favicon: 'default',
             loadingFavicon: 'loading',
-            title: s.name, 
+            title: utils.getInstanceName(s), 
             viewAttrs: {
                 disablewebsecurity: true,
                 webpreferences: 'allowDisplayingInsecureContent, zoomFactor=1, webSecurity=false',
@@ -186,7 +198,8 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr) 
         
         $q.when(utils.isSocksConnection(s)?sshTunnel.getSocksPort():null).then(function(port){
             tabConfig["proxyUrl"] = port?utils.createProxyUrl(port):null;
-            vm.chromeTabs.addTab(tabConfig);
+            vm.chromeTabs.showMainTab($tab);
+            vm.chromeTabs.updateTab($tab, tabConfig);
         });
     }
 
