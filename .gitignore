@@ -6,8 +6,6 @@ Thumbs.db
 dist
 coverage
 typings
-config/aws.json
-config/config.json
 Untitled-1.txt
 database
 test.js

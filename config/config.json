@@ -1,0 +1,54 @@
+{
+    "profile": {
+        "types": {
+            "generic": {
+                "label": "Generic",
+                "icon": "cloud"
+            },
+            "aws": {
+                "label": "AWS",
+                "icon": "amazon"
+            }
+        }
+    },
+    "instance": {
+        "connection": {
+            "types": {
+                "direct": {
+                    "label": "Direct"
+                },
+                "forward": {
+                    "label": "Forward Tunnel"
+                },
+                "socks": {
+                    "label": "Reverse Tunnel"
+                }
+            }
+        },
+        "application": {
+            "types": {
+                "ssh": {
+                    "label": "SSH",
+                    "port": 22,
+                    "protocol": [
+                        "ssh"
+                    ]
+                },
+                "couchdb": {
+                    "label": "CouchDB",
+                    "port": 5984,
+                    "protocol": [
+                        "http", "https"
+                    ]
+                },
+                "http": {
+                    "label": "HTTP/HTTPS",
+                    "port": 80,
+                    "protocol": [
+                        "http", "https"
+                    ]
+                }
+            }
+        }
+    }
+}
