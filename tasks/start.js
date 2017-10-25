@@ -3,8 +3,8 @@ const electron = require('electron');
 const gulp = require('gulp');
 
 gulp.task('start', ['build', 'watch'], () => {
-  childProcess.spawn(electron, ['.'], { stdio: 'inherit' })
-  .on('close', () => {
+  childProcess.spawn(electron, ['.','--inspect=[5858]'], { stdio: 'inherit' })
+    .on('close', () => {
     // User closed the app. Kill the host process.
     process.exit();
   });

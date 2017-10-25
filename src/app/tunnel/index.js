@@ -74,6 +74,56 @@ class SSHTunnel extends EventEmitter {
         });
     }
 
+    getShellPath() {
+        return this.connect().then(() => {
+            return Q.Promise((resolve, reject) => {
+                this.sshConnection.shell({cols: 80, rows: 80, term: 'xterm'}, (err, stream) => {
+                    if (err)
+                        return reject(err);
+                        var buffer = "";
+                        
+                        stream.on('data', function (data ) {
+                            console.log('STDOUT: ' + data);
+                            buffer+=data;
+                            var inputSize=0;
+                            var dataLength = data.length
+                            var pathCommand=true;
+                            if (dataLength > (2+inputSize) && (data.indexOf("$") >= dataLength - 2 || data.indexOf("#") >= dataLength - 2)) {
+                                if (buffer.indexOf("PATH=") > 0) {
+                                    var path = buffer.substring(buffer.lastIndexOf("="), buffer.lastIndexOf("ENDPATH"));
+                                    console.log("sdsss" + path);
+                                    if(stream.writable){
+                                        stream.end('\x03');
+                                        stream.signal('INT');
+                                        stream.signal('KILL');
+                                        stream.close();
+                                    }
+                                    resolve(path);
+                                }
+                                else if(pathCommand){
+                                    buffer = "";
+                                    pathCommand=false;
+                                    console.log('STDOUT: ' + data);
+                                    var cmd="echo PATH=$PATH ENDPATH \r\n ";
+                                    stream.write(cmd);
+                                    inputSize=cmd.length
+
+
+                                }
+                            }
+                            //stream.write("echo $PATH \r\n ");
+                            
+                        }).stderr.on('data', function (data) {
+                            console.log('STDERR: ' + data);
+                        });
+                       // stream.write("echo $PATH \r\n ");
+                        
+                        
+                        });
+            });
+        })
+    }
+
     /**
      * Spawn a command
      */

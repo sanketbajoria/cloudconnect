@@ -25,7 +25,7 @@ var shell = {
     },
     list: {
         cmd: function(path){
-            return `shopt -s nullglob; printf "["; c=0; for f in ${normalizePath(path)}*; do if [ $c -ne 0 ]; then printf ","; fi; printf "{"; if [ -d "$f" ]; then printf "\\\"isDir\\\":true,\\\"name\\\":\\\"%s\\\",\\\"size\\\":0,\\\"mtime\\\":%d" "$f" "$(date -r "$f" +%s)";  else printf "\\\"isDir\\\":false,\\\"name\\\":\\\"%s\\\",\\\"size\\\":%d,\\\"mtime\\\":%d" "$f" "$(wc -c < "$f")" "$(date -r "$f" +%s)"; fi; printf "}"; c=$((c+1)); done; printf "]";`
+            return `printf "["; c=0; for f in ${normalizePath(path)}*; do if [ $c -ne 0 ]; then printf ","; fi; printf "{"; if [ -d "$f" ]; then printf "\\\"isDir\\\":true,\\\"name\\\":\\\"%s\\\",\\\"size\\\":0,\\\"mtime\\\":%d" "$f" "$(date -r "$f" +%s)";  else printf "\\\"isDir\\\":false,\\\"name\\\":\\\"%s\\\",\\\"size\\\":%d,\\\"mtime\\\":%d" "$f" "$(wc -c < "$f")" "$(date -r "$f" +%s)"; fi; printf "}"; c=$((c+1)); done; printf "]";`
         },
         parser: function(res){
             var data = JSON.parse(res);

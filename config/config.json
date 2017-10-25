@@ -47,6 +47,13 @@
                     "protocol": [
                         "http", "https"
                     ]
+                },
+                "Docker": {
+                    "label": "docker",
+                    "port": 80,
+                    "protocol": [
+                        "http", "https"
+                    ]
                 }
             }
         }

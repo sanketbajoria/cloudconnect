@@ -3,31 +3,61 @@
     "configurations": [
 
         {
-            "name": "Launch",
+			
+            "name": "Launch Electron App",
             "type": "node",
-            "request": "launch",
-            "program": "${workspaceRoot}/app/background.js",
+            "program": "${workspaceRoot}/src/app.js", // important
+            "request": "launch",            
             "stopOnEntry": false,
             "args": [],
-            "cwd": "${workspaceRoot}",
-            "preLaunchTask": null,
-            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron.cmd",
+            "cwd": "${workspaceRoot}/",
+            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
             "runtimeArgs": [
                 ".",
-                "--enable-logging"
+                "--enable-logging",
+                "--remote-debugging-port=9229"
+                
             ],
-            "env": {},
-            "console": "internalConsole",
+            "preLaunchTask": null,            
+            "env": { }, 			
             "sourceMaps": false
+              
+            
         },
+		{
+            "name": "Debug Renderer Process",
+            "type": "chrome",
+            "request": "launch",
+            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
+            "runtimeArgs": [
+              "${workspaceRoot}",
+              "--enable-logging",
+              "--remote-debugging-port=28021"
+            ],
+            "sourceMaps": true
+            
+        },
+        {
+            "type": "chrome",
+            "request": "attach",
+            "name": "Launch Chrome",
+            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
+            "runtimeArgs": [
+                "${workspaceRoot}",
+                "--enable-logging",
+                "--remote-debugging-port=9229"
+             ],
+             "sourceMaps": false
+                
+        },
+
+        
         {
             "name": "Attach",
             "type": "node",
             "request": "attach",
-            "port": 5858,
+            "port": 32156,
             "address": "localhost",
-            "restart": false,
-            "sourceMaps": false,
             "localRoot": "${workspaceRoot}",
             "remoteRoot": null
         },

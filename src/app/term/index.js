@@ -21,6 +21,8 @@ module.exports = function($terminal, devTunnel){
                 console.log('STDERR: ' + data);
             });
             term.on('data', function(data){
+                console.log('term: ' + data);
+                
                 socket.write(data)
             }).on('close', function(){
                 socket.end('\x03');
