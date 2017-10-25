@@ -17,7 +17,9 @@ class AWS {
         }
         return new this.aws.EC2().describeInstances(params).promise().then(function (data) {
             return data.Reservations.reduce(function (p, r) {
-                p = p.concat(r.Instances);
+                p = p.concat(r.Instances.filter(function(i){
+                    return !AWS.isTerminated(i);
+                }));
                 return p;
             }, []);
         });
@@ -25,6 +27,14 @@ class AWS {
 
     static getHostName(instance){
         return instance.PublicDnsName || instance.PrivateDnsName
+    }
+
+    static isRunning(instance){
+        return instance.State.Code == 16; //running code 16 
+    }
+
+    static isTerminated(instance){
+        return instance.State.Code == 48; //terminated code 16 
     }
 
     static getUniqueId(instance){

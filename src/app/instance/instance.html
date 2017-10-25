@@ -1,12 +1,12 @@
 <div class="modal-header modal-header-galaxy modal-header-fullscreen">
     <h5 style="display:inline-block;"><i class="fa fa-arrow-left" data-dismiss="modal" ng-click="instanceCtrl.no()"></i> {{!instanceCtrl.editMode?'Add':'Edit'}}
-        Profile</h5>
+        Instance Detail</h5>
     <button type="button" class="btn btn-primary pull-right btn-sm" ng-disabled="instanceCtrl.isInvalid()" ng-click="instanceCtrl.saveInstance()">Save</button>
     <button type="button" class="btn btn-default pull-right btn-sm" ng-click="instanceCtrl.testConnection()">Test Connection</button>
 </div>
 <div class="modal-body" style="width:50%">
         <form name="instance" novalidate class="form-horizontal">
-            <div class="form-group form-group-sm">
+            <div class="form-group form-group-sm required">
                 <label for="type" class="control-label col-sm-3">Type:</label>
                 <div class="col-sm-9">
                     <select class="form-control input-sm" id="type" ng-model="instanceCtrl.instance.type" ng-options="k as v.label for (k,v) in instanceCtrl.config.profile.types"
@@ -15,14 +15,14 @@
             </div>
 
             <div ng-if="instanceCtrl.instance.type == 'generic'">
-                <div class="form-group form-group-sm">
+                <div class="form-group form-group-sm required">
                     <label for="name" class="control-label col-sm-3">Name:</label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control input-sm" id="name" ng-model="instanceCtrl.instance.generic.name" placeholder="Name of the instance"
                             required />
                     </div>
                 </div>
-                <div class="form-group form-group-sm">
+                <div class="form-group form-group-sm required">
                     <label for="host" class="control-label col-sm-3">Host:</label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control input-sm" id="host" ng-model="instanceCtrl.instance.generic.host" placeholder="DNS Name or IP Address"
@@ -32,14 +32,14 @@
             </div>
 
             <div ng-if="instanceCtrl.instance.type == 'aws'">
-                <div class="form-group form-group-sm">
+                <div class="form-group form-group-sm required">
                     <label for="awsProfile" class="control-label col-sm-3">AWS Profile:</label>
                     <div class="col-sm-9">
                         <select class="form-control input-sm" id="name" ng-options="profile as profile.name for profile in instanceCtrl.awsProfiles" ng-model="instanceCtrl.instance.aws.profile"
                             ng-change="instanceCtrl.changeAWSProfile()" placeholder="Choose existing AWS profile" required></select>
                     </div>
                 </div>
-                <div class="form-group form-group-sm has-feedback">
+                <div class="form-group form-group-sm has-feedback required">
                     <label for="name" class="control-label col-sm-3">AWS Name:</label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control input-sm" id="name" ng-model="instanceCtrl.instance.aws.instance" uib-typeahead="instance as instanceCtrl.getInstanceLabel(instance) for instance in instanceCtrl.getAWSInstances($viewValue, 12)" typeahead-loading="loadingInstances" typeahead-no-results="noResults" ng-disabled="!instanceCtrl.instance.aws.profile" placeholder="Type AWS instance detail such as instanceId, name etc"
@@ -52,7 +52,7 @@
                 </div>
             </div>
 
-            <div class="form-group form-group-sm">
+            <div class="form-group form-group-sm required">
                 <label for="connectType" class="control-label col-sm-3">Connect via:</label>
                 <div class="col-sm-9">
                     <select class="form-control input-sm" name="connectType" ng-options="k as v.label for (k, v) in instanceCtrl.config.instance.connection.types"
@@ -60,7 +60,7 @@
                 </div>
             </div>
 
-            <div ng-if="instanceCtrl.instance.connection.type != 'direct'" class="form-group form-group-sm">
+            <div ng-if="instanceCtrl.instance.connection.type != 'direct'" class="form-group form-group-sm required">
                 <div ng-if="instanceCtrl.sshInstances.length>0">
                     <label for="existingInstance" class="control-label col-sm-3" uib-tooltip="Choose an existing instance, having SSH capability">Existing Instance:</label>
                     <div class="col-sm-9">

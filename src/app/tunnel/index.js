@@ -171,9 +171,9 @@ class SSHTunnel extends EventEmitter {
                 delete this.config.identity;
             }
              
-            /*  this.config.debug = function(arg){
+            this.config.debug = function(arg){
                 console.log(arg);
-            }  */
+            } 
 
             //Start ssh server connection
             this.sshConnection = new SSH2();
