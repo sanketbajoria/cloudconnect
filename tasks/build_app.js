@@ -30,6 +30,11 @@ gulp.task('images', () => {
   .pipe(gulp.dest(destDir.path('./images/')));
 });
 
+gulp.task('icons', () => {
+  return gulp.src(srcDir.path('./icons/**'))
+  .pipe(gulp.dest(destDir.path('./icons/')));
+});
+
 gulp.task('css', () => {
   return gulp.src(srcDir.path('./app/**/*.scss'))
   .pipe(plumber())
@@ -80,5 +85,5 @@ gulp.task('clean', () => {
   fs.removeSync('dist');
 });
 
-gulp.task('build', ['bundle', 'css', 'js', 'html', 'environment', 'images']);
+gulp.task('build', ['bundle', 'css', 'js', 'html', 'environment', 'images', 'icons']);
 
