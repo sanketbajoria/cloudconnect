@@ -107,40 +107,44 @@ class ShellFileManager extends NodeFileManger{
   } */
 
   __normalizeParams(params){
-    params = [...params];
-    if(this.adminMode){
-      params[0] = `sudo bash -c '${params[0]}'`;
-      params[2] = this.adminMode; //sudo su can prompt for password which require pty;
-    }
-    return params;
+    return new Q.Promise((resolve, reject)=>{
+      params = [...params];
+      if(this.adminMode){
+        params[0] = `sudo bash -c '${params[0]}'`;
+        params[2] = this.adminMode; //sudo su can prompt for password which require pty;
+      }
+      resolve(params);
+    })
   }
 
   execCmd(){
-    var params = this.__normalizeParams(arguments);
-    var promise = queue.add(() => {
-      return this.tunnel.execCmd.apply(this.tunnel, params);
-    });
-    return promise.then((data) => {
-      queue.remove(promise);
-      return data;
-    });
+    return this.__normalizeParams(arguments).then(params => {
+      var promise = queue.add(() => {
+        return this.tunnel.execCmd.apply(this.tunnel, params);
+      });
+      return promise.then((data) => {
+        queue.remove(promise);
+        return data;
+      });
+    })
   }
 
   spawnCmd(){
-    var params = this.__normalizeParams(arguments);
-    params[2] = true; //forced pty for tail cmd
-    var promise = queue.add(() => {
-      return this.tunnel.spawnCmd.apply(this.tunnel, params);
-    });
-
-    return promise.then((stream) => {
-      stream.on('close', () => {
-        queue.remove(promise);
-      }).on('finish', () => {
-        queue.remove(promise);
+    return this.__normalizeParams(arguments).then(params => {
+      params[2] = true; //forced pty for tail cmd
+      var promise = queue.add(() => {
+        return this.tunnel.spawnCmd.apply(this.tunnel, params);
       });
-      return stream;
-    })
+  
+      return promise.then((stream) => {
+        stream.on('close', () => {
+          queue.remove(promise);
+        }).on('finish', () => {
+          queue.remove(promise);
+        });
+        return stream;
+      })
+    });
   }
 
   /* execCmd(){
