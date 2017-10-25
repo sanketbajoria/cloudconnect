@@ -43,7 +43,6 @@
     "debug": "^3.0.1",
     "draggabilly": "^2.1.1",
     "duplex-child-process": "0.0.5",
-    "font-awesome": "^4.7.0",
     "fs-extra": "^4.0.1",
     "fs-jetpack": "^1.0.0",
     "galaxyfauxton": "https://github.com/sanketbajoria/couchdb-fauxton/raw/master/fauxton-1.1.13.tgz",

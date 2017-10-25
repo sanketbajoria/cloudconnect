@@ -1,6 +1,6 @@
 var app = angular.module('galaxy');
 
-app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr) {
+app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, $timeout) {
     var vm = this;
     vm.tabCount = 0;
     vm.db = db;

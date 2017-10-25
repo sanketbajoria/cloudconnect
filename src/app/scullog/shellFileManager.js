@@ -110,6 +110,7 @@ class ShellFileManager extends NodeFileManger{
     params = [...params];
     if(this.adminMode){
       params[0] = `sudo bash -c '${params[0]}'`;
+      params[2] = this.adminMode; //sudo su can prompt for password which require pty;
     }
     return params;
   }
@@ -126,7 +127,8 @@ class ShellFileManager extends NodeFileManger{
   }
 
   spawnCmd(){
-    var params = this.__normalizeParams(arguments).concat([true]);
+    var params = this.__normalizeParams(arguments);
+    params[2] = true; //forced pty for tail cmd
     var promise = queue.add(() => {
       return this.tunnel.spawnCmd.apply(this.tunnel, params);
     });
