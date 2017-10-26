@@ -7,24 +7,42 @@
         <div class="form-group form-group-sm required">
             <label for="applicationType" class="control-label col-sm-3">Type:</label>
             <div class="col-sm-9">
-                <select class="form-control input-sm" id="applicationType" ng-model="vm.data.app.type" ng-options="k as v.label for (k,v) in vm.data.applicationTypes" ng-change="vm.data.app.protocol=vm.data.applicationTypes[vm.data.app.type].protocol[0]; vm.data.app.port = vm.data.applicationTypes[vm.data.app.type].port"
+                <select class="form-control input-sm" id="applicationType" ng-model="vm.data.app.type" ng-options="k as v.label for (k,v) in vm.data.applicationTypes"
+                    ng-change="vm.data.app.protocol=vm.data.applicationTypes[vm.data.app.type].protocol[0]; vm.data.app.port = vm.data.applicationTypes[vm.data.app.type].port"
                     required>
-                                <option value="">--Select--</option>
-                            </select>
-            </div>
-        </div>
-        <div class="form-group form-group-sm required">
-            <label for="port" class="control-label col-sm-3">Port:</label>
-            <div class="col-sm-9">
-                <input type="number" class="form-control input-sm" id="port" ng-model="vm.data.app.port" placeholder="Port range (0 to 65535)" min="0" max="65535" required />
-            </div>
-        </div>
-        <div class="form-group form-group-sm required">
-            <label for="protocol" class="control-label col-sm-3">Protocol:</label>
-            <div class="col-sm-9">
-                <select class="form-control input-sm" id="protocol" ng-model="vm.data.app.protocol" ng-options="k for k in vm.data.applicationTypes[vm.data.app.type].protocol" required>
+                    <option value="">--Select--</option>
                 </select>
             </div>
+        </div>
+        <div ng-if="vm.data.app.type!='Docker'"> 
+            <div class="form-group form-group-sm required">
+                <label for="port" class="control-label col-sm-3">Port:</label>
+                <div class="col-sm-9">
+                    <input type="number" class="form-control input-sm" id="port" ng-model="vm.data.app.port" placeholder="Port range (0 to 65535)" min="0" max="65535" required />
+                </div>
+            </div>
+            <div class="form-group form-group-sm required">
+                <label for="protocol" class="control-label col-sm-3">Protocol:</label>
+                <div class="col-sm-9">
+                    <select class="form-control input-sm" id="protocol" ng-model="vm.data.app.protocol" ng-options="k for k in vm.data.applicationTypes[vm.data.app.type].protocol" required>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div ng-if="vm.data.app.type=='Docker'">
+                <div ng-if="vm.hasSSHInstance()">
+                        
+                <div class="alert alert-info">
+                        <strong>Info!</strong> Indicates a neutral informative change or action.
+                    </div>
+                </div>
+            <div class="form-group form-group-sm required">
+                <label for="dockerName" class="control-label col-sm-3">Machine Name:</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control input-sm" id="dockerName" ng-model="vm.data.app.config.dockerName" placeholder="Docker Machine Name" required
+                    />
+                </div>
+            </div> 
         </div>
         <div ng-if="vm.data.app.type=='ssh'">
             <div class="form-group form-group-sm required">

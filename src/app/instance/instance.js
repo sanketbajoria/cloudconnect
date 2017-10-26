@@ -57,6 +57,14 @@
             return $scope.instance.$invalid || vm.instance.applications.length==0 || (vm.sshInstances.length == 0 && vm.instance.connection.type != 'direct')
         }
 
+        vm.hasSSHInstance = function(){
+              if(vm.instance.applications.length==0 ){
+                return vm.instance.applications.filter(function(a){
+                    return a.type=='ssh'
+                }).length>0
+              }
+        }
+
         
         vm.no = function () {
             $uibModalInstance.dismiss('cancel');

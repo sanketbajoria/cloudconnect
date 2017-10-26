@@ -32,7 +32,8 @@
                     "port": 22,
                     "protocol": [
                         "ssh"
-                    ]
+                    ],
+                    "dockerMachineName" : "default"
                 },
                 "couchdb": {
                     "label": "CouchDB",
@@ -50,10 +51,7 @@
                 },
                 "Docker": {
                     "label": "docker",
-                    "port": 80,
-                    "protocol": [
-                        "http", "https"
-                    ]
+                    "dockerMachineName" : "default"
                 }
             }
         }
