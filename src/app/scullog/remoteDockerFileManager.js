@@ -6,9 +6,10 @@ var stream = require('stream');
 
 class RemoteDockerFileManager extends ShellFileManager{
 
-    constructor(tunnel) {
+    constructor(tunnel , app) {
         super(tunnel);
         this.tunnel = tunnel;
+        this.app=app;
         
       }
 
@@ -22,7 +23,7 @@ class RemoteDockerFileManager extends ShellFileManager{
     __normalizeParams(params){
         params = [...params];
         return this.__getPath().then((path) =>{
-          params[0] = `PATH=${path}; docker exec qbo-web /bin/sh -c '${params[0]}'`
+          params[0] = `PATH=${path}; docker exec ${this.app.config.dockerName} /bin/sh -c '${params[0]}'`
           return params;
         });
       }
