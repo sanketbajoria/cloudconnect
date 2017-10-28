@@ -6,9 +6,9 @@ var Q = require('q'),
   queue = new Queue(3, Infinity);
   
 class ShellFileManager extends NodeFileManger{
-  constructor(tunnel) {
-    super();
-    this.adminMode = false;
+  constructor(scullog, tunnel, app) {
+    super(scullog);
+    this.app = app;
     this.tunnel = tunnel;
   }
 
@@ -84,34 +84,16 @@ class ShellFileManager extends NodeFileManger{
     });
   }
 
-/* 
-  * writeFile(p, content) {
-    return yield this.tunnel.sftp().then((sftp) => {
-      var wstream = sftp.createWriteStream.apply(sftp, [p]);
-      wstream.end(content);
-    })
-  }
-
-  createReadStream() {
-    var params = arguments;
-    return this.tunnel.sftp().then((sftp) => {
-      return sftp.createReadStream.apply(sftp, params);
-    });
-  }
-
-  createWriteStream() {
-    var params = arguments;
-    return this.tunnel.sftp().then((sftp) => {
-      return sftp.createWriteStream.apply(sftp, params);
-    });
-  } */
-
   __normalizeParams(params){
     return new Q.Promise((resolve, reject)=>{
       params = [...params];
-      if(this.adminMode){
-        params[0] = `sudo bash -c '${params[0]}'`;
-        params[2] = this.adminMode; //sudo su can prompt for password which require pty;
+      if(this.app.config.sudo){
+        if(this.app.config.secret.password){  
+          params[0] = `echo "${this.app.config.secret.password}" | sudo -S bash -c 'echo "\n";${params[0]}' | awk '{if(NR>1)print}'`;
+        }else{
+          params[0] = `sudo bash -c '${params[0]}'`;
+        }
+        params[2] = this.app.config.sudo; //sudo su can prompt for password which require pty;
       }
       resolve(params);
     })
@@ -147,14 +129,6 @@ class ShellFileManager extends NodeFileManger{
     });
   }
 
-  /* execCmd(){
-    return this.tunnel.execCmd.apply(this.tunnel, this.__normalizeParams(arguments));
-  }
-
-  spawnCmd(){
-    return this.tunnel.spawnCmd.apply(this.tunnel, this.__normalizeParams(arguments).concat([true]));
-  } */
-
   zipFolder(p) {
     var tempZipPath = `/tmp/${new Date().getTime()}-${path.basename(p)}.zip`;
     return this.__exec('zipFolder', p, tempZipPath).then(function(){
@@ -162,19 +136,10 @@ class ShellFileManager extends NodeFileManger{
     })
   }
 
-  filePath(relPath, base) {
-    if (relPath.indexOf('..') >= 0) {
-      var e = new Error('Do Not Contain .. in relPath!');
-      e.status = 400;
-      throw e;
-    } else if (!!!base || global.C.data.root.indexOf(base) == -1) {
-      var e = new Error('Invalid base location');
-      e.status = 400;
-      throw e;
-    } else {
-      return path.join(base, relPath);
-    }
+  getPath(){
+    return path;
   }
+
 }
 
 module.exports = ShellFileManager

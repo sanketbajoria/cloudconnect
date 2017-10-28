@@ -25,11 +25,15 @@ var shell = {
     },
     list: {
         cmd: function(path){
-            return `printf "["; c=0; for f in ${normalizePath(path)}*; do if [ $c -ne 0 ]; then printf ","; fi; printf "{"; if [ -d "$f" ]; then printf "\\\"isDir\\\":true,\\\"name\\\":\\\"%s\\\",\\\"size\\\":0,\\\"mtime\\\":%d" "$f" "$(date -r "$f" +%s)";  else printf "\\\"isDir\\\":false,\\\"name\\\":\\\"%s\\\",\\\"size\\\":%d,\\\"mtime\\\":%d" "$f" "$(wc -c < "$f")" "$(date -r "$f" +%s)"; fi; printf "}"; c=$((c+1)); done; printf "]";`
+            return `printf "["; c=0; if [ -n "$(ls ${normalizePath(path)})" ]; then for f in ${normalizePath(path)}*; do if [ $c -ne 0 ]; then printf ","; fi; printf "{"; if [ -d "$f" ]; then printf "\\\"isDir\\\":true,\\\"name\\\":\\\"%s\\\",\\\"size\\\":0,\\\"mtime\\\":%d" "$f" "$(date -r "$f" +%s)";  else printf "\\\"isDir\\\":false,\\\"name\\\":\\\"%s\\\",\\\"size\\\":%d,\\\"mtime\\\":%d" "$f" "$(wc -c < "$f")" "$(date -r "$f" +%s)"; fi; printf "}"; c=$((c+1)); done; fi; if [ -n "$(ls -A ${normalizePath(path)})" ]; then for f in ${normalizePath(path)}.*; do if [ $c -ne 0 ]; then printf ","; fi; printf "{"; if [ -d "$f" ]; then printf "\\\"isDir\\\":true,\\\"name\\\":\\\"%s\\\",\\\"size\\\":0,\\\"mtime\\\":%d" "$f" "$(date -r "$f" +%s)";  else printf "\\\"isDir\\\":false,\\\"name\\\":\\\"%s\\\",\\\"size\\\":%d,\\\"mtime\\\":%d" "$f" "$(wc -c < "$f")" "$(date -r "$f" +%s)"; fi; printf "}"; c=$((c+1)); done; fi; printf "]";`
         },
         parser: function(res){
+            console.log(res);
             var data = JSON.parse(res);
-            return data.map(function(l){
+            return data.filter(function(l){
+                var name = normalizeName(l.name);
+                return name != '.' && name != '..';
+            }).map(function(l){
                 return{
                     name: normalizeName(l.name),
                     mime: mime.lookup(normalizeName(l.name)),

@@ -1,5 +1,6 @@
 var AWS = require('../cloud/aws.js');
 var BashTunnel = require('../tunnel/bashTunnel');
+var checkLocalHost = require('check-localhost');
 var tunnels ={};
 var Q = require('q');
 function getSSH(i, db, sshConfig){
@@ -126,4 +127,7 @@ module.exports = {
     isDockerType: function (app) {
         return app.type === "Docker"
     },
+    isLocalHost: function(s){
+        return checkLocalHost(this.getRemoteAddr(s));
+    }
 }

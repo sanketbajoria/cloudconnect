@@ -76,7 +76,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             if(utils.isTerminalType(app)){
                 updateTab($tab, s, app, utils.createUrl(s, app));
             }else if(utils.isScullogType(app) || utils.isDockerType(app)){
-                new scullog(sshTunnel, app).then(function (p) {
+                new scullog(sshTunnel, s, app).then(function (p) {
                     s._scullog = {port: p};
                     updateTab($tab, s, app, utils.createScullogUrl(s));
                 });
