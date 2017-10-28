@@ -29,7 +29,7 @@ class LocalTunnel extends EventEmitter {
     execCmd(cmd, params, pty) {
         var machineName = arguments[arguments.length-1];
         cmd += (Array.isArray(params) ? (" " + params.join(" ")) : "");
-        cmd = `docker exec ${machineName} /bin/sh -c "${cmd}"`;
+        cmd = `docker exec ${machineName} /bin/sh -c '${cmd}'`;
         return Q.Promise((resolve, reject) => {
             cp.exec(cmd, (error, stdout, stderr) => {
                 if (error)

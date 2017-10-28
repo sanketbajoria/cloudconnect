@@ -1,5 +1,4 @@
 var AWS = require('../cloud/aws.js');
-var BashTunnel = require('../tunnel/bashTunnel');
 var checkLocalHost = require('check-localhost');
 var tunnels ={};
 var Q = require('q');
@@ -11,12 +10,7 @@ function getSSH(i, db, sshConfig){
     return tunnels[id];
 }
 module.exports = {
-    getBashTunnel: function (){
-        return new BashTunnel();
-        // return Q.promise((resolve, reject, notify) => {
-        //     resolve(new BashTunnel());
-        // });
-    },
+    
     createUrl: function (s, app) {
         if (this.getPort(s, app)) {
             return `${this.getProtocol(s, app)}://${this.getHost(s, app)}:${this.getPort(s, app)}`;
@@ -58,13 +52,7 @@ module.exports = {
     },
     getSSH: function(s, app, db){
         var lastSSH, i = s;
-        var instances = (this.isTerminalType(app) || this.isScullogType(app))?[s]:[];
-        if(this.isDockerType(app) ){
-            var instances = [s];
-            if(utils.getRemoteAddr(s)=="localhost" ){
-                return Q.when(new BashTunnel());
-            }
-        }
+        var instances = (this.isTerminalType(app) || this.isScullogType(app))?[s]:[];   
         while(i = i.connection.ref){
             i = db.getInstance(i);
             instances.push(i);
