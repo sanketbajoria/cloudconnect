@@ -36,7 +36,8 @@
                 data: {
                     app: app || {config:{secret:{key:'password', pem: {file: "dummy"}}}},
                     applicationTypes: vm.config.instance.application.types,
-                    editMode: editMode
+                    editMode: editMode,
+                    hasSSHInstance: vm.hasSSHInstance()
                 }
             }).result.then(function(data){
                 if(editMode){
@@ -58,11 +59,9 @@
         }
 
         vm.hasSSHInstance = function(){
-              if(vm.instance.applications.length==0 ){
                 return vm.instance.applications.filter(function(a){
                     return a.type=='ssh'
                 }).length>0
-              }
         }
 
         

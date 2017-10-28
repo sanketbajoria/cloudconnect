@@ -16,14 +16,6 @@
         vm.init = function () {
             $log.debug('ModalCtrl.init() invoked ...');
         };
-        vm.hasSSHInstance = function(){
-            if(vm.instance.applications.length==0 ){
-              return vm.data.app.filter(function(a){
-                  return a.type=='ssh'
-              }).length>0
-            }
-      };
-
         vm.init();
     }
 
