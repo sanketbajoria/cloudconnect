@@ -1,7 +1,49 @@
 
+const {clipboard}  = require('electron');
+
+function copySelection() {
+    if (term.hasSelection()) {
+        term.copiedText = term.getSelection();
+        clipboard.writeText(term.getSelection());
+        console.log(clipboard.readText());
+        
+    }
+}
+
+function pasteInTerminal() {
+    clipboard.writeText(term.getSelection());    
+}
 module.exports = function($terminal, devTunnel){
     var term = new Terminal({
         cursorBlink: true
+    });
+    
+    Terminal.prototype.copySelection = function (ev) {
+        if (term.hasSelection()) { //only if u have seleted text in terminal otherwise bubble the event to parent element 
+            term.copiedText = term.getSelection();
+            clipboard.writeText(term.getSelection());
+            term.clearSelection();
+            ev.stopPropagation();
+            return false; // Stop default behaviour of Ctrl + C or mouse event.
+        }
+    }
+    
+    Terminal.prototype.pasteInTerminal = function (ev) {
+            ev.stopPropagation();
+            term.handler(clipboard.readText());
+            term.textarea.value = '';
+            term.emit('paste', clipboard.readText());
+            term.cancel(ev);
+        
+    }
+    term.attachCustomKeyEventHandler(function (e) {
+        if (e.type === 'keydown' && e.ctrlKey && e.key === 'c') {
+            return this.copySelection(e);              
+        }
+        if (e.type === 'keydown' && e.ctrlKey && e.key === 'v') {
+            this.pasteInTerminal(e);
+            return false;
+        }
     });
     term.open($terminal[0], {
         focus: true
