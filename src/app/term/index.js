@@ -45,6 +45,8 @@ module.exports = function($terminal, devTunnel){
             return false;
         }
     });
+   
+    
     term.open($terminal[0], {
         focus: true
     });
@@ -52,6 +54,15 @@ module.exports = function($terminal, devTunnel){
     //term.writeln("Welcome to SSH Tunnel");
     setTimeout(function(){
         term.fit();
+        term.element.addEventListener('mousedown', function (ev){
+            
+                    if(ev.which == 3)
+                    {
+                          term.pasteInTerminal(ev);
+                          console.log("sjdsjds");
+                          return false;
+                    }
+                });
         devTunnel.getShellSocket({cols: term.cols, rows: term.rows, term: 'xterm'}).then(function(socket){
             //socket.write("sudo su\n");
             socket.on('close', function () {
