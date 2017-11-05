@@ -457,3 +457,64 @@ a {
   margin-left: 3px;
 }
 
+.-download-btn{
+  .fa{
+    transition: all 0.5s;
+  }
+
+  .fa.downloading{
+    font-size: 24px;
+    color: #5bc0de;
+  }
+}
+
+
+.download{
+  .modal-content{
+    background: #f9f9f9;
+  }
+  .card {
+    /* Add shadows to create the "card" effect */
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.5);
+    margin-top: 16px;
+    transition: 0.3s;
+    background-color: white;
+  
+    &:hover{
+      box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    }
+  
+    .content {
+      padding: 10px 16px;
+      font-size: 13px;
+      font-family: Roboto, 'Segoe UI', Tahoma, sans-serif;
+
+      .fileName {
+        font-size: 14px;
+      }
+
+      .fileMeta {
+        color: grey;
+        margin-bottom: 20px;
+        margin-top: 3px;
+        font-size: 13px;
+      }
+
+      .progress-bar-striped{
+        width: 100%;
+        float: inherit;
+      }
+      
+      .progress{
+        margin-bottom: 6px;
+        margin-top: 6px;
+        height: 16px;
+      }
+
+      .showInFolder {
+        margin-bottom: 6px;
+      }
+    }
+  }
+  
+}

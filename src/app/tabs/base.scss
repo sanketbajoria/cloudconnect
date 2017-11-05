@@ -126,6 +126,22 @@ $views-bg-color: #e6e6e6;
             top: -2px;
             font-size: 14px;
           }
+
+          &[data-favicon='scullog']:before {
+            font-family: Arial;
+            font-weight: bold;
+            content: 'S';
+            position: absolute;
+            left: -2px;
+            top: 0px;
+            font-size: 10px;
+            border: 1px solid #337ab7;
+            border-radius: 40px;
+            padding: 1px 5px 0px 5px;
+            background: #337ab7;
+            color: white;
+          }
+        
         }
 
         > .-title {

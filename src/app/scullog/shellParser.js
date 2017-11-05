@@ -20,7 +20,16 @@ var shell = {
     },
     getStats: {
         cmd: function(path){
-            return `test -f "${path}"; echo $?`;
+            //return `test -f ${normalizePath(path)}; echo $?; echo $(wc -c < ${normalizePath(path)})`;
+            return `if [ -f ${normalizePath(path)} ]; then echo "0"; echo $(wc -c < ${normalizePath(path)}); else echo "1"; echo "0"; fi;`
+        },
+        parser: function(data){
+            var res = normalize(data);
+            var isFile = res[0].trim() == 0;
+            return {
+                folder: !isFile,
+                size: isFile?parseInt(res[1].trim()):0
+            }
         }
     },
     list: {
@@ -110,43 +119,43 @@ var shell = {
     } */,
     exists: {
         cmd: function(path){
-            return `test -e "${path}"; echo $?`;
+            return `test -e ${normalizePath(path)}; echo $?`;
         }
     },
     remove: {
         cmd: function(path){
-            return `rm -rf "${path}"`;
+            return `rm -rf ${normalizePath(path)}`;
         }
     },
     mkdirs: {
         cmd: function(path){
-            return `mkdir -p "${path}"`;
+            return `mkdir -p ${normalizePath(path)}`;
         }
     },
     copy: {
         cmd: function(src, dest){
-            return `cp "${src}" "${dest}"`;
+            return `cp ${normalizePath(src)} ${normalizePath(dest)}`;
         }
     },
     move: {
         cmd: function(src, dest){
-            return `mv "${src}" "${dest}"`;
+            return `mv ${normalizePath(src)} ${normalizePath(dest)}`;
         }
     },
     zipFolder: {
         cmd: function(p, tempZipPath){
-            return `zip -r "${tempZipPath}" "${p}"`;
+            return `zip -r ${normalizePath(tempZipPath)} ${normalizePath(p)}`;
         }
     },
     readFile: {
         cmd: function(path){
-            return `cat "${path}"`;
+            return `cat ${normalizePath(path)}`;
         }
     },
     writeFile: {
         cmd: function(path, options){
             options = options || {};
-            return `tee ${options.flags=='a'?'>':''}> "${path}"`
+            return `tee ${options.flags=='a'?'>':''}> ${normalizePath(path)}`
         }
     }
 

@@ -196,7 +196,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             __app: app
         }
         
-        $q.when(utils.isSocksConnection(s)?sshTunnel.getSocksPort():null).then(function(port){
+        $q.when(utils.isSocksConnection(s, app)?sshTunnel.getSocksPort():null).then(function(port){
             tabConfig["proxyUrl"] = port?utils.createProxyUrl(port):null;
             vm.chromeTabs.showMainTab($tab);
             vm.chromeTabs.updateTab($tab, tabConfig);

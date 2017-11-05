@@ -1,4 +1,6 @@
 'use strict';
+var downloadQueue = require('./download/downloadQueue');
+var DownloadItem = require("./download/downloadItem");
 angular.module('galaxy').directive('chromeTabs', function ($compile) {
   return {
     restrict: 'E',
@@ -8,7 +10,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
     replace: true,
     templateUrl: 'tabs/tabs.html',
     controllerAs: 'tabCtrl',
-    controller: function ($scope, $element, $attrs) {
+    controller: function ($scope, $element, $attrs, galaxyModal, $timeout) {
       var vm = this;
       vm.findText = function(findNext, backward){
         if(vm.getCurrentWebContent()){
@@ -19,6 +21,15 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
             vm.getCurrentWebContent().stopFindInPage('clearSelection');
           }
         }
+      }
+
+      vm.openDownloads = function(){
+        galaxyModal.open({
+          templateUrl: 'download/download.html',
+          controller: 'DownloadController',
+          controllerAs: 'downloadCtrl',
+          windowClass: 'fullScreen download'
+      })
       }
 
       vm.getCurrentWebContent = function(){
@@ -48,41 +59,55 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
         $scope.api = $chromeTabs.data('chromeTabs');
       
 
-        $scope.$on('viewAdded', function (event, $view, instance) {
+        $scope.$on('viewAdded', function (event, $view, i, props) {
           var $webview = $scope.api.$views.data('chromeTabViews').getWebview($view);
-          if($webview.is('webview')){
+          if ($webview.is('webview')) {
             $webview[0].addEventListener('dom-ready', () => {
               $webview[0].getWebContents().on('found-in-page', (event, result) => {
-                $scope.$apply(function(){
+                $scope.$apply(function () {
                   vm.currentMatch = result.activeMatchOrdinal;
                   vm.totalMatch = result.matches;
                 })
               })
               $webview[0].getWebContents().session.on('will-download', (event, item, webContents) => {
+                $(".-download-btn .fa").addClass("downloading");
+                setTimeout(function(){
+                  $(".-download-btn .fa").removeClass("downloading");
+                }, 2000);
+                var downloadItem = new DownloadItem(item, props.__server)
+                downloadQueue.push(downloadItem);
                 // Set the save path, making Electron not to prompt a save dialog.
                 //item.setSavePath('/tmp/save.pdf');
                 console.log("Download started - " + item);
-              
                 item.on('updated', (event, state) => {
+                  downloadItem.state = state;
                   if (state === 'interrupted') {
                     console.log('Download is interrupted but can be resumed')
                   } else if (state === 'progressing') {
                     if (item.isPaused()) {
                       console.log('Download is paused')
                     } else {
-                      console.log(`Received bytes: ${item.getReceivedBytes()}`)
+                      var bytes = item.getReceivedBytes();
+                      console.log(`Received bytes: ${bytes} of ${item.getTotalBytes()}`);
+                      downloadItem.receivedBytes = bytes;
                     }
                   }
                 })
+
                 item.once('done', (event, state) => {
+                  downloadItem.state = state;
                   if (state === 'completed') {
                     console.log('Download successfully')
                   } else {
                     console.log(`Download failed: ${state}`)
                   }
-                })
+                });
               })
             })
+
+
+
+
             $webview[0].addEventListener('did-fail-load', (event) => {
               $scope.api.showErrorView($view, event.errorDescription);
             })
@@ -106,6 +131,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
         let defaultLoadingTabFavicon = 'loading';
         let defaultTabFavicon = 'default';
         let defaultSSHFavicon = 'ssh';
+        let defaultScullogFavicon = 'scullog';
 
         let tabTemplate = `
     <div class="-tab">
@@ -305,6 +331,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
             this.$zoom = $('<input type="text" name="zoom" class="-zoom form-control input-sm" readonly />');
             this.$zoomPlusBtn = $('<a href="#" class="-plus-zoom-btn btn">+</a>');
             this.$searchBtn = $compile('<a href="#" class="-search-btn btn" ng-click="api.showSearch=!api.showSearch"><i class="fa fa-search"></i></a>')($scope);
+            this.$downloadBtn = $compile('<a href="#" class="-download-btn btn" ng-click="tabCtrl.openDownloads()"><i class="fa fa-download"></i></a>')($scope);
 
             this.$views = $('<div class="-views"></div>');
             this.$styles = $('<style></style>');
@@ -447,6 +474,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
             this.$bottomLine.append(this.$reloadBtn);
             this.$bottomLine.append(this.$url);
             this.$bottomLine.append(this.$searchBtn);
+            this.$bottomLine.append(this.$downloadBtn);
             this.$bottomLine.append(this.$zoomMinusBtn);
             this.$bottomLine.append(this.$zoom);
             this.$bottomLine.append(this.$zoomPlusBtn);
@@ -815,12 +843,8 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
             $tab.data('props', props); // Update to new props.
 
             if (props.favicon) {
-              if (props.favicon === defaultLoadingTabFavicon) {
-                $tab.find('> .-favicon').css({ 'background-image': '' }).attr('data-favicon', defaultLoadingTabFavicon);
-              } else if (props.favicon === defaultTabFavicon) {
-                $tab.find('> .-favicon').css({ 'background-image': '' }).attr('data-favicon', defaultTabFavicon);
-              } else if (props.favicon === defaultSSHFavicon) {
-                $tab.find('> .-favicon').css({ 'background-image': '' }).attr('data-favicon', defaultSSHFavicon);
+              if (props.favicon === defaultLoadingTabFavicon || props.favicon === defaultTabFavicon || props.favicon === defaultSSHFavicon || props.favicon === defaultScullogFavicon) {
+                $tab.find('> .-favicon').css({ 'background-image': '' }).attr('data-favicon', props.favicon);
               } else {
                 $tab.find('> .-favicon').css({ 'background-image': 'url(\'' + props.favicon + '\')' }).attr('data-favicon', '');
               }
@@ -1132,7 +1156,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                       let favicon = props.loadingFavicon;
                       let title = typeof $webview[0].getTitle === 'function' ? $webview[0].getTitle() : '';
                       title = !title && isFirstUrl() ? props.url || props.title : title;
-                      title = !title ? props.title : title;
+                      title = !title || utils.isScullogType(props.__app) ? props.title : title;
 
                       // Update the tab favicon and title.
                       this.$parentObj._.updateTab($tab, { favicon, title }, 'view::state-change');
@@ -1149,6 +1173,8 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                       // In the case of failure, use fallbacks.
                       let favicon = !_favicon && isFirstUrl() ? props.favicon : _favicon;
                       favicon = !favicon ? this.settings.defaultProps.favicon : favicon;
+                      if(utils.isScullogType(props.__app))
+                        favicon=defaultScullogFavicon;
 
                       // Updating tab favicon.
                       this.$parentObj._.updateTab($tab, { favicon }, 'view::state-change');

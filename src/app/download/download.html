@@ -1,0 +1,43 @@
+<div class="modal-header modal-header-galaxy modal-header-fullscreen">
+    <h5 style="display:inline-block;">
+        <i class="fa fa-arrow-left" data-dismiss="modal" ng-click="downloadCtrl.no()"></i> Download </h5>
+    <button type="button" class="btn btn-primary pull-right btn-sm" ng-click="downloadCtrl.openDownloadFolder()">Open Download Folder</button>
+</div>
+<div class="modal-body" style="width:50%; margin:auto;">
+    <div class="card" ng-repeat="download in downloadCtrl.downloadItems track by download.id">
+        <div class="content" ng-class="download.state">
+            <div class="fileName">
+                <span>
+                    <b>{{download.filename}}</b>
+                </span>
+            </div>
+
+            <div class="fileMeta">
+                <span>{{download.path}}</span>
+                <br/>
+                <span>
+                    <b>{{download.server}}</b>
+                </span>
+            </div>
+
+            <div ng-if="download.state == 'completed'" class="showInFolder">
+                <a href="#" ng-click="downloadCtrl.openDownloadFolder(download)">Show in folder</a>
+            </div>
+
+
+            <div ng-if="download.state == 'progressing'" class="downloadState">
+                <span>Received {{downloadCtrl.utils.toHumanSize(download.receivedBytes)}}
+                    <span ng-if="download.totalBytes!=0">of {{downloadCtrl.utils.toHumanSize(download.totalBytes)}}</span>
+                    <span ng-if="download.totalBytes==0">of Unknown Size</span>
+                </span>
+                <div class="progress">
+                    <div ng-if="download.totalBytes!=0" class="progress-bar" role="progressbar" aria-valuenow="{{downloadCtrl.completePercent(download)}}" aria-valuemin="0" aria-valuemax="100" ng-style="downloadCtrl.progressStyle(download)">
+                    </div>
+                    <div ng-if="download.totalBytes==0" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="progress-bar progress-bar-striped active" role="progressbar">
+                        <span class="sr-only">Indeterminate</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

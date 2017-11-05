@@ -86,7 +86,7 @@ module.exports = {
         return Q.when(lastSSH);
     },
     createCouchUrl: function (s, app) {
-        return `${app.protocol}://localhost:${s._couch.port}`;
+        return `http://localhost:${s._couch.port}`;
     },
     createScullogUrl: function (s) {
         return `http://localhost:${s._scullog.port}`;
@@ -106,8 +106,8 @@ module.exports = {
     isForwardConnection: function (s) {
         return s.connection && s.connection.type === "forward";
     },
-    isSocksConnection: function (s) {
-        return s.connection && s.connection.type === "socks";
+    isSocksConnection: function (s, app) {
+        return !this.isTerminalType(app) && !this.isScullogType(app) && s.connection && s.connection.type === "socks";
     },
     isDirectConnection: function (s) {
         return s.connection && s.connection.type === "direct";
@@ -117,5 +117,13 @@ module.exports = {
     },
     isLocalHost: function(s){
         return checkLocalHost(this.getRemoteAddr(s));
+    },
+    toHumanSize: function(size){
+        var hz;
+        if (size < 1024) hz = size + ' B';
+        else if (size < 1024*1024) hz = (size/1024).toFixed(2) + ' KB';
+        else if (size < 1024*1024*1024) hz = (size/1024/1024).toFixed(2) + ' MB';
+        else hz = (size/1024/1024/1024).toFixed(2) + ' GB';
+        return hz;
     }
 }

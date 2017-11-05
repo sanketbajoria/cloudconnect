@@ -24,9 +24,10 @@ class ShellFileManager extends NodeFileManger{
   }
 
   * getStats(p) {
-    return yield this.__exec('getStats', p).then((isFile) => {
+    return yield this.__exec('getStats', p);
+    /* .then((isFile) => {
       return { folder: !isFile };
-    });
+    }); */
   };
 
   * list(p) {

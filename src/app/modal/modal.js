@@ -21,7 +21,11 @@
 
     function galaxyModal($uibModal){
         function openModal(config){
-            config = angular.merge({}, {
+            config.resolve = config.resolve || {};
+            config.resolve.config = function () {
+                return config;
+            }; 
+            config = Object.assign({
                 size: 'md',
                 backdrop: 'static',
                 animation: true,
@@ -30,11 +34,6 @@
                 controller: 'ModalController',
                 controllerAs: 'vm',
                 windowClass: 'galaxyModal',
-                resolve: {
-                    config: function () {
-                        return config;
-                    }
-                }
             }, config);
             return $uibModal.open(config);
         }
