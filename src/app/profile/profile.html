@@ -19,7 +19,7 @@
                 </select>
             </div>
         </div>
-        <div ng-if="profileCtrl.profile.type == 'aws'">
+        <div ng-if="profileCtrl.utils.isAWSType(profileCtrl.profile)">
             <div class="form-group form-group-sm required">
                 <label for="accessKey" class="control-label col-sm-3">Access Key:</label>
                 <div class="col-sm-9">

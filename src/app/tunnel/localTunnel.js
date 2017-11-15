@@ -14,7 +14,7 @@ class LocalTunnel extends EventEmitter {
     /**
      * Spawn a command
      */
-    spawnCmd(cmd, params, pty) {
+    spawnCmd(cmd, params, options) {
         var machineName = arguments[arguments.length-1];
         cmd += (Array.isArray(params) ? (" " + params.join(" ")) : "");
         return Q.Promise((resolve, reject) => {
@@ -26,7 +26,7 @@ class LocalTunnel extends EventEmitter {
     /**
      * Exec a command
      */
-    execCmd(cmd, params, pty) {
+    execCmd(cmd, params, options) {
         var machineName = arguments[arguments.length-1];
         cmd += (Array.isArray(params) ? (" " + params.join(" ")) : "");
         cmd = `docker exec ${machineName} /bin/sh -c '${cmd}'`;

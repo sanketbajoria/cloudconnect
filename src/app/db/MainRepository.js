@@ -1,22 +1,29 @@
 var loki = require('lokijs');
+var Q = require('q');
+var clone = require('clone');
+const defaultDBPath = "database/galaxy.default";
 
-module.exports = function (config) {
-    config = Object.assign({name: 'galaxy.default', getDatabasePath: function(){
-        return `database/${this.name}`;
-    }}, config);
-    var db = new loki(config.getDatabasePath(), {
+/**
+ * Class representing Database connection
+ * @param {*} config 
+ */
+function DB(path) {
+    //Main Database for storing profile and instances
+    path = path || defaultDBPath;
+    var db = new loki(path, {
         autoload: true,
         autoloadCallback: databaseInitialize,
         autosave: true,
         autosaveInterval: 4000
     }),
-        defer = require('q').defer();
+    defer = Q.defer();
 
     function databaseInitialize() {
         defer.resolve(db);
     }
 
-    return defer.promise.then(function (db) {
+    //When databases get initialized
+    return defer.promise.then(function (res) {
         var profiles = db.getCollection("profiles");
         if (profiles === null) {
             profiles = db.addCollection("profiles", { unique: ['name'] });
@@ -40,11 +47,11 @@ module.exports = function (config) {
                 return profiles.remove(profile);
             },
             getProfile: function (id) {
-                return profiles.get(id);
+                return clone(profiles.get(id));
             },
             findProfiles: function (query) {
                 query = query || {};
-                return profiles.find(query);
+                return clone(profiles.find(query));
             },
 
             //instances api
@@ -60,20 +67,20 @@ module.exports = function (config) {
                 return instances.remove(instance);
             },
             getInstance: function (id) {
-                return instances.get(id);
+                return clone(instances.get(id));
             },
             findInstances: function (query, profile) {
                 query = query || {};
                 if (profile) {
                     query.profile = profile.$loki;
                 }
-                return instances.find(query);
+                return clone(instances.find(query));
             },
-
-            getUniqueId: function (obj) {
-                return obj && obj.$loki
+            getPath: function(){
+                return path;
             }
         };
     });
-
 }
+
+module.exports = DB;

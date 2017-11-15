@@ -40,6 +40,8 @@ app.on('ready', () => {
     height: 600,
     //transparent: true,
     //frame: false,
+    backgroundColor: '#2e353d;',
+    //show: false,
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false

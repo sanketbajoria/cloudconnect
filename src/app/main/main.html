@@ -2,15 +2,29 @@
     <!-- Example row of columns -->
     <div class="row">
         <div class="col-sm-2 navview flexColumn" ng-hide="vm.collapsed">
+            <div class="navtopview">
+                <div class="form-group form-group-sm has-feedback filter">
+                    <input type="text" class="form-control input-sm" id="name" ng-model="vm.filterText" placeholder="Filter"/>
+                    <span class="form-control-feedback" style="color: gray">
+                        <i class="fa fa-search"></i>
+                    </span>
+                </div>
+                <div class="addProfile">
+                    <a href="javascript:" ng-click="vm.updateProfile()">
+                            <i class="material-icons">&#xE02E;</i>
+                    </a>
+                </div>
+            </div>
+            
             <div style="flex: 1 1 100%">
                 <ul class="menu-content item">
-                    <li class="item" ng-repeat="p in vm.db.findProfiles() track by vm.db.getUniqueId(p)" ng-init="collapsed=true"
+                    <li class="item" ng-repeat="p in vm.profiles | filter:vm.filterText track by vm.db.getUniqueId(p)" ng-init="collapsed=true"
                         ng-class="collapsed?'collapsed':''">
                         <div class="collection" ng-click="$event.originalEvent.removeProfile || (collapsed=!collapsed)">
-                            <div class="icon"><i class="material-icons">&#xE2C7;</i><!-- <i class="fa fa-{{vm.config.profile.types[p.type].icon}} fa-lg"></i> --></div>
+                            <div class="icon"><i class="material-icons">&#xE2C7;</i></div>
                             <div class="label">
                                 <div class="title"><span>{{p.name}}</span></div>
-                                <div class="instances"><span>{{vm.db.findInstances({}, p).length}} instances</span></div>
+                                <div class="instances"><span>{{p.instances.length}} instances</span></div>
                             </div>
                             <div class="navigation">
                                 <span class="arrow">
@@ -21,34 +35,34 @@
                                         <i class="material-icons">&#xe5d3;</i>  
                                     </span>
                                     <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                                        <li role="menuitem" ng-click="vm.updateInstance(p)"><a href="#"><i class="fa fa-plus"></i> Add New Instance Detail</a></li>
+                                        <li role="menuitem" ng-click="vm.updateInstance(p)"><a href="javascript:"><i class="fa fa-plus"></i> Add New Instance Detail</a></li>
                                         <li class="divider"></li>
-                                        <li role="menuitem" ng-click="vm.updateProfile(p)"><a href="#"><i class="fa fa-edit"></i> Edit Profile</a></li>
-                                        <li role="menuitem" ng-click="vm.removeProfile(p);"><a href="#"><i class="fa fa-trash"></i> Delete Profile</a></li>
+                                        <li role="menuitem" ng-click="vm.updateProfile(p)"><a href="javascript:"><i class="fa fa-edit"></i> Edit Profile</a></li>
+                                        <li role="menuitem" ng-click="vm.removeProfile(p);"><a href="javascript:"><i class="fa fa-trash"></i> Delete Profile</a></li>
                                     </ul>
                                 </span>        
                             </div>
                         </div>
                         <div class="sub-menu" ng-hide="collapsed">
                             <ul class="item">
-                                <li class="item" ng-repeat="s in vm.db.findInstances({}, p)" ng-click=" $event.preventDefault();$event.stopPropagation();s.__openAppMenu=!s.__openAppMenu">
-                                    <a href="#">{{vm.getInstanceName(s)}} </a>
+                                <li class="item" ng-repeat="s in p.instances track by vm.db.getUniqueId(s)" ng-click=" $event.preventDefault();$event.stopPropagation();s.__openAppMenu=!s.__openAppMenu">
+                                    <a href="javascript:">{{vm.getInstanceName(s)}} </a>
                                     <span uib-dropdown is-open="s.__openAppMenu" auto-close="outsideClick">
                                         <span uib-dropdown-toggle ng-click="$event.stopPropagation();">
                                             <i class="material-icons">&#xe5d3;</i>
                                         </span>
                                         <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="single-button">
                                             <li class="dropdown-header">Open App</li>
-                                            <li role="menuitem" ng-repeat-start="app in s.applications" ng-click="vm.openApp(s, app)"><a href="#">{{vm.config.instance.application.types[app.type].label}}</a></li>
-                                            <li role="menuitem" ng-repeat-end ng-if="app.type=='ssh'" ng-click="vm.openApp(s, vm.scullog(app))"><a href="#">{{vm.config.instance.application.types[app.type].label}} via Scullog</a></li>
+                                            <li role="menuitem" ng-repeat-start="app in s.applications" ng-click="vm.openApp(s, app)"><a href="javascript:">{{vm.config.instance.application.types[app.type].label}}</a></li>
+                                            <li role="menuitem" ng-repeat-end ng-if="app.type=='ssh'" ng-click="vm.openApp(s, vm.scullog(app))"><a href="javascript:">{{vm.config.instance.application.types[app.type].label}} via Scullog</a></li>
                                             <li class="divider"></li>
-                                            <li role="menuitem" ng-click="vm.updateInstance(p, s)"><a href="#"><i class="fa fa-edit"></i> Edit Instance Detail</a></li>
-                                            <li role="menuitem" ng-click="vm.removeInstance(p, s);"><a href="#"><i class="fa fa-trash"></i> Delete Instance Detail</a></li>
+                                            <li role="menuitem" ng-click="vm.updateInstance(p, s)"><a href="javascript:"><i class="fa fa-edit"></i> Edit Instance Detail</a></li>
+                                            <li role="menuitem" ng-click="vm.removeInstance(p, s);"><a href="javascript:"><i class="fa fa-trash"></i> Delete Instance Detail</a></li>
                                         </ul>
                                     </span>
                                 </li>
                             </ul>
-                            <!-- <div class="addProfile"><a href="#" class="btn btn-primary btn-xs" ng-click="vm.updateInstance(p)">
+                            <!-- <div class="addProfile"><a href="javascript:" class="btn btn-primary btn-xs" ng-click="vm.updateInstance(p)">
                       <i class="fa fa-plus"></i> Add New Instance Detail
                   </a></div> -->
                         </div>
@@ -56,13 +70,11 @@
                     
                 </ul>
             </div>
-            <div class="addProfile"><a href="#" class="btn btn-primary btn-sm" ng-click="vm.updateProfile()">
-            <i class="fa fa-plus"></i> Add new profile
-        </a></div>
+            
         </div>
         <div class="col-sm-10 mainview" ng-class="vm.collapsed?'expand':''">
             <chrome-tabs api="vm.chromeTabs" test="adsff" style="display:none"></chrome-tabs>
-            <a href="#" class="btn sidebarBtn" ng-class="vm.collapsed?'collapsed':''" ng-click="vm.collapsed=!vm.collapsed">
+            <a href="javascript:" class="btn sidebarBtn" ng-class="vm.collapsed?'collapsed':''" ng-click="vm.collapsed=!vm.collapsed">
             <i class="fa fa-navicon fa-lg"></i>
         </a>
         </div>

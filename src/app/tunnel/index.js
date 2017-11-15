@@ -17,8 +17,6 @@ var defaultOptions = {
     reconnectDelay: 5000
 };
 
-
-
 class SSHTunnel extends EventEmitter {
 
     static get CHANNEL() {
@@ -78,11 +76,12 @@ class SSHTunnel extends EventEmitter {
     /**
      * Spawn a command
      */
-    spawnCmd(cmd, params, pty) {
+    spawnCmd(cmd, params, options) {
+        options = options || {};
         cmd += (Array.isArray(params)?(" " + params.join(" ")):"");
         return this.connect().then(() => {
             return Q.Promise((resolve, reject) => {
-                this.sshConnection.exec(cmd, { pty: pty }, (err, stream) => {
+                this.sshConnection.exec(cmd, options, (err, stream) => {
                     if (err)
                         return reject(err);
                     stream.on('close', function(){
@@ -105,11 +104,12 @@ class SSHTunnel extends EventEmitter {
     /**
      * Exec a command
      */
-    execCmd(cmd, params, pty) {
+    execCmd(cmd, params, options) {
+        options = options || {};
         cmd += (Array.isArray(params)?(" " + params.join(" ")):"");
         return this.connect().then(() => {
             return Q.Promise((resolve, reject) => {
-                this.sshConnection.exec(cmd, {pty: pty}, (err, stream) => {
+                this.sshConnection.exec(cmd, options, (err, stream) => {
                     if (err)
                         return reject(err);
                     var buffer = "";

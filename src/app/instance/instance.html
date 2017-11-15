@@ -14,7 +14,7 @@
                 </div>
             </div>
 
-            <div ng-if="instanceCtrl.instance.type == 'generic'">
+            <div ng-if="instanceCtrl.utils.isGenericType(instanceCtrl.instance)">
                 <div class="form-group form-group-sm required">
                     <label for="name" class="control-label col-sm-3">Name:</label>
                     <div class="col-sm-9">
@@ -31,18 +31,18 @@
                 </div>
             </div>
 
-            <div ng-if="instanceCtrl.instance.type == 'aws'">
+            <div ng-if="!instanceCtrl.utils.isGenericType(instanceCtrl.instance)">
                 <div class="form-group form-group-sm required">
-                    <label for="awsProfile" class="control-label col-sm-3">AWS Profile:</label>
+                    <label for="awsProfile" class="control-label col-sm-3" ng-show="instanceCtrl.utils.isAWSType(instanceCtrl.instance)">AWS Profile:</label>
                     <div class="col-sm-9">
-                        <select class="form-control input-sm" id="name" ng-options="profile as profile.name for profile in instanceCtrl.awsProfiles" ng-model="instanceCtrl.instance.aws.profile"
-                            ng-change="instanceCtrl.changeAWSProfile()" placeholder="Choose existing AWS profile" required></select>
+                        <select class="form-control input-sm" id="name" ng-options="instanceCtrl.db.getUniqueId(profile) as profile.name for profile in instanceCtrl.cloudProfiles" ng-model="instanceCtrl.instance.cloud.profileId"
+                            ng-change="instanceCtrl.changeCloudProfile()" placeholder="Choose existing profile" required></select>
                     </div>
                 </div>
                 <div class="form-group form-group-sm has-feedback required">
-                    <label for="name" class="control-label col-sm-3">AWS Name:</label>
+                    <label for="name" class="control-label col-sm-3" ng-show="instanceCtrl.utils.isAWSType(instanceCtrl.instance)">AWS Name:</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control input-sm" id="name" ng-model="instanceCtrl.instance.aws.instance" uib-typeahead="instance as instanceCtrl.getInstanceLabel(instance) for instance in instanceCtrl.getAWSInstances($viewValue, 12)" typeahead-loading="loadingInstances" typeahead-no-results="noResults" ng-disabled="!instanceCtrl.instance.aws.profile" placeholder="Type AWS instance detail such as instanceId, name etc"
+                        <input type="text" class="form-control input-sm" id="name" ng-model="instanceCtrl.instance.cloud.instanceName" uib-typeahead="i for i in instanceCtrl.getCloudInstancesName($viewValue, 12)" typeahead-loading="loadingInstances" typeahead-no-results="noResults" ng-disabled="!instanceCtrl.instance.cloud.profileId" placeholder="Type instance detail such as instanceId, name, ip-address, host etc"
                             required />
                         <span class="form-control-feedback" style="margin-top: -2px" ng-show="loadingInstances"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
                         <div ng-show="noResults">

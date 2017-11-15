@@ -22,7 +22,7 @@ class RemoteDockerFileManager extends ShellFileManager {
                 }else{
                   params[0] = `PATH=${path}; sudo docker exec ${this.dockerApp.config.dockerName} /bin/sh -c '${params[0]}'`;
                 }
-                params[2] = this.app.config.sudo; //sudo su can prompt for password which require pty;
+                params[2] = Object.assign(params[2] || {}, {pty: this.app.config.sudo}); //sudo su can prompt for password which require pty;
             }else{
                 params[0] = `PATH=${path}; docker exec ${this.dockerApp.config.dockerName} /bin/sh -c '${params[0]}'`  
             }

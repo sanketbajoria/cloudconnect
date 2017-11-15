@@ -323,15 +323,15 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
             this.$content = $('<div class="-content"></div>');
             this.$bottomLine = $('<div class="-bottom-line form-inline"></div>');
 
-            this.$backBtn = $('<a href="#" class="-back-btn btn"><i class="fa fa-arrow-left"></i></a>');
-            this.$forwardBtn = $('<a href="#" class="-forward-btn btn"><i class="fa fa-arrow-right"></i></a>');
-            this.$reloadBtn = $('<a href="#" class="-reload-btn btn"><i class="fa fa-refresh"></i></a>');
+            this.$backBtn = $('<a href="javascript:" class="-back-btn btn"><i class="fa fa-arrow-left"></i></a>');
+            this.$forwardBtn = $('<a href="javascript:" class="-forward-btn btn"><i class="fa fa-arrow-right"></i></a>');
+            this.$reloadBtn = $('<a href="javascript:" class="-reload-btn btn"><i class="fa fa-refresh"></i></a>');
             this.$url = $('<input type="text" name="url" class="-url form-control input-sm" readonly />');
-            this.$zoomMinusBtn = $('<a href="#" class="-minus-zoom-btn btn">-</a>');
+            this.$zoomMinusBtn = $('<a href="javascript:" class="-minus-zoom-btn btn">-</a>');
             this.$zoom = $('<input type="text" name="zoom" class="-zoom form-control input-sm" readonly />');
-            this.$zoomPlusBtn = $('<a href="#" class="-plus-zoom-btn btn">+</a>');
-            this.$searchBtn = $compile('<a href="#" class="-search-btn btn" ng-click="api.showSearch=!api.showSearch"><i class="fa fa-search"></i></a>')($scope);
-            this.$downloadBtn = $compile('<a href="#" class="-download-btn btn" ng-click="tabCtrl.openDownloads()"><i class="fa fa-download"></i></a>')($scope);
+            this.$zoomPlusBtn = $('<a href="javascript:" class="-plus-zoom-btn btn">+</a>');
+            this.$searchBtn = $compile('<a href="javascript:" class="-search-btn btn" ng-click="api.showSearch=!api.showSearch"><i class="fa fa-search"></i></a>')($scope);
+            this.$downloadBtn = $compile('<a href="javascript:" class="-download-btn btn" ng-click="tabCtrl.openDownloads()"><i class="fa fa-download"></i></a>')($scope);
 
             this.$views = $('<div class="-views"></div>');
             this.$styles = $('<style></style>');

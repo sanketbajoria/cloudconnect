@@ -1,31 +1,29 @@
 'use strict';
 (function () {
     var app = angular.module('galaxy');
-    var AWS = require('./cloud/aws.js');
-    app.controller('InstanceController', function ($uibModalInstance, $scope, toastr, db, profile, instance, editMode, galaxyModal, $filter) {
-        var vm = this, awsInstances;
-        var instances = db.findInstances({}, profile);
+    var cloud = require('./cloud');
+    app.controller('InstanceController', function ($uibModalInstance, $scope, toastr, profile, instanceId, editMode, galaxyModal, $filter) {
+        var vm = this, cloudInstances;
+        var instances = db.getMainRepository().findInstances({}, profile);
         vm.db = db;
         vm.utils = utils;
-        vm.awsProfiles = db.findProfiles({type: 'aws'});
+        vm.cloudProfiles = db.getMainRepository().findProfiles({type: 'aws'});
         vm.config = JSON.parse(require('fs').readFileSync(__dirname + "/config.json", 'utf-8'));
         vm.editMode = editMode;
-        vm.instance = instance || {type: profile.type, generic: {}, aws: {}, sshConfig: {}, connection: {type: 'direct'}, applications:[]};
+        vm.instance = instanceId?db.getMainRepository().getInstance(instanceId):{type: profile.type, generic: {}, cloud: {}, sshConfig: {}, connection: {type: 'direct'}, applications:[]};
         
-        if(profile.type=='aws'){
-            vm.instance.aws.profile = vm.awsProfiles.filter(function(p){
-                return db.getUniqueId(p) == db.getUniqueId(profile)
-            })[0];
-            initAWSInstances()
+        if(!utils.isGenericType(profile)){
+            vm.instance.cloud.profileId = db.getUniqueId(profile);
+            initCloudInstances()
         }
 
-        vm.changeAWSProfile = function(){
-            initAWSInstances();
+        vm.changeCloudProfile = function(){
+            initCloudInstances();
         }
 
-        vm.getInstanceLabel = function(i){
+        vm.getCloudInstanceLabel = function(i){
             if(i){
-                return `${AWS.getName(i)} (${AWS.getUniqueId(i)})`;
+                return cloud.getCloudInstanceLabel(i);
             }
         }
 
@@ -48,7 +46,7 @@
             })
         }
 
-        vm.sshInstances = db.findInstances({}, profile).filter(function(i){
+        vm.sshInstances = db.getMainRepository().findInstances({}, profile).filter(function(i){
             return i.applications.filter(function(a){
                 return a.type=='ssh'
             }).length>0
@@ -72,28 +70,28 @@
         vm.saveInstance = function () {
             try{
                 if(vm.editMode){
-                    db.updateInstance(vm.instance, profile);
+                    db.getMainRepository().updateInstance(vm.instance, profile);
                     toastr.success("Instance saved", "Success");
                     $uibModalInstance.close(vm.instance);
                 }else{
                     var isDuplicate;
-                    /* if(vm.instance.type == 'generic'){
+                    /* if(utils.isGenericType(vm.instance)){
                         isDuplicate = instances.filter(function(i){
-                            if(i.type == 'generic'){
+                            if(utils.isGenericType(i)){
                                 return i.generic.name === vm.instance.generic.name;
                             }
                         }).length>0;
-                    }else if(vm.instance.type == 'aws'){
+                    }else if(utils.isAWSType(vm.instance)){
                         isDuplicate = instances.filter(function(i){
-                            if(i.type == 'aws'){
-                                return AWS.getUniqueId(i.aws.instance) === AWS.getUniqueId(vm.instance.aws.instance);
+                            if(utils.isAWSType(i)){
+                                return AWS.getUniqueId(i.instance) === AWS.getUniqueId(vm.instance.aws.instance);
                             }
                         }).length>0;
                     } */
                     if(isDuplicate){
                         throw new Error("Duplicate instance has been found under this profile");
                     }
-                    db.addInstance(vm.instance, profile);
+                    db.getMainRepository().addInstance(vm.instance, profile);
                     toastr.success("Instance saved", "Success");
                     $uibModalInstance.close(vm.instance);
                 }
@@ -102,15 +100,21 @@
             }
         }
 
-        vm.getAWSInstances = function(val, limit){
-            return awsInstances.then(function(instances){
-                return $filter('limitTo')($filter('filter')(instances, val), limit);
+        vm.getCloudInstancesName = function(val, limit){
+           var seen = {};
+           return cloudInstances.then(function(instances){
+                return $filter('limitTo')($filter('filter')(instances, val)
+                    .map((i) => i.getName())
+                    .filter((item, pos, ary) => {
+                        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+                    }), limit);
             })
         }
 
 
-        function initAWSInstances(val, limit){
-            awsInstances = new AWS(vm.instance.aws.profile.aws).getInstances();
+        function initCloudInstances(){
+            var profile = db.getMainRepository().getProfile(vm.instance.cloud.profileId);
+            cloudInstances = cloud.syncAndFetchCloudProfile(profile);
         }
 
     })

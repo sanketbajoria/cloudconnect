@@ -25,8 +25,9 @@
     var SSHTunnel = require('./tunnel/index.js');
     var couchDb = require('./couch');
     var scullog = require('./scullog');
-    var db = require('./db/loki.js');
+    var db = require('./db');
     var utils = require('./utils/utils.js');
+    var cloud = require('./cloud');
   </script>
 
   <script src="../node_modules/angular/angular.min.js" type="text/javascript"></script>
@@ -37,17 +38,34 @@
   <script src="app.js"></script>
   <script src="index.js"></script>
   <script src="directives/fileRead.js"></script>
-  <script src="main/main.js"></script>
+  <script src="main/mainCtrl.js"></script>
   <script src="modal/modal.js"></script>
-  <script src="profile/profile.js"></script>
-  <script src="instance/instance.js"></script>
+  <script src="profile/profileCtrl.js"></script>
+  <script src="instance/instanceCtrl.js"></script>
   <script src="tabs/index.js"></script>
   <script src="zoom/zoom.js"></script>
-  <script src="download/download.js"></script>
+  <script src="download/downloadCtrl.js"></script>
+  <script type="text/ng-template" id="preload.html">
+    <div class="preload">
+      <div class="centered">
+        <div class=row>
+          <div class="col-sm-3" style="padding-top: 32px;">
+            <span class="fa fa-globe" style="font-size: 42px;"></span>
+          </div>
+          <div class="col-sm-9">
+            <h1 class="title">GalaxyBot</h1>
+            <p class="tag" style="padding-left: 4px;">Connect any platform</p>
+          </div>
+        </div>
+      </div>
+    </div>
+</script>
 </head>
 
 <body ng-view ng-cloak>
   
+  
 </body>
+
 
 </html>

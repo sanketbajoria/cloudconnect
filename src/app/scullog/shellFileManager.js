@@ -114,7 +114,7 @@ class ShellFileManager extends NodeFileManger{
 
   spawnCmd(){
     return this.__normalizeParams(arguments).then(params => {
-      params[2] = true; //forced pty for tail cmd
+      params[2] = Object.assign(params[2] || {}, {pty: true}); //forced pty for tail cmd
       var promise = queue.add(() => {
         return this.tunnel.spawnCmd.apply(this.tunnel, params);
       });

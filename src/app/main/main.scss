@@ -235,16 +235,6 @@ a {
   color: limegreen;
 }
 
-.addProfile{
-  text-align: center;
-  margin-bottom: 8px;
-  margin-top: 8px;
-}
-
-.addProfile a{
-  width: 90%;
-}
-
 .flexColumn{
   display: flex;
   flex-direction: column;
@@ -517,4 +507,53 @@ a {
     }
   }
   
+}
+
+.btn.focus, .btn:focus, .btn:hover{
+  outline-color: transparent;
+}
+
+.preload{
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  right: 0px;
+  left: 0px;
+  background-color: #2e353d;
+  color: #e1ffff;
+}
+.centered {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.navtopview{
+  padding-left: 8px;
+  padding-top: 10px;
+  padding-bottom: 8px;
+  .filter{
+    margin-bottom: 0px;
+    width: 84%;
+    float: left;
+    input {
+      border-radius: 0px;
+    }
+  }
+  .addProfile{
+    float: left;
+    width: 16%;
+    text-align: center;
+    padding-top: 2px;
+    a{
+      color: #e1ffff;
+    }
+  }
+}
+
+a:focus{
+  outline-color: transparent !important;
+  outline: 0px !important;
+  outline-offset: 0px !important;
 }
