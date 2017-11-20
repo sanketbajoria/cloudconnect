@@ -4,7 +4,6 @@ const EventEmitter = require('events'),
     net = require('net'),
     fs = require('fs'),
     Q = require('q'),
-    C = require('cli-color'),
     clone = require('clone'),
     getPort = require("get-port"),
     socks = require('socksv5');

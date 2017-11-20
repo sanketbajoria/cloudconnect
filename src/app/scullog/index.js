@@ -1,4 +1,4 @@
-var Scullog = require('scullog'),
+    var Scullog = require('scullog'),
     utils = require('../utils/utils.js'),
     Q = require('q'),
     getPort = require("get-port"),
@@ -28,7 +28,9 @@ module.exports = function(devTunnel, server, app){
                 var scullog = new Scullog({
                     directory: '/',
                     port: port,
-                    fileManager: fileManager
+                    fileManager: fileManager,
+                    id: utils.getInstanceName(server),
+                    base: "./var/scullog" 
                 })
                 fileManager.scullog = scullog;
                 

@@ -15,7 +15,7 @@ const generateExternalModulesList = () => {
   return [].concat(
     nodeBuiltInModules,
     electronBuiltInModules,
-    Object.keys(appManifest.dependencies),
+    //Object.keys(appManifest.dependencies),
     Object.keys(appManifest.devDependencies)
   );
 };

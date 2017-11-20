@@ -16,9 +16,10 @@ import env from './env';
 
 const setApplicationMenu = () => {
   const menus = [editMenuTemplate];
-  if (env.name !== 'production') {
-    menus.push(devMenuTemplate);
-  }
+  menus.push(devMenuTemplate);
+  /* if (env.name !== 'production') {
+    
+  } */
   Menu.setApplicationMenu(Menu.buildFromTemplate(menus));
 };
 
@@ -31,8 +32,32 @@ if (env.name !== 'production') {
 }
 
 fse.ensureDirSync('database');
+function createLoadingScreen() {
+  var loadingScreen = createWindow('loading', {
+    width: 1000,
+    height: 600,
+    //transparent: true,
+    //frame: false,
+    backgroundColor: '#2e353d;',
+    show: false
+  });
+
+  loadingScreen.maximize();
+
+  loadingScreen.loadURL(url.format({
+    pathname: path.join(__dirname, 'loading.html'),
+    protocol: 'file:',
+    slashes: true,
+  }));
+  loadingScreen.on('closed', () => loadingScreen = null);
+  loadingScreen.webContents.on('did-finish-load', () => {
+      loadingScreen.show();
+  });
+  return loadingScreen;
+}
 
 app.on('ready', () => {
+  var loadingWindow = createLoadingScreen();
   setApplicationMenu();
 
   const mainWindow = createWindow('main', {
@@ -41,12 +66,14 @@ app.on('ready', () => {
     //transparent: true,
     //frame: false,
     backgroundColor: '#2e353d;',
-    //show: false,
+    show: false,
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false
     }
   });
+
+  
 
   mainWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'index.html'),
@@ -55,13 +82,17 @@ app.on('ready', () => {
   }));
 
   mainWindow.on('ready-to-show', function () {
+      loadingWindow.close();
+      mainWindow.maximize();
       mainWindow.show();
       mainWindow.focus();
+      mainWindow.openDevTools();
   });
 
-  if (env.name === 'development') {
-    mainWindow.openDevTools();
-  }
+  
+  /* if (env.name === 'development') {
+    
+  } */
 
   //mainWindow.setMenu(null);
 });

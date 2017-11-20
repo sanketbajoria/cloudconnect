@@ -9,7 +9,7 @@ const utils = require('./utils');
 const sass = require('gulp-sass');
 const projectDir = jetpack;
 const srcDir = jetpack.cwd('./src');
-const destDir = jetpack.cwd('./dist');
+const destDir = jetpack.cwd('./target');
 const fs = require('fs-extra');
 const autoprefixer = require('gulp-autoprefixer');
 
@@ -33,7 +33,7 @@ gulp.task('images', () => {
 gulp.task('icons', () => {
   return gulp.src(srcDir.path('./icons/**'))
   .pipe(gulp.dest(destDir.path('./icons/')));
-});
+}); 
 
 gulp.task('css', () => {
   return gulp.src(srcDir.path('./app/**/*.scss'))
@@ -82,7 +82,7 @@ gulp.task('watch', () => {
 });
 
 gulp.task('clean', () => {
-  fs.removeSync('dist');
+  fs.removeSync('target');
 });
 
 gulp.task('build', ['bundle', 'css', 'js', 'html', 'environment', 'images', 'icons']);

@@ -1,4 +1,4 @@
-var couchdb = require('fauxton'),
+var couchdb = require('galaxy-fauxton'),
     utils = require('../utils/utils.js'),
     Q = require('q'),
     getPort = require("get-port");

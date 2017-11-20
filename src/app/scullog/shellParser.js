@@ -1,5 +1,4 @@
 //http://plnkr.co/edit/swG2TXrkPCIwJsch4RZs?p=preview
-var XRegExp = require('xregexp');
 var mime = require('mime');
 
 function normalize(data){

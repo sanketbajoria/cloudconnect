@@ -35,16 +35,21 @@ function DB(path) {
         return {
             //profile api
             addProfile: function (profile) {
-                return profiles.insert(profile);
+                var ret = profiles.insert(profile);
+                db.saveDatabase();
+                return ret; 
             },
             updateProfile: function (profile) {
-                return profiles.update(profile);
+                var ret = profiles.update(profile);
+                db.saveDatabase();
+                return ret;
             },
             removeProfile: function (profile) {
                 this.findInstances({ profile: profile.$loki }).forEach((instance) => {
                     this.removeInstance(instance);
                 });
-                return profiles.remove(profile);
+                profiles.remove(profile);
+                db.saveDatabase();
             },
             getProfile: function (id) {
                 return clone(profiles.get(id));
@@ -57,14 +62,19 @@ function DB(path) {
             //instances api
             addInstance: function (instance, profile) {
                 instance.profile = profile.$loki;
-                return instances.insert(instance);
+                var ret = instances.insert(instance);
+                db.saveDatabase();
+                return ret;
             },
             updateInstance: function (instance, profile) {
                 instance.profile = profile.$loki;
-                return instances.update(instance);
+                var ret = instances.update(instance);
+                db.saveDatabase();
+                return ret;
             },
             removeInstance: function (instance) {
-                return instances.remove(instance);
+                instances.remove(instance);
+                db.saveDatabase();
             },
             getInstance: function (id) {
                 return clone(instances.get(id));
