@@ -105,9 +105,6 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
               })
             })
 
-
-
-
             $webview[0].addEventListener('did-fail-load', (event) => {
               $scope.api.showErrorView($view, event.errorDescription);
             })

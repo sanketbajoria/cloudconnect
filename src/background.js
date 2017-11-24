@@ -101,6 +101,11 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
+app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+    event.preventDefault();
+    callback(true);
+});
+
 //var Tunnel = require('./tunnel');
 
 // Listen for async message from renderer process

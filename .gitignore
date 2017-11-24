@@ -12,4 +12,6 @@ database
 test.js
 target/*
 !target/package.json
-var
+var/scullog/**
+!var/scullog/config
+!var/scullog/config/default.json

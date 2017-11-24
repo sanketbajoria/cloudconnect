@@ -14,6 +14,12 @@ class Cloud {
      */
     startAutomaticSync(mainDB) {
         this.stopAutomaticSync();
+        db.getCloudRepository().findCloudProfile().forEach((p) => {
+            var profile = mainDB.getProfile(p.profileId);
+            if(profile){
+                this.syncAndFetchCloudProfile(profile, true);
+            }
+        });
         this.$interval = setInterval(() => {
             db.getCloudRepository().findCloudProfile().forEach((p) => {
                 var profile = mainDB.getProfile(p.profileId);

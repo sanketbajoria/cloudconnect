@@ -16,6 +16,8 @@ class ShellFileManager extends NodeFileManger{
     return this.execCmd(shell[action].cmd.apply(shell[action], Array.prototype.slice.call(arguments, 1)))
       .then((data) => {
         return (shell[action].parser || shell.statusParser)(data);
+      }, (err) => {
+        return Q.reject(new Error(err.toString()));
       })
   }
 

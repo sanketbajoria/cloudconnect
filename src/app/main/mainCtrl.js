@@ -1,17 +1,13 @@
 var app = angular.module('galaxy');
 var Q = require('q');
-var tunnels = {};
 app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, $timeout, $filter) {
     var vm = this;
     vm.tabCount = 0;
     vm.db = db;
     vm.config = JSON.parse(require('fs').readFileSync(__dirname + "/config.json", 'utf-8'));
-    /*  Object.keys(vm.server.tunnels).reduce(function(r, k){
-        r[k] = new SSHTunnel(vm.server.tunnels[k]);
-        r[k].connect();
-        return r;
-    }, {}) *///;
-
+    
+    cloud.startAutomaticSync(db.getMainRepository());
+    
     $("body").on("keypress keydown keyup", function (e) {
         if(e.which == 6 && (e.ctrlKey || e.metaKey)){
             $scope.$apply(function(){
@@ -89,7 +85,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             openApp(i, app);
         }else{
             i.cloudInstances.forEach((ci) => {
-                var s = i;//angular.copy(Object.assign({}, i, {cloudInstances: undefined}));
+                var s = i;
                 s.cloud.instance = ci;
                 openApp(s, app);
             });
@@ -199,7 +195,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             title: utils.getInstanceName(s), 
             viewAttrs: {
                 disablewebsecurity: true,
-                webpreferences: 'allowDisplayingInsecureContent, zoomFactor=1, webSecurity=false',
+                webpreferences: 'allowDisplayingInsecureContent=true, zoomFactor=1, webSecurity=false',
                 allowpopups: true,
                 partition: url
             },
@@ -214,17 +210,8 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
         });
     }
 
-    function getTunnelFromCache(i, sshConfig){
-        var id = db.getUniqueId(i);
-        if(!tunnels[id] && sshConfig){
-            tunnels[id] = new SSHTunnel(sshConfig);
-        }
-        return tunnels[id];
-    }
-    
-
     function getSSH(s, app){
-        var lastSSH, i = s;
+        var i = s;
         var instances = (utils.isTerminalType(app) || utils.isScullogType(app))?[s]:[];   
         while(i = i.connection.ref){
             i = db.getMainRepository().getInstance(i);
@@ -233,33 +220,20 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             }
             instances.push(i);
         }
-        while(i=instances.pop()){
-            (function(instance){
-                var sshApp = instance.applications.filter(function(a){
-                    return utils.isTerminalType(a);
-                })[0];
-                var sshConfig = {username:sshApp.config.userName, host: utils.getRemoteAddr(instance), port: sshApp.port};
-                if(sshApp.config.secret.key == 'password'){
-                    sshConfig.password = sshApp.config.secret.password
-                }else{
-                    sshConfig.identity = sshApp.config.secret.pem.file.path;
-                }
-                if(!lastSSH){
-                    lastSSH = getTunnelFromCache(instance, sshConfig).connect(sshConfig);
-                }else {
-                    lastSSH = lastSSH.then((ssh) => {
-                        return ssh.spawnCmd(`nc ${utils.getRemoteAddr(instance)} ${sshApp.port}`);
-                    }).then((stream) => {
-                        sshConfig.sock = stream;
-                        return getTunnelFromCache(instance, sshConfig).connect(sshConfig);
-                    });
-                }
-                lastSSH = lastSSH.catch((err) => {
-                    return Q.reject(`Unable to connect to ${utils.getInstanceName(instance)} -- ${err}`)
-                });
-            })(i) 
-        }
-        return Q.when(lastSSH);
+        var sshConfigs = instances.reverse().map((instance) => {
+            var sshApp = instance.applications.filter(function (a) {
+                return utils.isTerminalType(a);
+            })[0];
+            var sshConfig = { username: sshApp.config.userName, host: utils.getRemoteAddr(instance), port: sshApp.port };
+            if (sshApp.config.secret.key == 'password') {
+                sshConfig.password = sshApp.config.secret.password
+            } else {
+                sshConfig.identity = sshApp.config.secret.pem.file.path;
+            }
+            sshConfig.uniqueId = db.getUniqueId(instance);
+            return sshConfig;
+        })
+        return new SSHTunnel(sshConfigs).connect();
     }
 
 });

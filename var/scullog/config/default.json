@@ -1,0 +1,32 @@
+{
+    "secret": "MIIEpQIBAAKCAQEAx3oaN1acb4Rvzuj9RPKPcqpFJaZwpKBow50SxADCkQeAYOslX23TZUdFZIXM8UjNii7FW0H8h7BUWMfVHvKB0CljP6wEth7BVqqY8GRXmuYFHsw+2jkHIddg/iwoXCsmtAmopEwifz4rZJGHsRXumYEpPJ9eYGmyg0hKJHAtZhYpS3hsla3j2Bir8eE4oV4HV/qB4yTcagWJ92leHWvj4XZKNwoabqUjQ9N1tgHAPQNpHaplIndc8+ligZNNRXOUvNuRkHHCjJqW0idbDPA48No7pAAduRJZD8CAWBkIiqRM5XYYp7R5I5cv2UPfNfBpatxokxi5HqrL/y618D+u/QIDAQABAoIBAG0e63Z4R81tamiK5fmwoy473OWyvg4gvg68P0a/j7AcpWrfV6tzfd/6dAiAdVNM2zuLSGUanNVxbUK/1mM+kCraaTOsm0sxWdxaKJ3gllfjGsv1OTDRX4hwtNt2NoHtDRgR7JIsH/bxgHVccxk5gTOyB2flWpBtYb0Vb5GtV/hukIq3ZjrAJfllLjFzg4SJve/hxpHyXIfd5/eveRNDo5J4EezB8HnwQrWoBMjiAcIy70PdkouWoUOs0Dhe/A5Mcf0SGeEqTtvuIA4+DSs8jqjoyn/ozpOCiamYk4FBlc5OpRS60h88yK76VAgfCqdncPycpDKyEcI5uUP5l/7QwjUCgYEA+paZvX9ts9BsRMgvDx+dDNP0yHVZgGCrr2Gte0qJL/hXYqbB7bmTwYloq/++IJ384t0yjHAz+nKmZT16hNceL3j61wwrVrnrmPn/okCk3Z3OW5saTCX1JOwfQ+SA5E6Y2KZ5zhQvytJXuszo92nfiXUb3MQkIUkBS64o5/vK9wcCgYEAy8jtrC35+bUBPoGtnR75oujZwYrr8GAFcfog6B+/7cyafDgd+pEAlRAiuKAD7JiZ4DnDpEaLhym1nK4XZQRBYqe1+k87nf+tUEmw5CAihvNWOlvy2M5PM419Db0OjDBqoRY0tCEPrK8RqgAO8AF2j/D4dXompy9YbgRiBsNbxNsCgYEA+WoYT6KbwBO9D6DoJfdjS7dTtooGsV6Gw6NHFqYTcemOoKQ19bV2OXXY9wkvZiuZ3vwnKd0r/yVKNQ5B+iJa6wlRMeXs5P9cXgDGzenlrqc5E7iHLi/BliRm4h53o8YPH+Ri7BjvkMJXi5gUcN2yHpCvUMbw5yhQ39DS6kOVutUCgYEAqvVRjpSzlWzoMkwQHjQSMT0vEVM+RFYJu2ifmpyoIxL2tydM3xwuZN84gbKcGCydSqKrInGcNDQli9/w+GntgJo57Ff0J8SK3UQ1Bex/ir8xo5vny0Ko5xLXymLEhY9IpQNAC62AvNnR89BAt9BCatc5WTS0oKTzhrhelFXn8ukCgYEAkkESXJdBrB+fVDAmUxBFPZ6QBuTgMkaFGa87j3o0NpBlxzLsWVzug+YY3aEIoJ7r/ZXIss9HWgZ51l/EplojA4LAE+j7E6edgQUn/NO9tjvE+nVtALRS5vtyWNgyVXx0HXB7KdlqwAMKVDx5gvq+f+lgM4s66z7YQg648zoSgR4=",
+    "actions": {
+      "default": [
+        "download",
+        "stream",
+        "refresh",
+        "privilege"
+      ],
+      "elevated": [
+        "delete",
+        "move",
+        "copy",
+        "create_file",
+        "update_file",
+        "rename",
+        "upload_file",
+        "create_folder",
+        "download",
+        "stream",
+        "refresh",
+        "service",
+        "change_base",
+        "favorite",
+        "edit_favorite",
+        "find"
+      ]
+    },
+    "morganFormat": "combined",
+    "remoteJSON":"https://raw.githubusercontent.com/sanketbajoria/scullog/master/package.json",
+    "remoteLocation":"https://github.com/sanketbajoria/scullog/archive/master.zip"
+  }

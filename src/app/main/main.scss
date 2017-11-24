@@ -229,6 +229,14 @@ a {
   font-size: 13px;
   padding-left: 10px;
   display: block;
+  position: relative;
+ /*  .xterm{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  } */
 }
 
 .sshTerminal .terminal{
@@ -267,17 +275,21 @@ a {
 }
 
 .fullScreen {
+  background-color: silver;
+  padding-top: 6px;
+  padding-bottom: 6px;
   .modal-dialog {
-    width: 100%;
+    width: 50%;
     height: 100%;
-    margin: 0;
-    padding: 0;
+    margin: auto;
+    min-width: 768px;
   }
   
   .modal-content {
-    height: auto;
+    height: 100%;
     min-height: 100%;
     border-radius: 0;
+    border:0px;
   }
 
   .modal-header-galaxy{
@@ -521,6 +533,9 @@ a {
   left: 0px;
   background-color: #2e353d;
   color: #e1ffff;
+  span.fa {
+    color: #00D8FF;
+  }
 }
 .centered {
   position: fixed;

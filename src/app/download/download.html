@@ -3,7 +3,7 @@
         <i class="fa fa-arrow-left" data-dismiss="modal" ng-click="downloadCtrl.no()"></i> Download </h5>
     <button type="button" class="btn btn-primary pull-right btn-sm" ng-click="downloadCtrl.openDownloadFolder()">Open Download Folder</button>
 </div>
-<div class="modal-body" style="width:50%; margin:auto;">
+<div class="modal-body">
     <div class="card" ng-repeat="download in downloadCtrl.downloadItems track by download.id">
         <div class="content" ng-class="download.state">
             <div class="fileName">

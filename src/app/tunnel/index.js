@@ -16,6 +16,10 @@ var defaultOptions = {
     reconnectDelay: 5000
 };
 
+function peek(arr){
+    return arr[arr.length - 1]
+}
+
 class SSHTunnel extends EventEmitter {
 
     static get CHANNEL() {
@@ -27,7 +31,11 @@ class SSHTunnel extends EventEmitter {
 
     constructor(options) {
         super();
-        this.config = Object.assign({}, defaultOptions, options);
+        options = Array.isArray(options)?options:[options];
+        this.config = options.map(o => {
+            o.uniqueId = o.uniqueId || `${o.username}@${o.host}`;
+            return Object.assign({}, defaultOptions, o); 
+        }); 
         this.activeTunnels = {};
         this.__$connectPromise = null;
         this.__retries = 0;
@@ -38,6 +46,48 @@ class SSHTunnel extends EventEmitter {
     emit(){
         super.emit(...arguments);
         //console.log(arguments);
+    }
+
+    /**
+     * Get SSH if existing from cache otherwise create new one
+     * @param {*} sshConfig 
+     * @param {*} create
+     */
+    static getSSH(sshConfigs, create) {
+        var sshConfig = peek(sshConfigs);
+        if (!SSHTunnel.__cache[sshConfig.uniqueId] && sshConfig && create) {
+            SSHTunnel.__cache[sshConfig.uniqueId] = { $connection: new SSHTunnel(sshConfigs).__connect(sshConfig), config: sshConfigs };
+        }
+        return SSHTunnel.__cache[sshConfig.uniqueId] && SSHTunnel.__cache[sshConfig.uniqueId].$connection;
+    }
+
+    /**
+     * Connect SSH connection, via single or multiple hopping connection
+     * @param {*} Single/Array of sshConfigs 
+     */
+    connect(){
+        var cacheSSH = SSHTunnel.getSSH(this.config);
+        if(cacheSSH){
+            return cacheSSH;
+        }else{
+            var lastSSH, sshConfig;
+            for(var i=0;i<this.config.length;i++){
+                (function(sshConfigs, idx){
+                    var sshConfig = peek(sshConfigs);
+                    if(!lastSSH){
+                        lastSSH = SSHTunnel.getSSH(sshConfigs.slice(0, idx+1), true);
+                    }else {
+                        lastSSH = lastSSH.then((ssh) => {
+                            return ssh.spawnCmd(`nc ${sshConfig.host} ${sshConfig.port}`);
+                        }).then((stream) => {
+                            sshConfig.sock = stream;
+                            return SSHTunnel.getSSH(sshConfigs.slice(0, idx+1), true);
+                        });
+                    }
+                })(this.config, i);
+            }
+            return lastSSH;
+        }
     }
 
     /**
@@ -144,33 +194,41 @@ class SSHTunnel extends EventEmitter {
     }
 
     /**
-     * Connect the SSH Connection
+     * On Disconnect of ssh connection, clear all the connection from cache which are dependent on this connection
      */
-    connect(c) {
-        this.config = Object.assign(this.config, c);
-        ++this.__retries;
-        
-        if (this.__$connectPromise != null)
-            return this.__$connectPromise;
+    onDisconnect(err){
+        this.__err = err;
+        this.emit(SSHTunnel.CHANNEL.SSH, { connected: false, err: this.__err }, this);
+        //Remove from cache and subsequent connections
+        Object.keys(SSHTunnel.__cache).forEach((k) => {
+            if(SSHTunnel.__cache[k].config.filter((s) => s.uniqueId === peek(this.config).uniqueId).length > 0){
+                delete SSHTunnel.__cache[k];
+            }
+        });
+    }
 
-        this.__$connectPromise = Q.promise((resolve, reject, notify) => {
-            if (!this.config || typeof this.config === 'function' || !this.config.host || !this.config.username) {
+    /**
+     * Connect the SSH Connection using config
+     */
+    __connect(config) {
+        return Q.promise((resolve, reject, notify) => {
+            if (!config || typeof config === 'function' || !config.host || !config.username) {
                 reject("Invalid SSH connection configuration host/username can't be empty");
-                this.__$connectPromise = null;
+                this.onDisconnect(new Error("Invalid SSH connection configuration host/username can't be empty"));
                 return;
             }
 
-            if (this.config.tryKeyboard && !this.config.password && typeof this.config !== 'undefined') {
-                delete this.config.password;
+            if (config.tryKeyboard && !config.password && typeof config !== 'undefined') {
+                delete config.password;
             }
 
-            if (this.config.identity) {
-                if (fs.existsSync(this.config.identity)) {
-                    this.config.privateKey = fs.readFileSync(this.config.identity);
+            if (config.identity) {
+                if (fs.existsSync(config.identity)) {
+                    config.privateKey = fs.readFileSync(config.identity);
                 }
-                delete this.config.identity;
+                delete config.identity;
             }
-             
+
             // this.config.debug = function(arg){
             //     console.log(arg);
             // } 
@@ -185,11 +243,10 @@ class SSHTunnel extends EventEmitter {
                 });
             }).on('ready', (err) => {
                 this.sshConnection.sftp((err, sftp) => {
-                    if (err){
-                        this.emit(SSHTunnel.CHANNEL.SSH, { connected: false, err: err }, this);
-                        this.__$connectPromise = null;
+                    if (err) {
+                        this.onDisconnect(err);
                         return reject(err);
-                    }
+                    };
                     this.emit(SSHTunnel.CHANNEL.SSH, { connected: true }, this);
                     this.__retries = 0;
                     this.__err = null;
@@ -197,14 +254,11 @@ class SSHTunnel extends EventEmitter {
                     resolve(this);
                 });
             }).on('error', (err) => {
-                this.emit(SSHTunnel.CHANNEL.SSH, { connected: false, err: err }, this);
-                this.__err = err;
                 reject(err);
-                this.__$connectPromise = null;
+                this.onDisconnect(err);
             }).on('close', (hadError) => {
-                this.emit(SSHTunnel.CHANNEL.SSH, { connected: false, err: this.__err }, this);
                 reject(this.__err);
-                this.__$connectPromise = null;
+                this.onDisconnect(this.__err);
                 if (this.__err != null && this.__err.level != "client-authentication" && this.__err.code != 'ENOTFOUND') {
                     if (this.config.reconnect && this.__retries <= this.config.reconnectTries) {
                         setTimeout(() => {
@@ -212,9 +266,8 @@ class SSHTunnel extends EventEmitter {
                         }, this.config.reconnectDelay);
                     }
                 }
-            }).connect(this.config);
+            }).connect(config);
         });
-        return this.__$connectPromise;
     }
 
     /**
@@ -307,5 +360,10 @@ class SSHTunnel extends EventEmitter {
         });
     }
 }
+
+/**
+ * For caching SSH Connection
+ */
+SSHTunnel.__cache = {};
 
 module.exports = SSHTunnel;
