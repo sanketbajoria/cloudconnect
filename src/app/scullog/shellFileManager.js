@@ -91,12 +91,14 @@ class ShellFileManager extends NodeFileManger{
     return new Q.Promise((resolve, reject)=>{
       params = [...params];
       if(this.app.config.sudo){
+        var cmd = params[0] + (Array.isArray(params[1]) ? (" " + params[1].join(" ")) : "");
         if(this.app.config.secret.password){  
-          params[0] = `echo "${this.app.config.secret.password}" | sudo -S bash -c 'echo "\n";${params[0]}' | awk '{if(NR>1)print}'`;
+          params[0] = `echo "${this.app.config.secret.password}" | sudo -S bash -c 'echo "\n";${cmd}' | awk '{if(NR>1)print}'`;
         }else{
-          params[0] = `sudo bash -c '${params[0]}'`;
+          params[0] = `sudo bash -c '${cmd}'`;
         }
-        params[2] = this.app.config.sudo; //sudo su can prompt for password which require pty;
+        params[1] = undefined;
+        params[2] = Object.assign(params[2] || {}, {pty: true}); //sudo su can prompt for password which require pty;
       }
       resolve(params);
     })

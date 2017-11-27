@@ -163,7 +163,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
     </div>
   `;
 
-        let loaderTemplate = `<div class="-loader"><div class="middle"><i class="fa fa-spinner fa-spin fa-fw"></i><span>Connecting...</span></div>`;
+        let loaderTemplate = `<div class="-loader"><div class="middle"><i class="fa fa-spinner fa-spin fa-fw"></i><span class="message">Connecting...</span></div>`;
 
         let errorTemplate = `<div class="-error"><div class="middle"><p><i class="fa fa-exclamation-triangle fa"></i></p><p>This site can't be reached</p><p class="-errorDescription"></p></div></div>`
 
@@ -379,9 +379,18 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
             this.$obj.toggle(show);
           }
 
+          getView($tab){
+            return this.$views.data('chromeTabViews').viewAtIndex($tab.index(), true);
+          }
+
           showMainTab($tab){
             var view = this.$views.data('chromeTabViews').viewAtIndex($tab.index(), true);
             this.showMainView(view);
+          }
+
+          updateTabLoadingMessage($tab, message){
+            var view = this.$views.data('chromeTabViews').viewAtIndex($tab.index(), true);
+            view.find(".-loader span.message").text(message);
           }
 
           showMainView(view){

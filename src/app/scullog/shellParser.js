@@ -36,7 +36,6 @@ var shell = {
             return `printf "["; c=0; if [ -n "$(ls ${normalizePath(path)})" ]; then for f in ${normalizePath(path)}*; do if [ $c -ne 0 ]; then printf ","; fi; printf "{"; if [ -d "$f" ]; then printf "\\\"isDir\\\":true,\\\"name\\\":\\\"%s\\\",\\\"size\\\":0,\\\"mtime\\\":%d" "$f" "$(date -r "$f" +%s)";  else printf "\\\"isDir\\\":false,\\\"name\\\":\\\"%s\\\",\\\"size\\\":%d,\\\"mtime\\\":%d" "$f" "$(wc -c < "$f")" "$(date -r "$f" +%s)"; fi; printf "}"; c=$((c+1)); done; fi; if [ -n "$(ls -A ${normalizePath(path)})" ]; then for f in ${normalizePath(path)}.*; do if [ $c -ne 0 ]; then printf ","; fi; printf "{"; if [ -d "$f" ]; then printf "\\\"isDir\\\":true,\\\"name\\\":\\\"%s\\\",\\\"size\\\":0,\\\"mtime\\\":%d" "$f" "$(date -r "$f" +%s)";  else printf "\\\"isDir\\\":false,\\\"name\\\":\\\"%s\\\",\\\"size\\\":%d,\\\"mtime\\\":%d" "$f" "$((wc -c < "$f") 2>/dev/null  || echo 0)" "$(date -r "$f" +%s)"; fi; printf "}"; c=$((c+1)); done; fi; printf "]";`
         },
         parser: function(res){
-            console.log(res);
             var data = JSON.parse(res);
             return data.filter(function(l){
                 var name = normalizeName(l.name);

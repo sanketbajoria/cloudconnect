@@ -2,7 +2,7 @@ var app = angular.module('galaxy');
 var Q = require('q');
 app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, $timeout, $filter) {
     var vm = this;
-    vm.tabCount = 0;
+    vm.tabs = {};
     vm.db = db;
     vm.config = JSON.parse(require('fs').readFileSync(__dirname + "/config.json", 'utf-8'));
     
@@ -21,19 +21,13 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
         }
     });
 
-    $scope.$on('viewAdded', function (event, view, instance, props){
-        var s = props.__server;
-        var app = props.__app;
-        if(utils.isTerminalType(app)){
-            getSSH(s, app).then((tunnel) => {
-                require('./term')(view.find('.sshTerminal'), tunnel);
-            })
-        }
-    });
 
-    $scope.$on('tabRemoved', function(){
-        --vm.tabCount;
-        vm.chromeTabs.toggle(vm.tabCount!= 0);
+    $scope.$on('tabBeingRemoved', (event, $tab) => {
+        if(vm.tabs[$tab.index()].ssh){
+            vm.tabs[$tab.index()].ssh.close();
+        }
+        delete vm.tabs[$tab.index()];
+        vm.chromeTabs.toggle(Object.keys(vm.tabs).length!= 0);
     });
 
     /* devTunnel.on(SSHTunnel.CHANNEL.SSH, function () {
@@ -149,7 +143,6 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
     }
 
     function addTab(s, app){
-        ++vm.tabCount;
         vm.chromeTabs.toggle(true);
         var tabConfig = {
             favicon: 'default',
@@ -158,14 +151,18 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             __server: s,
             __app: app
         }
-        return vm.chromeTabs.addTab(tabConfig);
+        var $tab = vm.chromeTabs.addTab(tabConfig);
+        vm.tabs[$tab.index()] = {};
+        return $tab;
     }
 
     function openApp(s, app){
         var $tab = addTab(s, app); 
-        getSSH(s, app).then((sshTunnel) => {
+        getSSH(s, app, $tab).then((sshTunnel) => {
             if(utils.isTerminalType(app)){
                 updateTab($tab, s, app, utils.createUrl(s, app));
+                var view = vm.chromeTabs.getView($tab);
+                require('./term')(view.find('.sshTerminal'), sshTunnel);
             }else if(utils.isScullogType(app) || utils.isDockerType(app)){
                 new scullog(sshTunnel, s, app).then(function (p) {
                     s._scullog = {port: p};
@@ -210,7 +207,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
         });
     }
 
-    function getSSH(s, app){
+    function getSSH(s, app, $tab){
         var i = s;
         var instances = (utils.isTerminalType(app) || utils.isScullogType(app))?[s]:[];   
         while(i = i.connection.ref){
@@ -220,20 +217,31 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             }
             instances.push(i);
         }
-        var sshConfigs = instances.reverse().map((instance) => {
-            var sshApp = instance.applications.filter(function (a) {
-                return utils.isTerminalType(a);
-            })[0];
-            var sshConfig = { username: sshApp.config.userName, host: utils.getRemoteAddr(instance), port: sshApp.port };
-            if (sshApp.config.secret.key == 'password') {
-                sshConfig.password = sshApp.config.secret.password
-            } else {
-                sshConfig.identity = sshApp.config.secret.pem.file.path;
-            }
-            sshConfig.uniqueId = db.getUniqueId(instance);
-            return sshConfig;
-        })
-        return new SSHTunnel(sshConfigs).connect();
+        if(instances.length > 0){
+            var sshConfigs = instances.reverse().map((instance) => {
+                var sshApp = instance.applications.filter(function (a) {
+                    return utils.isTerminalType(a);
+                })[0];
+                var sshConfig = { username: sshApp.config.userName, host: utils.getRemoteAddr(instance), port: sshApp.port };
+                if (sshApp.config.secret.key == 'password') {
+                    sshConfig.password = sshApp.config.secret.password
+                } else {
+                    sshConfig.identity = sshApp.config.secret.pem.file.path;
+                }
+                sshConfig.uniqueId = db.getUniqueId(instance);
+                return sshConfig;
+            })
+            var ssh = new SSHTunnel(sshConfigs, true).on("ssh", function () {
+                console.log(arguments);
+                //vm.chromeTabs.updateTabLoadingMessage();
+            }).on("tunnel", function () {
+                console.log(arguments);
+                //vm.chromeTabs.updateTabLoadingMessage();
+            });
+            vm.tabs[$tab.index()] = {ssh: ssh};
+            return ssh.connect();
+        }
+        return Q.when();
     }
 
 });

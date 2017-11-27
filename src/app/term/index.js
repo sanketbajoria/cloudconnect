@@ -1,5 +1,6 @@
 
 const { clipboard } = require('electron');
+var SSHConstants = require('../tunnel/sshConstants');
 
 function copySelection() {
     if (term.hasSelection()) {
@@ -66,7 +67,7 @@ module.exports = function ($terminal, devTunnel) {
                 return false;
             }
         });
-        devTunnel.getShellSocket({ width: $terminal.width(), height: $terminal.height(), term: 'xterm' }).then(function (socket) {
+        devTunnel.getShellSocket({ cols: term.cols, rows: term.rows, term: 'xterm' }).then(function (socket) {
             //socket.write("sudo su\n");
             socket.on('close', function () {
                 console.log('Stream :: close');
@@ -79,11 +80,16 @@ module.exports = function ($terminal, devTunnel) {
             term.on('data', function (data) {
                 //console.log('term: ' + data);
                 socket.write(data)
-            }).on('close', function () {
-                socket.end('\x03');
-                socket.signal('INT');
-                socket.signal('KILL');
+            })
+            term.on('close', function () {
+                devTunnel.endSocket(socket);
                 socket.close();
+            });
+
+            debugger;
+            devTunnel.once(`${SSHConstants.CHANNEL.SSH}:${SSHConstants.STATUS.BEFOREDISCONNECT}`, () => {
+                debugger;
+                devTunnel.endSocket(socket);
             });
         })
     }, 200)
