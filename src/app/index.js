@@ -13,13 +13,13 @@ var app = angular.module('galaxy', ['ngRoute', 'ngAnimate', 'ui.bootstrap', 'toa
         templateUrl: 'preload.html'
     });
 }).run(function($location){
-    $(window).resize(function(){
+   /*  $(window).resize(function(){
         $('.sshTerminal').each((idx, t) => {
             setTimeout(function(){
                 $(t).data('terminal').fit();
             }, 200)
         });
-    });
+    }); */
 });
 
 app.controller('IndexController', function($location){

@@ -284,15 +284,17 @@ $views-bg-color: #e6e6e6;
       //
       background:             $bottom-line-bg-color;
       box-shadow:             0 -0.05em $bottom-line-box-shadow-color;
-      display: flex;
-
-      > .-url{
-        flex: 1 1 auto;
-      }
-
-      > .-zoom{
-        width: 52px;
-        text-align: center;
+      .-toolbar {
+        display: flex;
+        .-url{
+          flex: 1 1 auto;
+          margin-left: 12px;
+          margin-right: 12px;
+        }
+        .-zoom{
+          width: 52px;
+          text-align: center;
+        }
       }
     }
 

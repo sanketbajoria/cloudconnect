@@ -174,7 +174,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
     <iframe class="-view" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-presentation allow-orientation-lock allow-pointer-lock"></iframe>
   `; // Note the absence of `allow-top-navigation` in this list; i.e., do not allow frames to break the tabbed interface.
         // This attribute can be altered at runtime using `defaultProps.viewAttrs.sandbox`.
-        let divViewTemplate = `<div class="-view"><div class="-main-view"><div class="sshTerminal"></div></div></div>`;
+        let divViewTemplate = `<div class="-view"><div class="-main-view"><div class="terminalContainer"><div class="header"><span></span></div><div class="sshTerminal"></div></div></div></div>`;
 
         // Begin `ChromeTabs{}` class.
 
@@ -319,17 +319,6 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
             this.$bar = $('<div class="-bar"></div>');
             this.$content = $('<div class="-content"></div>');
             this.$bottomLine = $('<div class="-bottom-line form-inline"></div>');
-
-            this.$backBtn = $('<a href="javascript:" class="-back-btn btn"><i class="fa fa-arrow-left"></i></a>');
-            this.$forwardBtn = $('<a href="javascript:" class="-forward-btn btn"><i class="fa fa-arrow-right"></i></a>');
-            this.$reloadBtn = $('<a href="javascript:" class="-reload-btn btn"><i class="fa fa-refresh"></i></a>');
-            this.$url = $('<input type="text" name="url" class="-url form-control input-sm" readonly />');
-            this.$zoomMinusBtn = $('<a href="javascript:" class="-minus-zoom-btn btn">-</a>');
-            this.$zoom = $('<input type="text" name="zoom" class="-zoom form-control input-sm" readonly />');
-            this.$zoomPlusBtn = $('<a href="javascript:" class="-plus-zoom-btn btn">+</a>');
-            this.$searchBtn = $compile('<a href="javascript:" class="-search-btn btn" ng-click="api.showSearch=!api.showSearch"><i class="fa fa-search"></i></a>')($scope);
-            this.$downloadBtn = $compile('<a href="javascript:" class="-download-btn btn" ng-click="tabCtrl.openDownloads()"><i class="fa fa-download"></i></a>')($scope);
-
             this.$views = $('<div class="-views"></div>');
             this.$styles = $('<style></style>');
 
@@ -408,24 +397,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
 
 
           updateToolbar($view, $tab) {
-            if ((!($view instanceof jQuery) || !$view.length) && $tab instanceof jQuery && $tab.length) {
-              $view = this.$views.data('chromeTabViews').viewAtIndex($tab.index(), true);
-            }
-            if (!($view instanceof jQuery) || !$view.length) {
-              return;
-            }
-            $view = this.$views.data('chromeTabViews').getWebview($view)[0];
-            try {
-              this.$backBtn.toggleClass('disabled', !$view.canGoBack());
-              this.$forwardBtn.toggleClass('disabled', !$view.canGoForward());
-              this.$url.val($view.getURL());
-              $view.getWebContents().getZoomFactor((zoom) => {
-                this.$zoom.val(Math.round(zoom * 100));
-              });
-            } catch (e) {
-
-            }
-
+            $scope.$emit("updateToolbar", $view, $tab);
           }
 
           destroy() {
@@ -475,15 +447,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
 
           addBottomLine() {
             this.$bar.append(this.$bottomLine);
-            this.$bottomLine.append(this.$backBtn);
-            this.$bottomLine.append(this.$forwardBtn);
-            this.$bottomLine.append(this.$reloadBtn);
-            this.$bottomLine.append(this.$url);
-            this.$bottomLine.append(this.$searchBtn);
-            this.$bottomLine.append(this.$downloadBtn);
-            this.$bottomLine.append(this.$zoomMinusBtn);
-            this.$bottomLine.append(this.$zoom);
-            this.$bottomLine.append(this.$zoomPlusBtn);
+            this.$bottomLine.append($compile('<toolbar></toolbar>')($scope))
           }
 
           removeBottomLine() {
@@ -539,7 +503,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
               }
             });
             var $chromeTabViews = this.$views.data('chromeTabViews');
-            this.$backBtn.on('click', () => {
+            /* this.$backBtn.on('click', () => {
               var view = $chromeTabViews.viewAtIndex(this.$currentTab.index(), true);
               this.showMainView(view);
               var webview = $chromeTabViews.getWebview(view)[0];
@@ -586,7 +550,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                   this.$zoom.val(Math.round(zoom * 100));
                 });
               }, 200);
-            });
+            }); */
 
           }
 
@@ -1021,8 +985,8 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
               throw 'Missing or invalid $view.';
             }
             $view = $view.first();
-            if($view.hasClass("-view") && $view.find(".-main-view").length){
-              $view = $view.find(".-main-view")
+            if($view.hasClass("-view") && $view.find("webview.-main-view").length){
+              $view = $view.find("webview.-main-view");
             }
             return $view;
           }

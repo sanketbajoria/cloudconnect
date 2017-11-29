@@ -40,6 +40,7 @@ a {
 .mainview {
   padding: 0px;
   background: linear-gradient(#dad9da, #d9d8d9);
+  overflow: hidden;
 }
 
 .top-navview.navbar.navbar-inverse{
@@ -221,27 +222,38 @@ a {
   }
 }
 
-.sshTerminal{
-  width: 100%;
+.terminalContainer {
+  display: flex;
+  flex-flow: column;
   height: 100%;
-  min-height: 100%;
-  background: black;
-  font-size: 13px;
-  padding-left: 10px;
-  display: block;
-  position: relative;
- /*  .xterm{
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-  } */
+
+  .header {
+    color: rgb(240, 240, 240);
+    background-color: rgb(0, 128, 0);
+    width: 100%;
+    border-color: white;
+    border-style: none none solid none;
+    border-width: 0px;
+    text-align: center;
+    flex: 0 1 auto;
+    z-index: 99;
+    height: 0px;
+  }
+
+  .sshTerminal {
+    flex: 1 1 auto;
+    width: 100%;
+    margin: 0 auto;
+    .terminal{
+      padding: 2px;
+      background-color: #000000;
+      color: limegreen;
+      position: absolute;
+      width: 100%;
+    }
+  }
 }
 
-.sshTerminal .terminal{
-  color: limegreen;
-}
 
 .flexColumn{
   display: flex;

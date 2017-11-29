@@ -6,12 +6,34 @@ function peek(arr) {
     return arr[arr.length - 1]
 }
 
-function on(sshConnection, event, callback) {
-    sshConnection.on(event, callback);
+function register(sshConnection, sshTunnel) {
+    var events = [SSHConstants.CHANNEL.SSH, SSHConstants.CHANNEL.TUNNEL];
+    sshConnection.__sshTunnels = sshConnection.__sshTunnels || [];
+    sshConnection.__sshTunnels.push(sshTunnel);
+    var cbs = events.map((event) => {
+        var cb = (function () {
+            this.emit.apply(this, arguments);
+        }).bind(sshTunnel, event);
+        sshConnection.on(event, cb);
+        return cb;    
+    });
     return {
         sshConnection: sshConnection,
+        events: events,
         close: function () {
-            return sshConnection.removeListener(event, callback);
+            var idx = sshConnection.__sshTunnels(sshTunnel);
+            sshConnection.__sshTunnels.splice(idx, 1);
+            if(sshConnection.__sshTunnels.length>0){
+                events.forEach((event, idx) => {
+                    sshConnection.removeListener(event, cbs[idx]);
+                });
+            }else{
+                sshConnection.close().then(() => {
+                    events.forEach((event, idx) => {
+                        sshConnection.removeListener(event, cbs[idx]);
+                    });
+                });    
+            }
         }
     }
 }
@@ -25,7 +47,7 @@ class SSHTunnel extends EventEmitter {
             o.uniqueId = o.uniqueId || `${o.username}@${o.host}`;
             return o;
         });
-        this.deregisterListeners = [];
+        this.deregister = [];
         this.cacheConnection = cacheConnection;
     }
 
@@ -43,12 +65,7 @@ class SSHTunnel extends EventEmitter {
             }
             ret = SSHTunnel.__cache[sshConfig.uniqueId];
         }
-        this.deregisterListeners.push(on(ret, SSHConstants.CHANNEL.SSH, (function(){
-            this.emit.apply(this, arguments);
-        }).bind(this, SSHConstants.CHANNEL.SSH)));
-        this.deregisterListeners.push(on(ret, SSHConstants.CHANNEL.TUNNEL, (function(){
-            this.emit.apply(this, arguments);
-        }).bind(this, SSHConstants.CHANNEL.TUNNEL)));
+        this.deregister.push(register(ret, this));
         return ret.connect().then((ssh) => {
             ssh.emit(SSHConstants.CHANNEL.SSH, SSHConstants.STATUS.CONNECT);
             return ssh;
@@ -82,12 +99,7 @@ class SSHTunnel extends EventEmitter {
      * Close SSH Connection
      */
     close() {
-        var sshConnections = this.deregisterListeners.map(f => f.sshConnection);
-        sshConnections.forEach((sshConnection) => {
-            sshConnection.close().then(() => {
-                this.deregisterListeners.forEach(f => f.close());
-            });
-        }) 
+        this.deregister.forEach(f => f.close());
     }
 
 }

@@ -137,7 +137,6 @@ class SSHConnection extends EventEmitter {
      * Close SSH Connection
      */
     close() {
-        debugger;
         this.emit(SSHConstants.CHANNEL.SSH, SSHConstants.STATUS.BEFOREDISCONNECT);
         return this.closeTunnel().then(() => {
             if (this.sshConnection){

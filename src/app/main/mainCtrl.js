@@ -1,5 +1,6 @@
 var app = angular.module('galaxy');
 var Q = require('q');
+var xTerm = require('./term');
 app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, $timeout, $filter) {
     var vm = this;
     vm.tabs = {};
@@ -23,10 +24,14 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
 
 
     $scope.$on('tabBeingRemoved', (event, $tab) => {
-        if(vm.tabs[$tab.index()].ssh){
-            vm.tabs[$tab.index()].ssh.close();
+        let props = $tab.data('props');        
+        if(vm.tabs[props.__id] && vm.tabs[props.__id].ssh){
+            vm.tabs[props.__id].ssh.close();
         }
-        delete vm.tabs[$tab.index()];
+        if(vm.tabs[props.__id] && vm.tabs[props.__id].term){
+            vm.tabs[props.__id].term.close();
+        }
+        delete vm.tabs[props.__id];
         vm.chromeTabs.toggle(Object.keys(vm.tabs).length!= 0);
     });
 
@@ -144,15 +149,18 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
 
     function addTab(s, app){
         vm.chromeTabs.toggle(true);
+        var id = new Date().getTime();
         var tabConfig = {
             favicon: 'default',
             loadingFavicon: 'loading',
             title: utils.getInstanceName(s), 
             __server: s,
-            __app: app
+            __app: app,
+            __id: id
         }
         var $tab = vm.chromeTabs.addTab(tabConfig);
-        vm.tabs[$tab.index()] = {};
+        $tab.id = id;
+        vm.tabs[$tab.id] = {};
         return $tab;
     }
 
@@ -162,7 +170,9 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             if(utils.isTerminalType(app)){
                 updateTab($tab, s, app, utils.createUrl(s, app));
                 var view = vm.chromeTabs.getView($tab);
-                require('./term')(view.find('.sshTerminal'), sshTunnel);
+                var term = new xTerm(view.find('.sshTerminal'), sshTunnel);
+                vm.tabs[$tab.id].term = term;
+                term.open();
             }else if(utils.isScullogType(app) || utils.isDockerType(app)){
                 new scullog(sshTunnel, s, app).then(function (p) {
                     s._scullog = {port: p};
@@ -238,7 +248,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
                 console.log(arguments);
                 //vm.chromeTabs.updateTabLoadingMessage();
             });
-            vm.tabs[$tab.index()] = {ssh: ssh};
+            vm.tabs[$tab.id].ssh = ssh;
             return ssh.connect();
         }
         return Q.when();
