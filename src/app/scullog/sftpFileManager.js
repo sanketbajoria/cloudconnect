@@ -1,16 +1,17 @@
 var Q = require('q'),
-  scullog = require('scullog'),
   shell = require('./shellParser'),
   path = require('path').posix,
-  NodeFileManger = scullog.NodeFileManager,
+  ShellFileManager = require('./shellFileManager'),
+  SFTP = require('ssh2-promise').SFTP,
   Queue = require('../utils/queue'),
   queue = new Queue(3, Infinity);
   
-class ShellFileManager extends NodeFileManger{
+class SFTPFileManager extends ShellFileManager{
   constructor(scullog, tunnel, app) {
     super(scullog);
     this.app = app;
     this.tunnel = tunnel;
+    this.sftp = new SFTP(this.tunnel);
   }
 
   __exec(action) {
@@ -23,18 +24,30 @@ class ShellFileManager extends NodeFileManger{
   }
 
   getService() {
-    return scullog.LinuxService(this.execCmd.bind(this));
+    return {};
   }
 
   * getStats(p) {
-    return yield this.__exec('getStats', p);
-    /* .then((isFile) => {
-      return { folder: !isFile };
-    }); */
+      return yield this.sftp.getStat(p).then((s) => {
+        return {
+          folder: s.isDirectory(),
+          size: s.size
+        }
+      });
   };
 
   * list(p) {
-    return yield this.__exec('list', p);
+    return yield this.sftp.readdir(p).then((data) => {
+      return data.map((d) => {
+        return {
+          name: d.filename,
+          mime: mime.lookup(d.filename),
+          folder: d.attrs.isDirectory(),
+          size: d.attrs.isDirectory()?0:d.attrs.size,
+          mtime: d.attrs.mtime*1000 
+        }
+      });
+    });
   };
 
   exists(p) {
@@ -42,15 +55,15 @@ class ShellFileManager extends NodeFileManger{
   }
 
   * remove(p) {
-    yield this.__exec('remove', p);
+    yield this.sftp.unlink(p);
   };
 
   unlink(p) {
-    return this.__exec('remove', p);
+    return this.sftp.unlink(p);
   };
 
   * mkdirs(dirPath) {
-    yield this.__exec('mkdirs', dirPath);
+    yield this.sftp.mkdirs(dirPath);
   };
 
   * copy(src, dest) {
@@ -58,34 +71,28 @@ class ShellFileManager extends NodeFileManger{
   };
 
   * rename(src, dest) {
-    return yield this.__exec('move', src, dest);
+    return yield this.sftp.rename(src, dest);
   };
 
   * move(srcs, dest) {
     for (var i = 0; i < srcs.length; ++i) {
       var basename = path.basename(srcs[i]);
-      yield this.__exec('move', srcs[i], path.join(dest, basename));
+      yield this.sftp.rename(srcs[i], path.join(dest, basename));
     }
   }
   
   * writeFile(p, content) {
-    return yield this.spawnCmd.apply(this, [shell['writeFile'].cmd(p)]).then((stream) => {
-      stream.end(content);
-    });
+    return yield this.sftp.writeFile(p, content);
   }
 
   createReadStream() {
     var params = arguments;
-    return this.spawnCmd.apply(this, [shell['readFile'].cmd(params[0])]).then((stream) => {
-      return stream;
-    });
+    return this.sftp.createReadStream(params[0]);
   }
 
   createWriteStream() {
     var params = arguments;
-    return this.spawnCmd.apply(this, [shell['writeFile'].cmd(params[0], params[1])]).then((stream) => {
-      return stream;
-    });
+    return this.sftp.createWriteStream(params[0], params[1]);
   }
 
   __normalizeParams(params){

@@ -35,25 +35,6 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
         vm.chromeTabs.toggle(Object.keys(vm.tabs).length!= 0);
     });
 
-    /* devTunnel.on(SSHTunnel.CHANNEL.SSH, function () {
-        if (!$scope.$$phase) {
-            $scope.$apply(function () {
-                console.log("SSH - " + arguments);
-            });
-        } else {
-            console.log("SSH - " + arguments);
-        }
-
-    });
-    devTunnel.on(SSHTunnel.CHANNEL.TUNNEL, function () {
-        if (!$scope.$$phase) {
-            $scope.$apply(function(){
-                console.log("Tunnel - " + arguments);
-            });
-        } else {
-            console.log("Tunnel - " + arguments);
-        }
-    }); */
     vm.getInstanceName = function(i){
         return utils.getInstanceName(i);
     }
@@ -241,7 +222,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
                 sshConfig.uniqueId = db.getUniqueId(instance);
                 return sshConfig;
             })
-            var ssh = new SSHTunnel(sshConfigs, true).on("ssh", function () {
+            var ssh = new SSHTunnel(sshConfigs).on("ssh", function () {
                 console.log(arguments);
                 //vm.chromeTabs.updateTabLoadingMessage();
             }).on("tunnel", function () {

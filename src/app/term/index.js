@@ -1,7 +1,6 @@
 
 const { clipboard } = require('electron');
-var SSHConstants = require('../tunnel/sshConstants');
-
+const SSHUtils = require('ssh2-promise').Utils;
 
 class Term{
     constructor($elem, ssh){
@@ -10,7 +9,6 @@ class Term{
         this.$header = $elem.parent().find('.header');
         this.resizeListener = function(){
             this.term.fit();
-            //this.$header.height(this.$header.height() + this.$elem.height() - this.$elem.find(".xterm-viewport").height() - 4);
             this.term.buffer.y--
             this.term.scroll();
         }.bind(this);
@@ -42,7 +40,7 @@ class Term{
     open(){
         setTimeout(() => {
             this.term.fit();
-            this.ssh.getShellSocket({ cols: this.term.cols, rows: this.term.rows, term: 'xterm' }).then((socket) => {
+            this.ssh.shell({ cols: this.term.cols, rows: this.term.rows, term: 'xterm' }).then((socket) => {
                 this.__socket = socket;
                 socket.on('close', () => {
                     console.log('Stream :: close');
@@ -58,7 +56,7 @@ class Term{
                     socket.write(data)
                 })
                 this.term.on('close', () => {
-                    this.ssh.endSocket(socket);
+                    SSHUtils.endSocket(socket);
                     socket.close();
                 });
                 this.term.on('resize', () => {
@@ -71,7 +69,7 @@ class Term{
     }
 
     close(){
-        this.ssh.endSocket(this.__socket);   
+        SSHUtils.endSocket(this.__socket);   
         this.term.removeAllListeners('data');
         this.term.removeAllListeners('close');
         this.term.destroy();

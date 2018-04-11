@@ -244,12 +244,41 @@ a {
     flex: 1 1 auto;
     width: 100%;
     margin: 0 auto;
+    font-size: 14px;
+    background-color: #000000;
+    padding-left: 4px;
     .terminal{
       padding: 2px;
       background-color: #000000;
       color: limegreen;
       position: absolute;
       width: 100%;
+      ::-webkit-scrollbar {
+        width: 7px;
+        height:7px;
+        background-color: rgba(0,0,0,0);
+      }
+      
+      ::-webkit-scrollbar:hover {
+        background-color: rgba(0, 0, 0, 0.09);
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: silver;
+      
+      }
+      ::-webkit-scrollbar-thumb:active {
+        background: rgba(0,0,0,0.61); /* Some darker color when you click it */
+      }
+      
+      /* add vertical min-height & horizontal min-width */
+      ::-webkit-scrollbar-thumb:vertical {
+      min-height: 10px;
+      }
+      ::-webkit-scrollbar-thumb:horizontal {
+      min-width: 10px;
+      }
+      
     }
   }
 }

@@ -41,7 +41,7 @@ class RemoteDockerFileManager extends ShellFileManager {
     }
 
     __getShellPath() {
-        return this.tunnel.getShellSocket().then((stream) => {
+        return this.tunnel.shell().then((stream) => {
             return new Q.Promise((resolve, reject) => {
                 var buffer = "";
                 stream.on('data', function (data) {

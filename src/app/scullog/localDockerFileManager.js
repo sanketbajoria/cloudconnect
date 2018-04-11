@@ -11,11 +11,11 @@ class LocalDockerFileManager extends ShellFileManager {
     }
 
     execCmd() {
-        return this.tunnel.execCmd.apply(this.tunnel, [...arguments].concat(this.app.config.dockerName));
+        return this.tunnel.exec.apply(this.tunnel, [...arguments].concat(this.app.config.dockerName));
     }
 
     spawnCmd() {
-        return this.tunnel.spawnCmd.apply(this.tunnel, [...arguments].concat(this.app.config.dockerName));
+        return this.tunnel.spawn.apply(this.tunnel, [...arguments].concat(this.app.config.dockerName));
     }
 
 }
