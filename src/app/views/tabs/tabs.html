@@ -1,0 +1,21 @@
+<div class='chrome-tabs'>
+    <div class="popover search-window form-inline" ng-show="api.showSearch">
+        <div class="form-group form-group-sm has-feedback" style="margin-bottom: 0px;">
+            <input type="text" ng-model="tabCtrl.searchText" ng-change="tabCtrl.findText()" class="form-control">
+            <span class="feedback form-control-feedback" style="color:silver; width: 56px; font-family:'Times New Roman', Times, serif" ng-show="tabCtrl.searchText">{{tabCtrl.currentMatch}}/{{tabCtrl.totalMatch}}</span>
+        </div>
+        <div class="content">
+            <span>|</span>
+        </div>
+        <div class="content">
+            <span class="fa fa-chevron-up" ng-click="tabCtrl.findText(true, true)"></span>
+        </div>
+        <div class="content">
+            <span class="fa fa-chevron-down" ng-click="tabCtrl.findText(true, false)"></span>
+        </div>
+        <div class="content">
+            <span class="fa fa-remove" ng-click="api.showSearch=false"></span>
+        </div>
+    </div>
+
+</div>

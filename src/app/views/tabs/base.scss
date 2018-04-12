@@ -1,0 +1,398 @@
+@import '../../../../node_modules/bourbon/app/assets/stylesheets/bourbon';
+
+// Colors.
+
+$bg-color-1: #dad9da;
+$bg-color-2: #d9d8d9;
+$box-shadow-color: #b7b7b7;
+
+$tab-title-color: #222;
+
+$tab-close-color: #505050;
+$tab-close-hover-active-color: #fff;
+$tab-close-hover-bg-color: #e25c4b;
+$tab-close-hover-active-bg-color: #b74a3b;
+
+$tab-background-svg-bg-color: #d0d0d0;
+$tab-background-svg-current-bg-color: #f2f2f2;
+$tab-background-svg-shadow-color: rgba(0, 0, 0, 0.27);
+
+$bottom-line-bg-color: #f2f2f2;
+$bottom-line-box-shadow-color: rgba(0, 0, 0, 0.27);
+
+$views-border-color: #9a9a9a;
+
+$views-bg-color: #e6e6e6;
+
+// Styles.
+
+.chrome-tabs {
+  font-size:                  10px;
+  font-family:               -apple-system, BlinkMacSystemFont, sans-serif;
+
+  // Regarding system fonts, see: <http://jas.xyz/2izzLlO>
+
+  //
+  box-sizing:                 border-box;
+/* 
+  * {
+    box-sizing:               inherit;
+    font-family:              inherit;
+  }
+ */
+  > .-bar {
+    overflow:                 hidden;
+
+    //
+    position:                 relative;
+
+    //
+    width:                    100%;
+    height:                   8.2em;
+
+    //
+    padding:                  1em 1.2em 0.45em;
+    border-radius:            0;
+
+    //
+    box-shadow:               0 0.05em $box-shadow-color;
+    background:               linear-gradient($bg-color-1, $bg-color-2);
+
+    > .-content {
+      overflow:               hidden;
+
+      //
+      position:               relative;
+
+      //
+      width:                  100%;
+      height:                 4em;
+
+      > .-tab {
+        left:                 0;
+        z-index:              1;
+        position:             absolute;
+
+        //
+        border:               0;
+        margin:               0;
+
+        //
+        width:                24em;
+        height:               2.8em;
+
+        &,
+        * {
+          @include user-select(none);
+
+          cursor:             default;
+        }
+
+        > .-favicon {
+          z-index:            3;
+          position:           relative;
+
+          //
+          pointer-events:     none;
+
+          //
+          vertical-align:     top;
+
+          //
+          margin-top:         0.6em;
+          margin-left:        1.6em;
+
+          //
+          width:              1.6em;
+          height:             1.6em;
+          display:            inline-block;
+
+          //
+          background-size:    1.6em;
+
+          &[data-favicon='loading'] {
+            background-image: url('../images/loading-favicon.gif');
+          }
+
+          &[data-favicon='default'] {
+            background-image: url('../images/default-favicon.svg');
+          }
+
+          &[data-favicon='ssh']:before {
+            content: "\f120";
+            font-family: FontAwesome;
+            left: 3px;
+            position: absolute;
+            top: -2px;
+            font-size: 14px;
+          }
+
+          &[data-favicon='scullog']:before {
+            font-family: Arial;
+            font-weight: bold;
+            content: 'S';
+            position: absolute;
+            left: -2px;
+            top: 0px;
+            font-size: 10px;
+            border: 1px solid #337ab7;
+            border-radius: 40px;
+            padding: 1px 5px 0px 5px;
+            background: #337ab7;
+            color: white;
+          }
+        
+        }
+
+        > .-title {
+          white-space:        nowrap;
+          overflow:           hidden;
+          text-overflow:      ellipsis;
+
+          //
+          position:           relative;
+
+          //
+          pointer-events:     none;
+
+          //
+          vertical-align:     top;
+          display:            inline-block;
+          max-width:          calc(100% - 5em);
+
+          //
+          margin-top:         0.5em;
+          padding:            0 0.25em;
+
+          //
+          font-size:          1.2em;
+          color:              $tab-title-color;
+          -webkit-font-smoothing: antialiased;
+        }
+
+        > .-close {
+          z-index:            2;
+          top:                0.7em;
+          right:              1.4em;
+          position:           absolute;
+
+          //
+          width:              1.4em;
+          height:             1.4em;
+
+          //
+          border-radius:      50%;
+
+          //
+          color:              $tab-close-color;
+
+          &::before {
+            left:             0;
+            bottom:           0;
+            top:              0.05em;
+            position:         absolute;
+
+            //
+            line-height:      1;
+            width:            100%;
+            display:          block;
+
+            //
+            text-align:       center;
+            font-size:        1.15em;
+            content:          '\00D7';
+            font-family:      'Lucida Grande', 'Lucida Sans Unicode', Verdana, Arial, Helvetica, sans-serif;
+          }
+
+          &:hover,
+          &:hover:active {
+            color:            $tab-close-hover-active-color;
+          }
+
+          &:hover {
+            background:       $tab-close-hover-bg-color;
+          }
+
+          &:hover:active {
+            background:       $tab-close-hover-active-bg-color;
+          }
+        }
+
+        > .-background {
+          overflow:           hidden;
+
+          //
+          top:                0;
+          left:               0;
+          position:           absolute;
+
+          //
+          pointer-events:     none;
+
+          //
+          width:              100%;
+          height:             100%;
+
+          > svg {
+            width:            100%;
+            height:           100%;
+
+            .-background {
+              fill:           $tab-background-svg-bg-color;
+              transform:      translateX(0.25px) translateY(0.25px);
+            }
+
+            .-shadow {
+              fill:           none;
+              stroke-width:   0.5px;
+              stroke:         $tab-background-svg-shadow-color;
+            }
+          }
+        }
+
+        &.-current {
+          z-index:            999;
+
+          > .-background {
+            > svg {
+              .-background {
+                fill:         $tab-background-svg-current-bg-color;
+              }
+            }
+          }
+        }
+
+        &.-just-added {
+          top:                10px;
+          animation:          chrome-tabs-just-added 120ms forwards ease-in-out;
+        }
+      }
+    }
+
+    > .-bottom-line {
+      left:                   0;
+      bottom:                 0;
+      top:                    3.8em;
+      padding-top:            0.5em;
+      z-index:                20;
+      position:               absolute;
+
+      //
+      width:                  100%;
+      //height:                 4.2em;
+
+      //
+      background:             $bottom-line-bg-color;
+      box-shadow:             0 -0.05em $bottom-line-box-shadow-color;
+      .-toolbar {
+        display: flex;
+        .-url{
+          flex: 1 1 auto;
+          margin-left: 12px;
+          margin-right: 12px;
+        }
+        .-zoom{
+          width: 52px;
+          text-align: center;
+        }
+      }
+    }
+
+    &.-dragging > .-content > .-tab:not(.-currently-dragged),
+    &:not(.-dragging) > .-content > .-tab.-just-dragged {
+      transition:             transform 120ms ease-in-out;
+    }
+  }
+
+  > .-views {
+    background-color:         $views-bg-color;
+    height:                   calc(100vh - 8.2em);
+    border-top:               1px solid $views-border-color;
+
+    > .-content {
+      height:                 100%;
+
+      > .-view {
+        display:              none;
+
+        //
+        top:                  0;
+        right:                0;
+        bottom:               0;
+        left:                 0;
+
+        //
+        width:                100%;
+        height:               100%;
+
+        //
+        border:               0;
+        margin:               0;
+        padding:              0;
+
+        &.-current {
+          flex:               0 1;
+          display:            flex;
+        }
+        > .-main-view {
+          top:                  0;
+          right:                0;
+          bottom:               0;
+          left:                 0;
+  
+          //
+          width:                100%;
+          height:               100%;
+  
+          //
+          border:               0;
+          margin:               0;
+          padding:              0;
+          display:              none;
+        }
+        > .-loader{
+          position: relative;
+          width: 100%;
+          i{
+            font-size: 56px;
+          }
+          span{
+            font-size: 16px;
+            display: block;
+            margin-top: 12px;
+          }
+        }
+        .middle{
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+        > .-error{
+          position: relative;
+          width: 100%;
+          text-align: left;
+          display: none;
+          i{
+            font-size: 56px;
+          }
+          p{
+            font-size: 16px;
+            margin-bottom: 20px;
+          }
+          p.-errorDescription{
+            font-size: 10px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animations.
+
+@include keyframes(chrome-tabs-just-added) {
+  to {
+    top:                      0;
+  }
+}
