@@ -1,5 +1,7 @@
+const configPath = __dirname + "/../config.json";
+var fs = require('fs');
 var checkLocalHost = require('check-localhost');
-
+var config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 module.exports = {
     
     createUrl: function (s, app) {
@@ -102,5 +104,15 @@ module.exports = {
         } else {
             $scope.$apply(fn);
         }
+    },
+    saveDB: function(db, cb){
+        return function(){
+            var ret = cb(...arguments);
+            db.save();
+            return ret;
+        }
+    },
+    getConfiguration: function(){
+        return config;
     }
 }

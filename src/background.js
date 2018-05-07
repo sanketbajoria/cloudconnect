@@ -31,7 +31,7 @@ if (env.name !== 'production') {
   app.setPath('userData', `${userDataPath} (${env.name})`);
 }
 
-fse.ensureDirSync('database');
+fse.ensureDirSync('workspace');
 function createLoadingScreen() {
   var loadingScreen = createWindow('loading', {
     width: 1000,

@@ -11,10 +11,11 @@
   <link rel="stylesheet" type="text/css" href="../../node_modules/angular-toastr/dist/angular-toastr.min.css" />
   <link rel="stylesheet" href="tabs/base.css" />
   <link rel="stylesheet" href="tabs/dark.css" />
-  
+
   <link rel="stylesheet" href="../../node_modules/xterm/dist/xterm.css" />
 
   <link href="main/main.css" rel="stylesheet" type="text/css">
+  <link href="loader/loader.css" rel="stylesheet" type="text/css">
 
   <script src="../../node_modules/xterm/dist/xterm.js"></script>
   <script src="../../node_modules/xterm/dist/addons/fit/fit.js"></script>
@@ -28,7 +29,7 @@
     var db = require('../db');
     var utils = require('../utils/utils.js');
     var cloud = require('../cloud');
-    var config = JSON.parse(require('fs').readFileSync(__dirname + "/../config.json", 'utf-8'));
+    var config = utils.getConfiguration();
   </script>
 
   <script src="../../node_modules/angular/angular.min.js" type="text/javascript"></script>
@@ -40,6 +41,9 @@
   <script src="index.js"></script>
   <script src="directives/fileRead.js"></script>
   <script src="directives/onEnterPress.js"></script>
+  <script src="workspace/WorkspaceService.js"></script>
+  <script src="loader/LoaderService.js"></script>
+  <script src="workspace/workspaceCtrl.js"></script>
   <script src="main/mainCtrl.js"></script>
   <script src="modal/modal.js"></script>
   <script src="profile/profileCtrl.js"></script>
@@ -47,26 +51,11 @@
   <script src="tabs/index.js"></script>
   <script src="toolbar/toolbar.js"></script>
   <script src="download/downloadCtrl.js"></script>
-  <script type="text/ng-template" id="preload.html">
-    <div class="preload">
-      <div class="centered">
-        <div class=row>
-          <div class="col-sm-3" style="padding-top: 32px;">
-            <span class="fa fa-globe" style="font-size: 42px;"></span>
-          </div>
-          <div class="col-sm-9">
-            <h1 class="title">GalaxyBot</h1>
-            <p class="tag" style="padding-left: 4px;">Connect any platform</p>
-          </div>
-        </div>
-      </div>
-    </div>
-</script>
 </head>
 
 <body ng-view ng-cloak>
-  
-  
+
+
 </body>
 
 

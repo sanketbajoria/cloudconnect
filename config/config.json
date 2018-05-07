@@ -1,4 +1,11 @@
 {
+    "workspace": {
+        "path": "workspace",
+        "main": "main",
+        "cloud": "cloud",
+        "defaultSecret": "3RT4-eTr3er-klkl-ADsf-TuoP",
+        "config": "config.json"
+    },
     "profile": {
         "types": {
             "generic": {

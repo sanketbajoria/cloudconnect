@@ -29,7 +29,7 @@
                 size: 'md',
                 backdrop: 'static',
                 animation: true,
-                keyboard: true,
+                keyboard: false,
                 templateUrl: 'modal/confirm.html',
                 controller: 'ModalController',
                 controllerAs: 'vm',

@@ -42,7 +42,7 @@
                 <div class="form-group form-group-sm has-feedback required">
                     <label for="name" class="control-label col-sm-3" ng-show="instanceCtrl.utils.isAWSType(instanceCtrl.instance)">AWS Name:</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control input-sm" id="name" ng-model="instanceCtrl.instance.cloud.instanceName" uib-typeahead="i for i in instanceCtrl.getCloudInstancesName($viewValue, 12)" typeahead-loading="loadingInstances" typeahead-no-results="noResults" ng-disabled="!instanceCtrl.instance.cloud.profileId" placeholder="Type instance detail such as instanceId, name, ip-address, host etc"
+                        <input type="text" class="form-control input-sm" id="name" ng-model="instanceCtrl.instance.cloud.instanceName" uib-typeahead="i for i in instanceCtrl.getCloudInstancesName($viewValue, 12)" typeahead-min-length="0" typeahead-loading="loadingInstances" typeahead-no-results="noResults" ng-disabled="!instanceCtrl.instance.cloud.profileId" placeholder="Type instance detail such as instanceId, name, ip-address, host etc"
                             required />
                         <span class="form-control-feedback" style="margin-top: -2px" ng-show="loadingInstances"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
                         <div ng-show="noResults">

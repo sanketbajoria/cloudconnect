@@ -1,11 +1,13 @@
 var app = angular.module('galaxy');
 var Q = require('q');
 var xTerm = require('../applications/term');
-app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, $timeout, $filter) {
+app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, $timeout, $filter, WorkspaceService, $document) {
     var vm = this;
     vm.tabs = {};
     vm.db = db;
     vm.config = config;
+    
+    $document[0].title = "GalaxyBot" + (WorkspaceService.getWorkspaceName()?" - " + WorkspaceService.getWorkspaceName():'');
     
     cloud.startAutomaticSync(db.getMainRepository());
     
@@ -70,6 +72,17 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
                 openApp(s, app);
             });
         }
+    }
+
+    vm.switchWorkspace = function(){
+        galaxyModal.open({
+            templateUrl: 'workspace/workspace.html',
+            controller: 'WorkspaceController',
+            controllerAs: 'workspaceCtrl',
+            resolve: {
+                "isStarting": false
+            }
+        });
     }
     
     vm.updateProfile = function(profile){

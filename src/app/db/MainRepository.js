@@ -1,25 +1,31 @@
 var loki = require('lokijs');
+var cryptedFileAdapter = require('../../node_modules/lokijs/src/loki-crypted-file-adapter'); 
 var Q = require('q');
 var clone = require('clone');
-const defaultDBPath = "database/galaxy.default";
+var saveDB = require('../utils/utils').saveDB;
 
 /**
  * Class representing Database connection
  * @param {*} config 
  */
-function DB(path) {
+function DB(path, password, newWorkspace) {
     //Main Database for storing profile and instances
-    path = path || defaultDBPath;
+    cryptedFileAdapter.setSecret(password);
     var db = new loki(path, {
         autoload: true,
         autoloadCallback: databaseInitialize,
-        autosave: true,
-        autosaveInterval: 4000
+        //autosave: true,
+        //autosaveInterval: 4000,
+        adapter: cryptedFileAdapter
     }),
     defer = Q.defer();
 
-    function databaseInitialize() {
-        defer.resolve(db);
+    function databaseInitialize(err) {
+        if(!newWorkspace && err && err instanceof Error){
+            defer.reject(err);
+        }else{
+            defer.resolve(db);
+        }
     }
 
     //When databases get initialized
@@ -32,25 +38,21 @@ function DB(path) {
         if (instances === null) {
             instances = db.addCollection("instances");
         }
+        db.saveDatabase();
         return {
             //profile api
-            addProfile: function (profile) {
-                var ret = profiles.insert(profile);
-                db.saveDatabase();
-                return ret; 
-            },
-            updateProfile: function (profile) {
-                var ret = profiles.update(profile);
-                db.saveDatabase();
-                return ret;
-            },
-            removeProfile: function (profile) {
+            addProfile: saveDB(db, function (profile) {
+                return profiles.insert(profile);
+            }),
+            updateProfile: saveDB(db, function (profile) {
+                return profiles.update(profile);
+            }),
+            removeProfile: saveDB(db, function (profile) {
                 this.findInstances({ profile: profile.$loki }).forEach((instance) => {
                     this.removeInstance(instance);
                 });
                 profiles.remove(profile);
-                db.saveDatabase();
-            },
+            }),
             getProfile: function (id) {
                 return clone(profiles.get(id));
             },
@@ -60,22 +62,17 @@ function DB(path) {
             },
 
             //instances api
-            addInstance: function (instance, profile) {
+            addInstance: saveDB(db, function (instance, profile) {
                 instance.profile = profile.$loki;
-                var ret = instances.insert(instance);
-                db.saveDatabase();
-                return ret;
-            },
-            updateInstance: function (instance, profile) {
+                return instances.insert(instance);
+            }),
+            updateInstance: saveDB(db, function (instance, profile) {
                 instance.profile = profile.$loki;
-                var ret = instances.update(instance);
-                db.saveDatabase();
-                return ret;
-            },
-            removeInstance: function (instance) {
+                return instances.update(instance);
+            }),
+            removeInstance: saveDB(db, function (instance) {
                 instances.remove(instance);
-                db.saveDatabase();
-            },
+            }),
             getInstance: function (id) {
                 return clone(instances.get(id));
             },
