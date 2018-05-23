@@ -305,6 +305,7 @@ a {
   -moz-border-radius-topright: 5px;
    border-top-left-radius: 5px;
    border-top-right-radius: 5px;
+   margin-right: -1px;
 }
 
 .modal-header-galaxy .close{
@@ -639,14 +640,28 @@ a {
   padding-left: 8px;
   padding-top: 10px;
   padding-bottom: 8px;
+  display: flex;
   .filter{
     margin-bottom: 0px;
-    width: 68%;
+    flex: 1;
     float: left;
     input {
       border-radius: 0px;
     }
-    margin-right: 3%;
+    margin-right: 10px;
+  }
+  .navigation{
+    .dropdown-menu{
+      margin-top: 3px;
+      border-radius: 0px;
+      right: -10px;
+      i.material-icons{
+        font-size: 15px;
+        vertical-align: bottom;
+        margin-left: -7px;
+      }
+    }
+    margin-right: 10px;
   }
   .addProfile{
     float: left;
@@ -663,4 +678,29 @@ a:focus{
   outline-color: transparent !important;
   outline: 0px !important;
   outline-offset: 0px !important;
+}
+
+.modal {
+  text-align: center;
+  padding: 0!important;
+}
+
+.modal::before {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+  margin-right: -4px;
+}
+
+.modal-dialog {
+  display: inline-block;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.application {
+  .form-horizontal .checkbox, .form-horizontal .checkbox-inline, .form-horizontal .radio, .form-horizontal .radio-inline {
+    padding-top: 0px;
+  }
 }

@@ -9,15 +9,17 @@
                         <i class="fa fa-search"></i>
                     </span>
                 </div>
-                <div class="addProfile">
-                    <a href="javascript:" ng-click="vm.updateProfile()">
-                            <i class="material-icons">&#xE02E;</i>
-                    </a>
-                </div>
-                <div class="addProfile">
-                    <a href="javascript:" ng-click="vm.switchWorkspace()">
-                        <i class="material-icons">party_mode</i>
-                    </a>
+                <div class="navigation">
+                    <span uib-dropdown class="settings">
+                        <span uib-dropdown-toggle>
+                            <i class="material-icons">more_vert</i>  
+                        </span>
+                        <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                            <li role="menuitem" ng-click="vm.updateProfile()"><a href="javascript:"><i class="material-icons">&#xE02E;</i> Add new profile</a></li>
+                            <li class="divider"></li>
+                            <li role="menuitem" ng-click="vm.switchWorkspace();"><a href="javascript:"><i class="material-icons">party_mode</i> Switch Workspace</a></li>
+                        </ul>
+                    </span>        
                 </div>
             </div>
             
@@ -54,7 +56,7 @@
                                     <a href="javascript:">{{vm.getInstanceName(s)}} </a>
                                     <span uib-dropdown is-open="s.__openAppMenu" auto-close="outsideClick">
                                         <span uib-dropdown-toggle ng-click="$event.stopPropagation();">
-                                            <i class="material-icons">&#xe5d3;</i>
+                                            <!-- <i class="material-icons">&#xe5d3;</i> -->
                                         </span>
                                         <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="single-button">
                                             <li class="dropdown-header">Open App</li>

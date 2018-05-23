@@ -1,0 +1,55 @@
+.connectionView {
+    .modal-content{
+        border-radius: 0px;
+        border: none; 
+    }
+    .modal-body{
+        background-color: rgba(0,0,0,0.85);
+    }
+    button{
+        color: white;
+    }
+    .nodes{
+        padding: 40px 20px 20px;
+    }
+    .node {
+        text-align: center;
+        .content {
+            font-size: 14px;
+            font-family: "Comic Sans MS", cursive, sans-serif;
+            border-radius: 5px;
+            border: 1px solid silver;
+            padding: 8px 10px;
+            display: inline-block;
+            position: relative;
+            margin-bottom: 29px;
+            i{
+                margin-right: 8px;
+            }
+        }
+        .content::after {
+            content: "";
+            position: absolute;
+            top: 102%;
+            left: 50%;
+            border-left: 1px solid white;
+            width: 0;
+            height: 30px;
+        }
+        .content.connecting {
+            background-color: #6c757d;
+            color: white;
+        }
+        .content.connected {
+            background-color: #28a745;
+            color: white;
+        }
+        .content.disconnected {
+            background-color: indianred;
+            color: white;
+        }
+    }
+    .node:last-child .content::after {
+        display: none;
+    }
+}

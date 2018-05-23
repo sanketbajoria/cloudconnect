@@ -2,7 +2,6 @@ var loki = require('lokijs');
 var cryptedFileAdapter = require('../../node_modules/lokijs/src/loki-crypted-file-adapter'); 
 var Q = require('q');
 var CloudInstance = require('../cloud/CloudInstance');
-var saveDB = require('../utils/utils').saveDB;
 
 
 function mapToModel(cloudProfiles){
@@ -48,9 +47,12 @@ function DB(path, password, newWorkspace){
             });
         }
         cloudDb.saveDatabase();
-        return {
+
+        var ret = {};
+        var saveDB = require('../utils/utils').saveDB(cloudDb, ret);
+        Object.assign(ret, {
             //cloud instances api
-            updateCloudProfile: saveDB(cloudDb, function (profileId, instances) {
+            updateCloudProfile: saveDB(function (profileId, instances) {
                 var doc = cloudProfiles.by("profileId", profileId);
                 var ret;
                 if (!doc) {
@@ -64,7 +66,7 @@ function DB(path, password, newWorkspace){
                     return cloudProfiles.update(doc);
                 }
             }),
-            removeCloudProfile: saveDB(cloudDb, function (profileId) {
+            removeCloudProfile: saveDB(function (profileId) {
                 var doc = cloudProfiles.by("profileId", profileId);
                 return cloudProfiles.remove(doc);
             }),
@@ -81,7 +83,8 @@ function DB(path, password, newWorkspace){
             getPath: function(){
                 return path;
             }
-        };
+        });
+        return ret;
     });
 }
 

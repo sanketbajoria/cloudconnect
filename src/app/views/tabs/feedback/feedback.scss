@@ -1,0 +1,87 @@
+.-views>.-content>.-view .-feedback {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    >.-loader {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        .middle {
+            text-align: center;
+        }
+        .funnyMessage {
+            font-size: 16px;
+            color: darkorange;
+            font-family: "Comic Sans MS", cursive, sans-serif;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            position: relative;
+            margin: 10px auto;
+        }
+        .double-bounce1,
+        .double-bounce2 {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: darkorange;
+            opacity: 0.6;
+            position: absolute;
+            top: 0;
+            left: 0;
+            -webkit-animation: sk-bounce 2.0s infinite ease-in-out;
+            animation: sk-bounce 2.0s infinite ease-in-out;
+        }
+        .double-bounce2 {
+            -webkit-animation-delay: -1.0s;
+            animation-delay: -1.0s;
+        }
+        @-webkit-keyframes sk-bounce {
+            0%,
+            100% {
+                -webkit-transform: scale(0.0)
+            }
+            50% {
+                -webkit-transform: scale(1.0)
+            }
+        }
+        @keyframes sk-bounce {
+            0%,
+            100% {
+                transform: scale(0.0);
+                -webkit-transform: scale(0.0);
+            }
+            50% {
+                transform: scale(1.0);
+                -webkit-transform: scale(1.0);
+            }
+        }
+    }
+    >.-error {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: left;
+        color: indianred;
+        .middle {
+            text-align: center;
+        }
+        i {
+            font-size: 48px;
+            margin-bottom: 10px;    
+        }
+        div.-main {
+            font-size: 16px;
+            font-family: "Comic Sans MS", cursive, sans-serif;
+        }
+        div.-errorDescription {
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+    }
+}

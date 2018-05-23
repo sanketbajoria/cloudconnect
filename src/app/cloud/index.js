@@ -1,5 +1,5 @@
 var db = require('../db');
-var AWS = require('./aws');
+var CloudProfile = require('./CloudProfile');
 var utils = require('../utils/utils');
 var CloudInstance = require('./CloudInstance');
 var Q = require('q');
@@ -51,13 +51,13 @@ class Cloud {
                 return Q.when(ret);
             }
         }
-        if (utils.isAWSType(profile)) {
-            return new AWS(profile.aws).getInstances().then((awsInstances) => {
-                var cloudInstances = awsInstances.map((a) => new CloudInstance(profile.type, a));
-                this.updateCloudProfile(profile, cloudInstances);
-                return cloudInstances;
-            });
-        }
+        var cloudProfile = new CloudProfile(profile);
+        cloudProfile.setConfig(profile[profile.type]);
+        return cloudProfile.getInstances().then((awsInstances) => {
+            var cloudInstances = awsInstances.map((a) => new CloudInstance(profile.type, a));
+            this.updateCloudProfile(profile, cloudInstances);
+            return cloudInstances;
+        });
     }
 
     /**
@@ -99,69 +99,10 @@ class Cloud {
     getCloudInstancesBasedOnInstanceId(profile, cloudInstanceName, cloudInstanceId) {
         var cloudInstances = this.getCloudInstances(profile);
         return cloudInstances.filter(function (i) {
-            if (utils.isAWSType(profile)) {
-                return i.getName() == cloudInstanceName && (!cloudInstanceId || i.getUniqueId() == cloudInstanceId);
-            }
+            return i.getName() == cloudInstanceName && (!cloudInstanceId || i.getUniqueId() == cloudInstanceId);
         });
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-    /**
-     * Get address of cloud instance
-     * @param {*} s 
-     */
-    /* getCloudInstanceAddress(s) {
-        if (utils.isAWSType(s)) {
-            var cloudInstance = this.getCloudInstance(s.profileId, s.cloudInstanceId, s.type);
-            if (cloudInstance) {
-                return AWS.getHostName(cloudInstance);
-            }
-        }
-    } */
-
-    /**
-     * Get name of cloud instance
-     * @param {*} s 
-     */
-    /* getCloudInstanceName(s) {
-        if (utils.isAWSType(s)) {
-            var cloudInstance = this.getCloudInstance(s.profileId, s.cloudInstanceId, s.type);
-            if (cloudInstance) {
-                return AWS.getName(cloudInstance);
-            }
-        }
-    } */
-
-    /**
-     * Get the Cloud Instance Label
-     * @param {*} s 
-     */
-    /* getCloudInstanceLabel(s){
-        if(utils.isAWSType(s)){
-            return `${AWS.getName(s)} (${AWS.getUniqueId(s)})`;
-        }
-    } */
 }
 
 module.exports = new Cloud();

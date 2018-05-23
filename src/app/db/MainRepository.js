@@ -2,7 +2,6 @@ var loki = require('lokijs');
 var cryptedFileAdapter = require('../../node_modules/lokijs/src/loki-crypted-file-adapter'); 
 var Q = require('q');
 var clone = require('clone');
-var saveDB = require('../utils/utils').saveDB;
 
 /**
  * Class representing Database connection
@@ -39,15 +38,18 @@ function DB(path, password, newWorkspace) {
             instances = db.addCollection("instances");
         }
         db.saveDatabase();
-        return {
+
+        var ret = {};
+        var saveDB = require('../utils/utils').saveDB(db, ret);
+        Object.assign(ret, {
             //profile api
-            addProfile: saveDB(db, function (profile) {
+            addProfile: saveDB(function (profile) {
                 return profiles.insert(profile);
             }),
-            updateProfile: saveDB(db, function (profile) {
+            updateProfile: saveDB(function (profile) {
                 return profiles.update(profile);
             }),
-            removeProfile: saveDB(db, function (profile) {
+            removeProfile: saveDB(function (profile) {
                 this.findInstances({ profile: profile.$loki }).forEach((instance) => {
                     this.removeInstance(instance);
                 });
@@ -62,15 +64,15 @@ function DB(path, password, newWorkspace) {
             },
 
             //instances api
-            addInstance: saveDB(db, function (instance, profile) {
+            addInstance: saveDB(function (instance, profile) {
                 instance.profile = profile.$loki;
                 return instances.insert(instance);
             }),
-            updateInstance: saveDB(db, function (instance, profile) {
+            updateInstance: saveDB(function (instance, profile) {
                 instance.profile = profile.$loki;
                 return instances.update(instance);
             }),
-            removeInstance: saveDB(db, function (instance) {
+            removeInstance: saveDB(function (instance) {
                 instances.remove(instance);
             }),
             getInstance: function (id) {
@@ -86,7 +88,8 @@ function DB(path, password, newWorkspace) {
             getPath: function(){
                 return path;
             }
-        };
+        });
+        return ret;
     });
 }
 

@@ -1,0 +1,24 @@
+<div class="form-group form-group-sm required">
+    <label for="accessKey" class="control-label col-sm-3">Access Key:</label>
+    <div class="col-sm-9">
+        <input type="text" class="form-control input-sm" id="accessKey" ng-model="profileCtrl.profile[profileCtrl.profile.type].accessKey" required>
+    </div>
+</div>
+<div class="form-group form-group-sm required">
+    <label for="secretKey" class="control-label col-sm-3">Secret Key:</label>
+    <div class="col-sm-9">
+        <div class="input-group">
+            <input type="{{profileCtrl.showSecret?'text':'password'}}" class="form-control input-sm" id="secretKey" ng-model="profileCtrl.profile[profileCtrl.profile.type].secretKey"
+                required>
+            <span class="input-group-addon" ng-click="profileCtrl.showSecret=!profileCtrl.showSecret">
+                <i class="fa" ng-class="profileCtrl.showSecret?'fa-eye':'fa-eye-slash'"></i>
+            </span>
+        </div>
+    </div>
+</div>
+<div class="form-group form-group-sm required">
+    <label for="region" class="control-label col-sm-3">Region:</label>
+    <div class="col-sm-9">
+        <input type="text" class="form-control input-sm" id="region" ng-model="profileCtrl.profile[profileCtrl.profile.type].region" required>
+    </div>
+</div>

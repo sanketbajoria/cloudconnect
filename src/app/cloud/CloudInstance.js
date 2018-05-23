@@ -1,30 +1,30 @@
-var AWS = require('./aws');
-var utils = require('../utils/utils.js');
-
+var CloudProfile = require('./CloudProfile');
 class CloudInstance{
     constructor(type, instance){
         this.__type = type
         this.__instance = instance;
+        this.cloudProfile = new CloudProfile(type);
     }
-
+    
     getName(){
-        if(utils.isAWSType(this.__type)){
-            return AWS.getName(this.__instance);
-        }
+        return this.cloudProfile.getName(this.__instance);
     }
 
     getAddress(){
-        if(utils.isAWSType(this.__type)){
-            return AWS.getHostName(this.__instance);
-        }
+        return this.cloudProfile.getHostName(this.__instance);
     }
 
     getUniqueId(){
-        if(utils.isAWSType(this.__type)){
-            return AWS.getUniqueId(this.__instance);
-        }
+        return this.cloudProfile.getUniqueId(this.__instance);
     }
 
+    isRunning(){
+        return this.cloudProfile.isRunning(this.__instance);
+    }
+
+    isTerminated(){
+        return this.cloudProfile.isTerminated(this.__instance);
+    }
 }
 
 module.exports = CloudInstance;

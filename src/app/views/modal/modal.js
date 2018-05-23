@@ -35,7 +35,9 @@
                 controllerAs: 'vm',
                 windowClass: 'galaxyModal',
             }, config);
-            return $uibModal.open(config);
+            var ret = $uibModal.open(config);
+            ret.result.catch(() => {});
+            return ret;
         }
 
         return {

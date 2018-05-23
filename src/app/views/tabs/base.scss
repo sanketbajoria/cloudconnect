@@ -111,11 +111,11 @@ $views-bg-color: #e6e6e6;
           background-size:    1.6em;
 
           &[data-favicon='loading'] {
-            background-image: url('../images/loading-favicon.gif');
+            background-image: url('../../images/loading-favicon.gif');
           }
 
           &[data-favicon='default'] {
-            background-image: url('../images/default-favicon.svg');
+            background-image: url('../../images/default-favicon.svg');
           }
 
           &[data-favicon='ssh']:before {
@@ -140,6 +140,15 @@ $views-bg-color: #e6e6e6;
             padding: 1px 5px 0px 5px;
             background: #337ab7;
             color: white;
+          }
+
+          &[data-favicon='custom']:before {
+            content: "\f074";
+            font-family: FontAwesome;
+            left: 3px;
+            position: absolute;
+            top: -2px;
+            font-size: 14px;
           }
         
         }
@@ -350,39 +359,11 @@ $views-bg-color: #e6e6e6;
           padding:              0;
           display:              none;
         }
-        > .-loader{
-          position: relative;
-          width: 100%;
-          i{
-            font-size: 56px;
-          }
-          span{
-            font-size: 16px;
-            display: block;
-            margin-top: 12px;
-          }
-        }
         .middle{
           position: absolute;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-        }
-        > .-error{
-          position: relative;
-          width: 100%;
-          text-align: left;
-          display: none;
-          i{
-            font-size: 56px;
-          }
-          p{
-            font-size: 16px;
-            margin-bottom: 20px;
-          }
-          p.-errorDescription{
-            font-size: 10px;
-          }
         }
       }
     }

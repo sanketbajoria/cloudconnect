@@ -1,0 +1,42 @@
+<div class="modal-body">
+  <button type="button" class="close" data-dismiss="modal" ng-click="vm.no()">&times;</button>
+  <div class="nodes">
+    <div ng-repeat="i in vm.data.sshConnections" class="node">
+      <div ng-switch="i.type">
+        <div ng-switch-when="ssh">
+          <div ng-switch="i.status">
+            <div class="content connecting" ng-switch-when="beforeconnect">
+              <i class="fa fa-spinner fa-spin fa-fw"></i>Connecting {{i.config.name}}
+            </div>
+            <div class="content connected" ng-switch-when="connect">
+              <i class="fa fa-check-circle"></i>Connected {{i.config.name}}
+            </div>
+            <div class="content connecting" ng-switch-when="beforedisconnect">
+                <i class="fa fa-spinner fa-spin fa-fw"></i>Disconnecting {{i.config.name}}
+            </div>
+            <div class="content disconnected" ng-switch-when="disconnect">
+              <i class="fa fa-times-circle"></i>Disconnected {{i.config.name}} {{i.err.message}} 
+            </div>
+          </div>
+        </div>
+        <div ng-switch-when="tunnel">
+            <div ng-switch="i.status">
+                <div class="content connecting" ng-switch-when="beforeconnect">
+                    <i class="fa fa-spinner fa-spin fa-fw"></i>Establishing {{i.config.prefix}} tunnel
+                </div>
+                <div class="content connected" ng-switch-when="connect">
+                    <i class="fa fa-check-circle"></i>Established {{i.config.prefix}} tunnel at {{i.config.localPort}} port
+                </div>
+                <div class="content connecting" ng-switch-when="beforedisconnect">
+                    <i class="fa fa-spinner fa-spin fa-fw"></i>Disconnecting {{i.config.prefix}} tunnel at {{i.config.localPort}} port
+                </div>
+                <div class="content disconnected" ng-switch-when="disconnect">
+                    <i class="fa fa-times-circle"></i>Disconnected {{i.config.prefix}} tunnel at {{i.config.localPort}} port
+                </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

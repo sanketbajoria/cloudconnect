@@ -49,6 +49,7 @@ class Term{
                 this.__socket = socket;
                 socket.on('close', () => {
                     console.log('Stream :: close');
+                    //close the tab
                 }).on('data', (data) => {
                     this.term.write(data.toString("UTF-8"));
                 }).stderr.on('data', (data) => {
@@ -75,6 +76,7 @@ class Term{
 
     close(){
         SSHUtils.endSocket(this.__socket);   
+        this.term.clearCursorBlinkingInterval();
         this.term.removeAllListeners('data');
         this.term.removeAllListeners('close');
         this.term.destroy();

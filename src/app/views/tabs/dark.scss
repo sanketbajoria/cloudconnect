@@ -29,11 +29,11 @@ $views-bg-color: #151515;
       > .-tab {
         .-favicon {
           &[data-favicon='loading'] {
-            background-image: url('../images/loading-favicon-dark.gif');
+            background-image: url('../../images/loading-favicon-dark.gif');
           }
 
           &[data-favicon='default'] {
-            background-image: url('../images/default-favicon-dark.svg');
+            background-image: url('../../images/default-favicon-dark.svg');
           }
         }
 

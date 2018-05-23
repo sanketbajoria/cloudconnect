@@ -1,9 +1,11 @@
 'use strict';
+var fs = require('fs');
 (function () {
     function mapFile(file){
         return {
             name: file.name,
-            path: file.path
+            path: file.path,
+            content: fs.readFileSync(file.path)
         }
     }
     var app = angular.module('galaxy');

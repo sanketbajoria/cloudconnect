@@ -1,0 +1,23 @@
+<div class="-feedback">
+    <div class="-loader" ng-show="!feedbackCtrl.displayError">
+        <div class="middle">
+                <div class="spinner">
+                        <div class="double-bounce1"></div>
+                        <div class="double-bounce2"></div>
+                      </div>
+            <span class="funnyMessage">{{feedbackCtrl.funnyMessage}}</span>
+            <a href="javascript:" ng-click="feedbackCtrl.openConnectionStatus()">Detail View</a>
+        </div>
+    </div>
+    <div class="-error" ng-show="feedbackCtrl.displayError">
+        <div class="middle">
+            <div>
+                <i class="fa fa-exclamation-triangle fa"></i>
+            </div>
+            <div class="-main" ng-show="feedbackCtrl.sshFailed">Unable to establish SSH Connection</div>
+            <div class="-main" ng-show="!feedbackCtrl.sshFailed">This site can't be reached</div>
+            <div class="-errorDescription">{{feedbackCtrl.errorDescription}}</div>
+            <a ng-show="feedbackCtrl.sshFailed" href="javascript:" ng-click="feedbackCtrl.openConnectionStatus()">Detail View</a>
+        </div>
+    </div>
+</div>

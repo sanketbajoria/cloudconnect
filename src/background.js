@@ -34,15 +34,15 @@ if (env.name !== 'production') {
 fse.ensureDirSync('workspace');
 function createLoadingScreen() {
   var loadingScreen = createWindow('loading', {
-    width: 1000,
-    height: 600,
-    //transparent: true,
-    //frame: false,
+    width: 200,
+    height: 150,
+    transparent: true,
+    frame: false,
     backgroundColor: '#2e353d;',
     show: false
   });
 
-  loadingScreen.maximize();
+  //loadingScreen.maximize();
 
   loadingScreen.loadURL(url.format({
     pathname: path.join(__dirname, 'views/loading.html'),
@@ -57,7 +57,7 @@ function createLoadingScreen() {
 }
 
 app.on('ready', () => {
-  var loadingWindow = createLoadingScreen();
+  var loadingWindow = createLoadingScreen(); 
   setApplicationMenu();
 
   const mainWindow = createWindow('main', {
@@ -84,7 +84,6 @@ app.on('ready', () => {
   mainWindow.on('ready-to-show', function () {
       loadingWindow.close();
       mainWindow.maximize();
-      mainWindow.show();
       mainWindow.focus();
       mainWindow.openDevTools();
   });

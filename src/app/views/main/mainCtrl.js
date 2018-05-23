@@ -1,11 +1,12 @@
 var app = angular.module('galaxy');
 var Q = require('q');
 var xTerm = require('../applications/term');
-app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, $timeout, $filter, WorkspaceService, $document) {
+app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, $timeout, $filter, WorkspaceService, $document, LoaderService) {
     var vm = this;
     vm.tabs = {};
     vm.db = db;
     vm.config = config;
+    LoaderService.stop();
     
     $document[0].title = "GalaxyBot" + (WorkspaceService.getWorkspaceName()?" - " + WorkspaceService.getWorkspaceName():'');
     
@@ -52,11 +53,11 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
         vm.profiles = db.getMainRepository().findProfiles();
         vm.profiles.forEach((p) => {
             p.instances = vm.db.getMainRepository().findInstances({}, p);
-            p.instances.forEach((i) => {
+            /* p.instances.forEach((i) => {
                 if(!utils.isGenericType(i)){
                     i.cloudInstances = cloud.getCloudInstancesBasedOnInstanceId(db.getMainRepository().getProfile(i.cloud.profileId), i.cloud.instanceName);
                 }
-            });
+            }); */
         });
     }
 
@@ -64,10 +65,10 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
    
     vm.openApp = function(i, app){
         if(utils.isGenericType(i)){
-            openApp(i, app);
+            openApp(angular.copy(i), app);
         }else{
-            i.cloudInstances.forEach((ci) => {
-                var s = i;
+            cloud.getCloudInstancesBasedOnInstanceId(db.getMainRepository().getProfile(i.cloud.profileId), i.cloud.instanceName).forEach((ci) => {
+                var s = angular.copy(i);
                 s.cloud.instance = ci;
                 openApp(s, app);
             });
@@ -141,7 +142,42 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
         });
     }
 
-    function addTab(s, app){
+    function openApp(s, app){
+        var ssh = utils.getSSH(s, app, db);
+        var $tab = addTab(s, app, ssh); 
+        $tab.on('loaderInitialized', function(){
+            ssh.connect().then((sshTunnel) => {
+                if(utils.isTerminalType(app)){
+                    updateTab($tab, s, app, utils.createUrl(s, app));
+                    var view = vm.chromeTabs.getView($tab);
+                    var term = new xTerm(view.find('.sshTerminal'), sshTunnel);
+                    vm.tabs[$tab.id].term = term;
+                    term.open();
+                }else if(utils.isScullogType(app) || utils.isDockerType(app)){
+                    new scullog(sshTunnel, s, app).then(function (p) {
+                        s._scullog = {port: p};
+                        updateTab($tab, s, app, utils.createScullogUrl(s));
+                    });
+                }else {
+                    $q.when(utils.isForwardConnection(s) ? sshTunnel.addTunnel({name: utils.getInstanceName(s), remoteAddr: utils.getRemoteAddr(s), remotePort: app.port}) : '').then(function (t) {
+                        s._tunnel = t;
+                        if (utils.isCouchDBType(app)) {
+                            couchDb.addIfNotExist(s, app).then(function (c) {
+                                s._couch = c;
+                                updateTab($tab, s, app, utils.createCouchUrl(s, app), sshTunnel);
+                            });
+                        } else {
+                            updateTab($tab, s, app, utils.createUrl(s, app), sshTunnel);
+                        } 
+                    });
+                }
+            }).catch((err) => {
+                console.log("Error ssh - " + err);
+            });
+        })
+    }
+
+    function addTab(s, app, ssh){
         vm.chromeTabs.toggle(true);
         var id = new Date().getTime();
         var tabConfig = {
@@ -150,42 +186,14 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             title: utils.getInstanceName(s), 
             __server: s,
             __app: app,
-            __id: id
+            __id: id,
+            __ssh: ssh
         }
         var $tab = vm.chromeTabs.addTab(tabConfig);
         $tab.id = id;
         vm.tabs[$tab.id] = {};
+        vm.tabs[$tab.id].ssh = ssh;
         return $tab;
-    }
-
-    function openApp(s, app){
-        var $tab = addTab(s, app); 
-        getSSH(s, app, $tab).then((sshTunnel) => {
-            if(utils.isTerminalType(app)){
-                updateTab($tab, s, app, utils.createUrl(s, app));
-                var view = vm.chromeTabs.getView($tab);
-                var term = new xTerm(view.find('.sshTerminal'), sshTunnel);
-                vm.tabs[$tab.id].term = term;
-                term.open();
-            }else if(utils.isScullogType(app) || utils.isDockerType(app)){
-                new scullog(sshTunnel, s, app).then(function (p) {
-                    s._scullog = {port: p};
-                    updateTab($tab, s, app, utils.createScullogUrl(s));
-                });
-            }else {
-                $q.when(utils.isForwardConnection(s) ? sshTunnel.addTunnel({name: utils.getInstanceName(s), remoteAddr: utils.getRemoteAddr(s), remotePort: app.port}) : '').then(function (t) {
-                    s._tunnel = t;
-                    if (utils.isCouchDBType(app)) {
-                        couchDb.addIfNotExist(s, app).then(function (c) {
-                            s._couch = c;
-                            updateTab($tab, s, app, utils.createCouchUrl(s, app), sshTunnel);
-                        });
-                    } else {
-                        updateTab($tab, s, app, utils.createUrl(s, app), sshTunnel);
-                    } 
-                });
-            }
-        });
     }
 
     function updateTab($tab, s, app, url, sshTunnel) {
@@ -205,47 +213,11 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
         }
         
         $q.when(utils.isSocksConnection(s, app)?sshTunnel.getSocksPort():null).then(function(port){
+            s._socks = port;
             tabConfig["proxyUrl"] = port?utils.createProxyUrl(port):null;
             vm.chromeTabs.showMainTab($tab);
             vm.chromeTabs.updateTab($tab, tabConfig);
         });
-    }
-
-    function getSSH(s, app, $tab){
-        var i = s;
-        var instances = (utils.isTerminalType(app) || utils.isScullogType(app))?[s]:[];   
-        while(i = i.connection.ref){
-            i = db.getMainRepository().getInstance(i);
-            if(!utils.isGenericType(i)){
-                i.cloud.instance = cloud.getCloudInstancesBasedOnInstanceId(db.getMainRepository().getProfile(i.cloud.profileId), i.cloud.instanceName)[0];
-            }
-            instances.push(i);
-        }
-        if(instances.length > 0){
-            var sshConfigs = instances.reverse().map((instance) => {
-                var sshApp = instance.applications.filter(function (a) {
-                    return utils.isTerminalType(a);
-                })[0];
-                var sshConfig = { username: sshApp.config.userName, host: utils.getRemoteAddr(instance), port: sshApp.port };
-                if (sshApp.config.secret.key == 'password') {
-                    sshConfig.password = sshApp.config.secret.password
-                } else {
-                    sshConfig.identity = sshApp.config.secret.pem.file.path;
-                }
-                sshConfig.uniqueId = db.getUniqueId(instance);
-                return sshConfig;
-            })
-            var ssh = new SSHTunnel(sshConfigs).on("ssh", function () {
-                console.log(arguments);
-                //vm.chromeTabs.updateTabLoadingMessage();
-            }).on("tunnel", function () {
-                console.log(arguments);
-                //vm.chromeTabs.updateTabLoadingMessage();
-            });
-            vm.tabs[$tab.id].ssh = ssh;
-            return ssh.connect();
-        }
-        return Q.when();
     }
 
 });

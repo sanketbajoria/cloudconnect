@@ -74,23 +74,6 @@
                     toastr.success("Instance saved", "Success");
                     $uibModalInstance.close(vm.instance);
                 }else{
-                    var isDuplicate;
-                    /* if(utils.isGenericType(vm.instance)){
-                        isDuplicate = instances.filter(function(i){
-                            if(utils.isGenericType(i)){
-                                return i.generic.name === vm.instance.generic.name;
-                            }
-                        }).length>0;
-                    }else if(utils.isAWSType(vm.instance)){
-                        isDuplicate = instances.filter(function(i){
-                            if(utils.isAWSType(i)){
-                                return AWS.getUniqueId(i.instance) === AWS.getUniqueId(vm.instance.aws.instance);
-                            }
-                        }).length>0;
-                    } */
-                    if(isDuplicate){
-                        throw new Error("Duplicate instance has been found under this profile");
-                    }
                     db.getMainRepository().addInstance(vm.instance, profile);
                     toastr.success("Instance saved", "Success");
                     $uibModalInstance.close(vm.instance);

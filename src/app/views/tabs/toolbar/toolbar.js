@@ -3,7 +3,7 @@ angular.module('galaxy').directive('toolbar', function () {
         restrict: 'E',
         controller: ToolbarCtrl,
         controllerAs: 'toolbarCtrl',
-        templateUrl: 'toolbar/toolbar.html',
+        templateUrl: 'tabs/toolbar/toolbar.html',
         replace: true
     }
 });
@@ -46,9 +46,11 @@ function ToolbarCtrl($scope, galaxyModal) {
         if($webview.is('webview')){
             setTimeout(() => {
                 $webview[0].getWebContents().getZoomFactor((zoom) => {
-                    zoom = zoom - 0.1;
-                    $webview[0].setZoomFactor(zoom);
-                    vm.zoom = Math.round(zoom * 100) + '%';
+                    utils.safeApply($scope, function(){
+                        zoom = zoom - 0.1;
+                        $webview[0].setZoomFactor(zoom);
+                        vm.zoom = Math.round(zoom * 100) + '%';
+                    });
                 });
             }, 200);
         }else{
@@ -65,9 +67,11 @@ function ToolbarCtrl($scope, galaxyModal) {
         if($webview.is('webview')){
             setTimeout(() => {
                 $webview[0].getWebContents().getZoomFactor((zoom) => {
-                    zoom = zoom + 0.1;
-                    $webview[0].setZoomFactor(zoom);
-                    vm.zoom = Math.round(zoom * 100) + '%';
+                    utils.safeApply($scope, function(){
+                        zoom = zoom + 0.1;
+                        $webview[0].setZoomFactor(zoom);
+                        vm.zoom = Math.round(zoom * 100) + '%';
+                    });
                 });
             }, 200);
         }else{
@@ -108,7 +112,6 @@ function ToolbarCtrl($scope, galaxyModal) {
                 if($webview[0].getWebContents()){
                     vm.url = $webview[0].getURL();
                     $webview[0].getWebContents().getZoomFactor((zoom) => {
-                        zoom = zoom + 0.1;
                         utils.safeApply($scope, function(){
                             vm.zoom = Math.round(zoom * 100) + "%";
                         })

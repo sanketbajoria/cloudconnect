@@ -19,35 +19,12 @@
                 </select>
             </div>
         </div>
-        <div ng-if="profileCtrl.utils.isAWSType(profileCtrl.profile)">
-            <div class="form-group form-group-sm required">
-                <label for="accessKey" class="control-label col-sm-3">Access Key:</label>
-                <div class="col-sm-9">
-                    <input type="text" class="form-control input-sm" id="accessKey" ng-model="profileCtrl.profile.aws.accessKey" required>
-                </div>
-            </div>
-            <div class="form-group form-group-sm required">
-                <label for="secretKey" class="control-label col-sm-3">Secret Key:</label>
-                <div class="col-sm-9">
-                    <div class="input-group">
-                        <input type="{{profileCtrl.showSecret?'text':'password'}}" class="form-control input-sm" id="secretKey" ng-model="profileCtrl.profile.aws.secretKey" required>
-                        <span class="input-group-addon" ng-click="profileCtrl.showSecret=!profileCtrl.showSecret">
-                            <i class="fa" ng-class="profileCtrl.showSecret?'fa-eye':'fa-eye-slash'"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group form-group-sm required">
-                <label for="region" class="control-label col-sm-3">Region:</label>
-                <div class="col-sm-9">
-                    <input type="text" class="form-control input-sm" id="region" ng-model="profileCtrl.profile.aws.region" required>
-                </div>
-            </div>
-        </div>
+        <div ng-include="profileCtrl.getPath()"></div>
     </form>
 </div>
 <div class="modal-footer modal-footer-galaxy">
-    <button type="button" class="btn btn-default btn-sm pull-left" ng-if="profileCtrl.profile.type && profileCtrl.profile.type != 'generic'" ng-disabled="profile.$invalid" ng-click="profileCtrl.testConnection()">Test Connection</button>
+    <button type="button" class="btn btn-default btn-sm pull-left" ng-if="!profileCtrl.isTesting && profileCtrl.profile.type && profileCtrl.profile.type != 'generic'" ng-disabled="profile.$invalid" ng-click="profileCtrl.testConnection()">Test Connection</button>
+    <button type="button" class="btn btn-default btn-sm pull-left" ng-if="profileCtrl.isTesting" disabled="true" ><i class="fa fa-circle-o-notch fa-spin"></i> Testing</button>
     <button type="button" class="btn btn-default btn-sm" ng-click="profileCtrl.no()">Cancel</button>
     <button type="button" class="btn btn-primary btn-sm" ng-disabled="profile.$invalid" ng-click="profileCtrl.saveProfile()">Save</button>
 </div>

@@ -120,6 +120,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
         let defaultTabFavicon = 'default';
         let defaultSSHFavicon = 'ssh';
         let defaultScullogFavicon = 'scullog';
+        let defaultCustomFavicon = 'custom';
 
         let tabTemplate = `
     <div class="-tab">
@@ -154,19 +155,16 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
     </div>
   `;
 
-        let loaderTemplate = `<div class="-loader"><div class="middle"><i class="fa fa-spinner fa-spin fa-fw"></i><span class="message">Connecting...</span></div>`;
-
-        let errorTemplate = `<div class="-error"><div class="middle"><p><i class="fa fa-exclamation-triangle fa"></i></p><p>This site can't be reached</p><p class="-errorDescription"></p></div></div>`
-
         let webViewTemplate = `
-    <div class="-view"><webview class="-main-view"></webview></div></div>
+    <div class="-view"><webview class="-main-view"></webview></div>
   `;
         let iframeViewTemplate = `
     <iframe class="-view" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-presentation allow-orientation-lock allow-pointer-lock"></iframe>
   `; // Note the absence of `allow-top-navigation` in this list; i.e., do not allow frames to break the tabbed interface.
         // This attribute can be altered at runtime using `defaultProps.viewAttrs.sandbox`.
-        let divViewTemplate = `<div class="-view"><div class="-main-view"><div class="terminalContainer"><div class="header"><span></span></div><div class="sshTerminal"></div></div></div></div>`;
-
+        let divViewTemplate = `<div class="-view"></div>`;
+        let terminalTemplate = `<div class="-main-view"><div class="terminalContainer"><div class="header"><span></span></div><div class="sshTerminal"></div></div></div>`;
+        let customViewTemplate = `<custom></custom>`;
         // Begin `ChromeTabs{}` class.
 
         class ChromeTabs {
@@ -365,27 +363,8 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
 
           showMainTab($tab){
             var view = this.$views.data('chromeTabViews').viewAtIndex($tab.index(), true);
-            this.showMainView(view);
+            $scope.api.showMainView(view);
           }
-
-          updateTabLoadingMessage($tab, message){
-            var view = this.$views.data('chromeTabViews').viewAtIndex($tab.index(), true);
-            view.find(".-loader span.message").text(message);
-          }
-
-          showMainView(view){
-            view.find(".-main-view").toggle(true);
-            view.find(".-loader").toggle(false);
-            view.find(".-error").toggle(false);
-          }
-
-          showErrorView(view, err){
-            view.find(".-error .-errorDescription").text(err);
-            view.find(".-main-view").toggle(false);
-            view.find(".-loader").toggle(false);
-            view.find(".-error").toggle(true);
-          }
-
 
           updateToolbar($view, $tab) {
             $scope.$emit("updateToolbar", $view, $tab);
@@ -493,56 +472,6 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                 this.removeTab($target.parent('.-tab'));
               }
             });
-            var $chromeTabViews = this.$views.data('chromeTabViews');
-            /* this.$backBtn.on('click', () => {
-              var view = $chromeTabViews.viewAtIndex(this.$currentTab.index(), true);
-              this.showMainView(view);
-              var webview = $chromeTabViews.getWebview(view)[0];
-              setTimeout(function(){
-                webview.goBack();
-              }, 200);
-            });
-            this.$forwardBtn.on('click', () => {
-              var view = $chromeTabViews.viewAtIndex(this.$currentTab.index(), true);
-              this.showMainView(view);
-              var webview = $chromeTabViews.getWebview(view)[0];
-              setTimeout(function(){
-                webview.goForward();
-              }, 200);
-            });
-            this.$reloadBtn.on('click', () => {
-              var view = $chromeTabViews.viewAtIndex(this.$currentTab.index(), true);
-              this.showMainView(view);
-              var webview = $chromeTabViews.getWebview(view)[0];
-              setTimeout(function(){
-                webview.reload();
-              }, 200);
-            });
-            this.$zoomMinusBtn.on('click', () => {
-              var view = $chromeTabViews.viewAtIndex(this.$currentTab.index(), true);
-              this.showMainView(view);
-              var webview = $chromeTabViews.getWebview(view)[0];
-              setTimeout(() => {
-                webview.getZoomFactor((zoom) => {
-                  zoom = zoom - 0.1;
-                  webview.setZoomFactor(zoom);
-                  this.$zoom.val(Math.round(zoom * 100));
-                });
-              }, 200);
-            });
-            this.$zoomPlusBtn.on('click', () => {
-              var view = $chromeTabViews.viewAtIndex(this.$currentTab.index(), true);
-              this.showMainView(view);
-              var webview = $chromeTabViews.getWebview(view)[0];
-              setTimeout(() => {
-                webview.getZoomFactor((zoom) => {
-                  zoom = zoom + 0.1;
-                  webview.setZoomFactor(zoom);
-                  this.$zoom.val(Math.round(zoom * 100));
-                });
-              }, 200);
-            }); */
-
           }
 
           removeEvents() {
@@ -804,7 +733,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
             $tab.data('props', props); // Update to new props.
 
             if (props.favicon) {
-              if (props.favicon === defaultLoadingTabFavicon || props.favicon === defaultTabFavicon || props.favicon === defaultSSHFavicon || props.favicon === defaultScullogFavicon) {
+              if (props.favicon === defaultLoadingTabFavicon || props.favicon === defaultTabFavicon || props.favicon === defaultSSHFavicon || props.favicon === defaultScullogFavicon || props.favicon === defaultCustomFavicon) {
                 $tab.find('> .-favicon').css({ 'background-image': '' }).attr('data-favicon', props.favicon);
               } else {
                 $tab.find('> .-favicon').css({ 'background-image': 'url(\'' + props.favicon + '\')' }).attr('data-favicon', '');
@@ -955,13 +884,22 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
             let $view = null
             if (utils.isTerminalType(props.__app)) {
               $view = $(divViewTemplate);
+              $view.append($(terminalTemplate));
+            } else if(utils.isCustomType(props.__app)){
+              $view = $(divViewTemplate);
+              var scope = $scope.$new(false);
+              scope.server = props.__server;
+              scope.$tab = $tab;
+              $view.append($compile(customViewTemplate)(scope));
             } else {
               $view = $( // Template based on view type.
                 this.settings.type === 'webviews' ? webViewTemplate : iframeViewTemplate
               );
             }
-            $view.append(loaderTemplate);
-            $view.append(errorTemplate);
+            var scope = $scope.$new(false);
+            scope.ssh = props.__ssh;
+            scope.$tab = $tab;
+            $view.append($compile('<feedback></feedback>')(scope))
             $view.data('urlCounter', 0); // Initialize.
             this.$content.append($view); // Add to DOM.
 
@@ -1091,7 +1029,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                 if (require && (!($tab instanceof jQuery) || !$tab.length)) throw 'Missing $tab.';
                 return $tab; // Otherwise, return the tab now.
               }; // Dynamically, in case it was moved by a user.
-              if (!utils.isTerminalType(props.__app)) {
+              if (!utils.isTerminalType(props.__app) && !utils.isCustomType(props.__app)) {
                 if (this.settings.type === 'webviews') {
                   let _favicon = ''; // Held until loading is complete.
                   var self = this.$parentObj.data('chromeTabs');
@@ -1104,9 +1042,10 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                       // Increment the `<webview>` URL counter.
                       $view.data('urlCounter', $view.data('urlCounter') + 1);
                       
-                      $view.find('.-loader').hide();
+                      $scope.api.showMainView($view);
+                      /* $view.find('.-loader').hide();
                       $view.find('.-main-view').show();
-
+                      */
                       if (props && props.proxyUrl) {
                         $webview.first()[0].getWebContents().session.setProxy({ proxyRules: props.proxyUrl }, function () {
                           return true; //$view.loadURL(props.url);
@@ -1148,7 +1087,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                     .on('page-favicon-updated.chrome-tabs', (e) => {
                       let $tab = $getTab(),
                         props = $view.data('props');
-
+                        self.updateToolbar($view, $tab);
                       // In the case of failure, use fallbacks.
                       _favicon = e.originalEvent.favicons.length ? e.originalEvent.favicons[0] : '';
                       let favicon = !_favicon && isFirstUrl() ? props.favicon : _favicon;
@@ -1166,7 +1105,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                     .on('page-title-updated.chrome-tabs', (e) => {
                       let $tab = $getTab(),
                         props = $view.data('props');
-
+                        self.updateToolbar($view, $tab);
                       // In the case of failure, use fallbacks.
                       let title = e.originalEvent.title || ''; // If not empty.
                       title = !title && typeof $webview[0].getURL === 'function' ? $webview[0].getURL() : title;
@@ -1273,7 +1212,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                 }
               }else{
                 let props = $view.data('props');
-                this.$parentObj._.updateTab($tab, { favicon: defaultSSHFavicon, title: props.title }, 'view::state-change');
+                this.$parentObj._.updateTab($tab, { favicon: utils.isTerminalType(props.__app)?defaultSSHFavicon:defaultCustomFavicon, title: props.title }, 'view::state-change');
               }
 
             }

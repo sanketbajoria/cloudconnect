@@ -5279,9 +5279,8 @@ sprintf@0.1.x:
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/sprintf/-/sprintf-0.1.5.tgz#8f83e39a9317c1a502cb7db8050e51c679f6edcf"
 
-ssh2-promise@0.0.9:
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/ssh2-promise/-/ssh2-promise-0.0.9.tgz#9dcb26cde2c23b347f87141c69db2658461d5247"
+ssh2-promise@../ssh2-promise:
+  version "0.1.0"
   dependencies:
     socksv5 "0.0.6"
     ssh2 "^0.5.5"

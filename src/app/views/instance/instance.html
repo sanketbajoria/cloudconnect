@@ -33,14 +33,14 @@
 
             <div ng-if="!instanceCtrl.utils.isGenericType(instanceCtrl.instance)">
                 <div class="form-group form-group-sm required">
-                    <label for="awsProfile" class="control-label col-sm-3" ng-show="instanceCtrl.utils.isAWSType(instanceCtrl.instance)">AWS Profile:</label>
+                    <label for="cloudProfile" class="control-label col-sm-3">{{instanceCtrl.utils.getCloudProfileConfiguration(instanceCtrl.instance).label}} Profile:</label>
                     <div class="col-sm-9">
-                        <select class="form-control input-sm" id="name" ng-options="instanceCtrl.db.getUniqueId(profile) as profile.name for profile in instanceCtrl.cloudProfiles" ng-model="instanceCtrl.instance.cloud.profileId"
+                        <select class="form-control input-sm" id="cloudProfile" ng-options="instanceCtrl.db.getUniqueId(profile) as profile.name for profile in instanceCtrl.cloudProfiles" ng-model="instanceCtrl.instance.cloud.profileId"
                             ng-change="instanceCtrl.changeCloudProfile()" placeholder="Choose existing profile" required></select>
                     </div>
                 </div>
                 <div class="form-group form-group-sm has-feedback required">
-                    <label for="name" class="control-label col-sm-3" ng-show="instanceCtrl.utils.isAWSType(instanceCtrl.instance)">AWS Name:</label>
+                    <label for="name" class="control-label col-sm-3">{{instanceCtrl.utils.getCloudProfileConfiguration(instanceCtrl.instance).label}} Name:</label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control input-sm" id="name" ng-model="instanceCtrl.instance.cloud.instanceName" uib-typeahead="i for i in instanceCtrl.getCloudInstancesName($viewValue, 12)" typeahead-min-length="0" typeahead-loading="loadingInstances" typeahead-no-results="noResults" ng-disabled="!instanceCtrl.instance.cloud.profileId" placeholder="Type instance detail such as instanceId, name, ip-address, host etc"
                             required />
@@ -70,14 +70,11 @@
                                     ng-model="instanceCtrl.instance.connection.ref" required>
                                             <option value="">--Select--</option>
                                         </select>
+                                <div ng-if="instanceCtrl.sshInstances.length==0" class="alert alert-danger" style="padding: 4px;margin-bottom:0px;margin-top: 1px;">Error, No existing instance can be found, with tunneling(ssh) capability. Please, add new instance, which will be utilized to create tunnel with this instance.</div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div ng-if="instanceCtrl.sshInstances.length==0">
-                    <p style="color:red">Error, No existing instance can be found, with tunneling(ssh) capability. Please, add new instance, which will be utilized to create tunnel with this instance.</p>
-                </div>
-                
             </div>
         </form>
 
