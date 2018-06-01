@@ -155,6 +155,28 @@ var shell = {
             options = options || {};
             return `tee ${options.flags=='a'?'>':''}> ${normalizePath(path)}`
         }
+    },
+    listDocker: {
+        cmd: function(){
+            return "docker ps";
+        },
+        parser: function(data){
+            var res = normalize(data);
+            var ret = [];
+            for(var i=1;i<res.length;i++){
+                var token = res[i].split(/\s{4,}/);
+                ret.push({
+                    containerId: token[0].trim(),
+                    image: token[1].trim(),
+                    command: token[2].trim(),
+                    createdOn: token[3].trim(),
+                    status: token[4].trim(),
+                    port: token[5].trim(),
+                    name: token[6].trim()
+                })
+            }
+            return ret;
+        }
     }
 
 }

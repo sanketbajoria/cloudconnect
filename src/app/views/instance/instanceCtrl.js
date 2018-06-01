@@ -27,15 +27,20 @@
             }
         }
 
+        vm.getDescription = function(app, idx){
+            return "dummy";
+        }
+
         vm.editApplication = function(app, idx){
             var editMode = !!app;
             galaxyModal.open({
                 templateUrl: 'instance/application.html',
+                controller: 'ApplicationController',
+                controllerAs: 'applicationCtrl',
                 data: {
                     app: app || {config:{secret:{key:'password', pem: {file: "dummy"}}}},
-                    applicationTypes: vm.config.instance.application.types,
                     editMode: editMode,
-                    hasSSHInstance: vm.hasSSHInstance()
+                    instance: vm.instance
                 }
             }).result.then(function(data){
                 if(editMode){
@@ -43,7 +48,12 @@
                 }else{
                     vm.instance.applications.push(data.app)
                 }
-            })
+            }).catch(angular.noop);
+        }
+
+
+        vm.testApplication = function(app, idx){
+            utils.getSSH(vm.instance, app, db).connect();
         }
 
         vm.sshInstances = db.getMainRepository().findInstances({}, profile).filter(function(i){
@@ -56,13 +66,6 @@
             return $scope.instance.$invalid || vm.instance.applications.length==0 || (vm.sshInstances.length == 0 && vm.instance.connection.type != 'direct')
         }
 
-        vm.hasSSHInstance = function(){
-                return vm.instance.applications.filter(function(a){
-                    return a.type=='ssh'
-                }).length>0
-        }
-
-        
         vm.no = function () {
             $uibModalInstance.dismiss('cancel');
         }
@@ -93,7 +96,6 @@
                     }), limit);
             })
         }
-
 
         function initCloudInstances(){
             var profile = db.getMainRepository().getProfile(vm.instance.cloud.profileId);

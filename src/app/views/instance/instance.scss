@@ -1,0 +1,121 @@
+/* Styles go here */
+
+.card {
+    box-shadow: 0 5px 11px 0 rgba(0, 0, 0, .18), 0 4px 15px 0 rgba(0, 0, 0, .15);
+    transition: 0.3s;
+    border-radius: 5px;
+    /* 5px rounded corners */
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 8px;
+    .card-content {
+        display: flex;
+        flex-direction: row;
+        min-height: 78px;
+    }
+    .card-icon {
+        display: inline-flex;
+        /* make element size relative to content */
+        align-items: center;
+        /* vertical alignment of items */
+        padding: 2px 16px;
+        font-size: 24px;
+    }
+    .card-title {
+        color: rgb(33, 37, 41);
+        display: block;
+        font-family: Roboto, sans-serif;
+        font-size: 17px;
+        font-weight: 400;
+        margin-top: 0px;
+    }
+    .card-description {
+        color: #747373;
+        font-family: Roboto, sans-serif;
+        font-size: 12px;
+    }
+    .card-footer {
+        text-align: center;
+    }
+}
+
+/* On mouse-over, add a deeper shadow */
+
+.card:hover {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, .18), 0 8px 16px 0 rgba(0, 0, 0, .18);
+}
+
+.btn-floating {
+    border-bottom-left-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    box-shadow: rgba(0, 0, 0, 0.18) 0px 5px 11px 0px, rgba(0, 0, 0, 0.15) 0px 4px 15px 0px;
+    box-sizing: border-box;
+    color: rgb(255, 255, 255);
+    cursor: pointer;
+    display: inline-block;
+    font-family: Roboto, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    height: 36px;
+    line-height: 24px;
+    margin-bottom: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 10px;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
+    position: relative;
+    text-align: center;
+    text-decoration-color: rgb(255, 255, 255);
+    text-decoration-line: none;
+    text-decoration-style: solid;
+    transition-delay: 0s;
+    transition-duration: 0.2s;
+    transition-property: all;
+    transition-timing-function: ease-in-out;
+    user-select: none;
+    vertical-align: middle;
+    width: 36px;
+    word-wrap: break-word;
+    z-index: 1;
+}
+
+.btn-floating:hover {
+    -webkit-box-shadow: 0 8px 17px 0 rgba(0, 0, 0, .2), 0 6px 20px 0 rgba(0, 0, 0, .19);
+    box-shadow: 0 8px 17px 0 rgba(0, 0, 0, .2), 0 6px 20px 0 rgba(0, 0, 0, .19);
+    color: white;
+}
+
+.btn-edit {
+    background-color: #337ab7;
+    border-color: #2e6da4;
+    padding-top: 5px;
+    padding-left: 3px;
+}
+
+.btn-trash {
+    background-color: #ac2925;
+    border-color: #761c19;
+    padding-top: 5px;
+}
+
+.btn-check {    
+    background-color: #d58512;
+    border-color: #985f0d;
+    padding-top: 6px;
+}
+
+i.icon-browser{
+    font-size: 32px;
+}
+
+i.icon-browser:before {
+    font-family: 'Material Icons';
+    content:"\e89d"
+}

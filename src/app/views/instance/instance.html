@@ -45,7 +45,7 @@
                         <input type="text" class="form-control input-sm" id="name" ng-model="instanceCtrl.instance.cloud.instanceName" uib-typeahead="i for i in instanceCtrl.getCloudInstancesName($viewValue, 12)" typeahead-min-length="0" typeahead-loading="loadingInstances" typeahead-no-results="noResults" ng-disabled="!instanceCtrl.instance.cloud.profileId" placeholder="Type instance detail such as instanceId, name, ip-address, host etc"
                             required />
                         <span class="form-control-feedback" style="margin-top: -2px" ng-show="loadingInstances"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
-                        <div ng-show="noResults">
+                        <div ng-show="noResults" class="alert alert-danger" style="padding: 4px; margin-bottom: 0px;">
                             <i class="glyphicon glyphicon-remove"></i> No Results Found
                         </div>
                     </div>
@@ -79,27 +79,33 @@
         </form>
 
     <!-- Add Application -->
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Port</th>
-                    <th>Protocol</th>
-                    <th>Config</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="a in instanceCtrl.instance.applications">
-                    <td>{{a.type}}</td>
-                    <td>{{a.port}}</td>
-                    <td>{{a.protocol}}</td>
-                    <td>{{instanceCtrl.getConfiguration(a)}}</td>
-                    <td><i class="fa fa-edit" style="margin-right: 8px;" ng-click="instanceCtrl.editApplication(a, $index)"></i><i class="fa fa-trash" ng-click="instanceCtrl.instance.applications.splice($index, 1)"></i></td>
-                </tr>
-            </tbody>
-        </table>
-        <button type="button" class="btn btn-primary btn-sm" ng-click="instanceCtrl.editApplication()">Add Application</button>
+    <button type="button" class="btn btn-primary btn-sm" style="margin-bottom: 4px;" ng-click="instanceCtrl.editApplication()">Add Application</button>
+    <div class="row">
+        <div class="col-xs-4" ng-repeat="a in instanceCtrl.instance.applications">
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i ng-class="instanceCtrl.config.instance.application.types[a.type].icon"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">{{a.name || a.type}} {{a.name?'('+a.type+')':''}}</div>
+                        <div class="card-description" ng-switch="a.type">
+                            <span ng-switch-when="ssh">Username: {{a.config.userName}}, Port: {{a.port}}</span>
+                            <span ng-switch-when="http">Relative Path: {{a.config.relativePath?a.config.relativePath:'/'}}, Port: {{a.port}}</span>
+                            <span ng-switch-when="docker">Docker Name: {{a.config.dockerName}}</span>
+                            <span ng-switch-when="custom">Port: {{a.port}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a type="button" class="btn-floating btn-small btn-trash" ng-click="instanceCtrl.instance.applications.splice($index, 1)"><i class="fa fa-trash"></i></a>
+                    <a type="button" class="btn-floating btn-small btn-check" ng-click="instanceCtrl.testApplication(a, $index)"><i class="fa fa-check"></i></a>
+                    <a type="button" class="btn-floating btn-edit" ng-click="instanceCtrl.editApplication(a, $index)"><i class="fa fa-edit"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+        
     </div>
 
 </div>

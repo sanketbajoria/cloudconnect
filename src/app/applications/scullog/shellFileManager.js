@@ -146,6 +146,10 @@ class ShellFileManager extends NodeFileManger{
     return path;
   }
 
+  listDocker(){
+    return this.__exec('listDocker');
+  }
+
 }
 
 module.exports = ShellFileManager

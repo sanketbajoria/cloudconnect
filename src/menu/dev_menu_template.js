@@ -3,10 +3,12 @@ import { app, BrowserWindow } from 'electron';
 export const devMenuTemplate = {
   label: 'Development',
   submenu: [{
-    label: 'Reload',
+    label: 'Relaunch',
     accelerator: 'CmdOrCtrl+R',
     click: () => {
-      BrowserWindow.getFocusedWindow().webContents.reloadIgnoringCache();
+      //BrowserWindow.getFocusedWindow().webContents.reloadIgnoringCache();
+      app.relaunch({args: process.argv.slice(1).concat(['--relaunch'])});
+      app.exit(0);
     },
   },
   {

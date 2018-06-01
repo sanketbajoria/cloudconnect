@@ -83,7 +83,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             resolve: {
                 "isStarting": false
             }
-        });
+        }).catch(angular.noop);
     }
     
     vm.updateProfile = function(profile){
@@ -97,7 +97,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             }
         }).result.then(function(){
             initProfiles();
-        });
+        }).catch(angular.noop);
     }
 
     vm.updateInstance = function(profile, instance){
@@ -113,7 +113,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             }
         }).result.then(function(){
             initProfiles();
-        })
+        }).catch(angular.noop);
     }
 
     vm.removeInstance = function(profile, instance){
@@ -126,7 +126,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
              db.getMainRepository().removeInstance(instance);
              initProfiles();
              toastr.success("Instance detail removed successfully", "Success");
-         });
+         }).catch(angular.noop);
     }
 
     vm.removeProfile = function(p){
@@ -139,14 +139,14 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             db.getMainRepository().removeProfile(p);
             initProfiles();
             toastr.success("Profile removed successfully", "Success");
-        });
+        }).catch(angular.noop);
     }
 
     function openApp(s, app){
         var ssh = utils.getSSH(s, app, db);
         var $tab = addTab(s, app, ssh); 
         $tab.on('loaderInitialized', function(){
-            ssh.connect().then((sshTunnel) => {
+            Q.when(ssh.connect()).then((sshTunnel) => {
                 if(utils.isTerminalType(app)){
                     updateTab($tab, s, app, utils.createUrl(s, app));
                     var view = vm.chromeTabs.getView($tab);
@@ -159,7 +159,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
                         updateTab($tab, s, app, utils.createScullogUrl(s));
                     });
                 }else {
-                    $q.when(utils.isForwardConnection(s) ? sshTunnel.addTunnel({name: utils.getInstanceName(s), remoteAddr: utils.getRemoteAddr(s), remotePort: app.port}) : '').then(function (t) {
+                    $q.when(utils.isForwardConnection(s) ? sshTunnel.addTunnel({name: utils.getInstanceName(s), remoteAddr: utils.getRemoteAddr(s), remotePort: app.port, localPort: app.localPort}) : '').then(function (t) {
                         s._tunnel = t;
                         if (utils.isCouchDBType(app)) {
                             couchDb.addIfNotExist(s, app).then(function (c) {
@@ -212,7 +212,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             __app: app
         }
         
-        $q.when(utils.isSocksConnection(s, app)?sshTunnel.getSocksPort():null).then(function(port){
+        $q.when(utils.isSocksConnection(s, app)?sshTunnel.getSocksPort(app.localPort):null).then(function(port){
             s._socks = port;
             tabConfig["proxyUrl"] = port?utils.createProxyUrl(port):null;
             vm.chromeTabs.showMainTab($tab);

@@ -18,6 +18,8 @@
                             <li role="menuitem" ng-click="vm.updateProfile()"><a href="javascript:"><i class="material-icons">&#xE02E;</i> Add new profile</a></li>
                             <li class="divider"></li>
                             <li role="menuitem" ng-click="vm.switchWorkspace();"><a href="javascript:"><i class="material-icons">party_mode</i> Switch Workspace</a></li>
+                            <li role="menuitem" ng-click="vm.importWorkspace();"><a href="javascript:"><i class="material-icons">party_mode</i> Import Workspace</a></li>
+                            <li role="menuitem" ng-click="vm.exportWorkspace();"><a href="javascript:"><i class="material-icons">party_mode</i> Export Workspace</a></li>
                         </ul>
                     </span>        
                 </div>
@@ -53,6 +55,7 @@
                         <div class="sub-menu" ng-hide="collapsed">
                             <ul class="item">
                                 <li class="item" ng-repeat="s in p.instances track by vm.db.getUniqueId(s)" ng-click=" $event.preventDefault();$event.stopPropagation();s.__openAppMenu=!s.__openAppMenu">
+                                    <i class="fa fa-angle-right"></i>
                                     <a href="javascript:">{{vm.getInstanceName(s)}} </a>
                                     <span uib-dropdown is-open="s.__openAppMenu" auto-close="outsideClick">
                                         <span uib-dropdown-toggle ng-click="$event.stopPropagation();">
@@ -60,7 +63,7 @@
                                         </span>
                                         <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="single-button">
                                             <li class="dropdown-header">Open App</li>
-                                            <li role="menuitem" ng-repeat-start="app in s.applications" ng-click="vm.openApp(s, app)"><a href="javascript:">{{vm.config.instance.application.types[app.type].label}}</a></li>
+                                            <li role="menuitem" ng-repeat-start="app in s.applications" ng-click="vm.openApp(s, app)"><a href="javascript:">{{app.name || vm.config.instance.application.types[app.type].label}}</a></li>
                                             <li role="menuitem" ng-repeat-end ng-if="app.type=='ssh'" ng-click="vm.openApp(s, vm.scullog(app))"><a href="javascript:">{{vm.config.instance.application.types[app.type].label}} via Scullog</a></li>
                                             <li class="divider"></li>
                                             <li role="menuitem" ng-click="vm.updateInstance(p, s)"><a href="javascript:"><i class="fa fa-edit"></i> Edit Instance Detail</a></li>

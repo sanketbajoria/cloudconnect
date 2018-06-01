@@ -67,16 +67,28 @@ module.exports = {
         return `socks5://localhost:${port}`;
     },
     isCouchDBType: function (app) {
-        return app.type === "couchdb"
+        var type = app.type || app;
+        return type === "couchdb"
     },
     isTerminalType: function (app) {
-        return app.type === "ssh"
+        var type = app.type || app;
+        return type === "ssh"
     },
     isScullogType: function (app) {
-        return app.type === "scullog"
+        var type = app.type || app;
+        return type === "scullog"
     },
     isCustomType: function (app) {
-        return app.type === "custom"
+        var type = app.type || app;
+        return type === "custom"
+    },
+    isHttpType: function (app) {
+        var type = app.type || app;
+        return type === "http"
+    },
+    isDockerType: function (app) {
+        var type = app.type || app;
+        return type === "docker"
     },
     isForwardConnection: function (s) {
         return s.connection && s.connection.type === "forward";
@@ -86,9 +98,6 @@ module.exports = {
     },
     isDirectConnection: function (s) {
         return s.connection && s.connection.type === "direct";
-    },
-    isDockerType: function (app) {
-        return app.type === "Docker"
     },
     isLocalHost: function (s) {
         return checkLocalHost(this.getRemoteAddr(s));
@@ -142,7 +151,10 @@ module.exports = {
     },
     getSSH: function(s, app, db){
         var i = s;
-        var instances = (this.isTerminalType(app) || this.isScullogType(app))?[s]:[];   
+        var instances = (this.isTerminalType(app) || this.isScullogType(app) || (!this.isLocalHost(s) && this.isDockerType(app)))?[s]:[];
+        if(instances.length>0 && !this.isGenericType(i) && (!s.cloud.instance || !s.cloud.instance.getAddress)){
+            i.cloud.instance = cloud.getCloudInstancesBasedOnInstanceId(db.getMainRepository().getProfile(s.cloud.profileId), i.cloud.instanceName)[0];
+        }   
         while(i = i.connection.ref){
             i = db.getMainRepository().getInstance(i);
             if(!this.isGenericType(i)){
@@ -150,26 +162,23 @@ module.exports = {
             }
             instances.push(i);
         }
-        if(instances.length > 0){
-            var sshConfigs = instances.reverse().map((instance) => {
-                var sshApp = instance.applications.filter((a) => {
-                    return this.isTerminalType(a);
-                })[0];
-                var sshConfig = { username: sshApp.config.userName, host: this.getRemoteAddr(instance), port: sshApp.port };
-                if (sshApp.config.secret.key == 'password') {
-                    sshConfig.password = sshApp.config.secret.password
-                } else {
-                    sshConfig.identity = sshApp.config.secret.pem.file.path;
-                    sshConfig.passphrase = sshApp.config.secret.pem.passphrase;
-                    sshConfig.privateKey = sshApp.config.secret.pem.file.content;
-                }
-                sshConfig.uniqueId = db.getUniqueId(instance);
-                sshConfig.name = this.getInstanceName(instance)
-                return sshConfig;
-            })
-            return new SSHTunnel(sshConfigs);
-        }
-        return Q.when();
+        var sshConfigs = instances.reverse().map((instance) => {
+            var sshApp = instance.applications.filter((a) => {
+                return this.isTerminalType(a);
+            })[0];
+            var sshConfig = { username: sshApp.config.userName, host: this.getRemoteAddr(instance), port: sshApp.port };
+            if (sshApp.config.secret.key == 'password') {
+                sshConfig.password = sshApp.config.secret.password
+            } else {
+                sshConfig.identity = sshApp.config.secret.pem.file.path;
+                sshConfig.passphrase = sshApp.config.secret.pem.passphrase;
+                sshConfig.privateKey = sshApp.config.secret.pem.file.content;
+            }
+            sshConfig.uniqueId = db.getUniqueId(instance);
+            sshConfig.name = this.getInstanceName(instance)
+            return sshConfig;
+        })
+        return new SSHTunnel(sshConfigs);
     },
     isPortReachable: (port, opts) => {
         opts = Object.assign({timeout: 2000}, opts);

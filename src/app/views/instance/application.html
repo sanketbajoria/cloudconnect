@@ -1,19 +1,19 @@
 <div class="modal-header modal-header-galaxy">
-    <button type="button" class="close" data-dismiss="modal" ng-click="vm.no()">&times;</button>
-    <h5>{{!vm.data.editMode?'Add':'Edit'}} Application</h5>
+    <button type="button" class="close" data-dismiss="modal" ng-click="applicationCtrl.no()">&times;</button>
+    <h5>{{!applicationCtrl.data.editMode?'Add':'Edit'}} Application</h5>
 </div>
 <div class="modal-body application">
     <form name="application" novalidate class="form-horizontal">
-        <div ng-if="!vm.data.hasSSHInstance && vm.data.app.type=='Docker' ">
-            <div class="alert alert-info">
-                <strong>Info!</strong> You need to add valid SSH Connection.
+        <div ng-if="applicationCtrl.notValidSSH && applicationCtrl.data.app.type=='docker' ">
+            <div class="alert alert-danger">
+                Unable to access docker. You need to add valid SSH Connection, maybe with sudo access.
             </div>
         </div>
         <div class="form-group form-group-sm required">
             <label for="applicationType" class="control-label col-sm-3">Type:</label>
             <div class="col-sm-9">
-                <select class="form-control input-sm" id="applicationType" ng-model="vm.data.app.type" ng-options="k as v.label for (k,v) in vm.data.applicationTypes"
-                    ng-change="vm.data.app.protocol=vm.data.applicationTypes[vm.data.app.type].protocol[0]; vm.data.app.port = vm.data.applicationTypes[vm.data.app.type].port"
+                <select class="form-control input-sm" id="applicationType" ng-model="applicationCtrl.data.app.type" ng-options="k as v.label for (k,v) in applicationCtrl.data.applicationTypes"
+                    ng-change="applicationCtrl.data.app.protocol=applicationCtrl.data.applicationTypes[applicationCtrl.data.app.type].protocol[0]; applicationCtrl.data.app.port = applicationCtrl.data.applicationTypes[applicationCtrl.data.app.type].port;"
                     required>
                     <option value="">--Select--</option>
                 </select>
@@ -22,41 +22,46 @@
         <div class="form-group form-group-sm">
             <label for="applicationName" class="control-label col-sm-3">Name:</label>
             <div class="col-sm-9">
-                <input type="text" class="form-control input-sm" id="userName" ng-model="vm.data.app.name" placeholder="Custom Name" />
+                <input type="text" class="form-control input-sm" id="userName" ng-model="applicationCtrl.data.app.name" placeholder="Custom Name" />
             </div>
         </div>
-        <div ng-if="vm.data.app.type!='Docker'">
+        <div ng-if="applicationCtrl.data.app.type!='docker'">
             <div class="form-group form-group-sm required">
                 <label for="port" class="control-label col-sm-3">Port:</label>
                 <div class="col-sm-9">
-                    <input type="number" class="form-control input-sm" id="port" ng-model="vm.data.app.port" placeholder="Port range (0 to 65535)"
+                    <input type="number" class="form-control input-sm" id="port" ng-model="applicationCtrl.data.app.port" placeholder="Port range (0 to 65535)"
                         min="0" max="65535" required />
                 </div>
             </div>
-            <div class="form-group form-group-sm required" ng-if="vm.data.app.type!='custom'">
+            <div class="form-group form-group-sm required" ng-if="applicationCtrl.data.app.type!='custom'">
                 <label for="protocol" class="control-label col-sm-3">Protocol:</label>
                 <div class="col-sm-9">
-                    <select class="form-control input-sm" id="protocol" ng-model="vm.data.app.protocol" ng-options="k for k in vm.data.applicationTypes[vm.data.app.type].protocol"
+                    <select class="form-control input-sm" id="protocol" ng-model="applicationCtrl.data.app.protocol" ng-options="k for k in applicationCtrl.data.applicationTypes[applicationCtrl.data.app.type].protocol"
                         required>
                     </select>
                 </div>
             </div>
         </div>
-        <div ng-if="vm.data.app.type=='Docker'">
-
-            <div class="form-group form-group-sm required">
+        <div ng-if="applicationCtrl.data.app.type=='docker'">
+            <div class="form-group form-group-sm has-feedback required">
                 <label for="dockerName" class="control-label col-sm-3">Machine Name:</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control input-sm" id="dockerName" ng-model="vm.data.app.config.dockerName" placeholder="Docker Machine Name"
+                    <input type="text" class="form-control input-sm" id="dockerName" ng-model="applicationCtrl.data.app.config.dockerName" uib-typeahead="i for i in applicationCtrl.getDockerNames($viewValue, 12)" typeahead-min-length="0" typeahead-loading="loadingDockers" typeahead-no-results="noResults" placeholder="Type docker name, container id etc.."
                         required />
+                    <span class="form-control-feedback" style="margin-top: -2px" ng-show="loadingDockers"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
+                    <div ng-show="noResults" class="alert alert-danger" style="padding: 4px; margin-bottom: 0px;">
+                        <i class="glyphicon glyphicon-remove"></i> No Results Found
+                    </div>
+                    <!-- <input type="text" class="form-control input-sm" id="dockerName" ng-model="applicationCtrl.data.app.config.dockerName" placeholder="Docker Machine Name"
+                        required /> -->
                 </div>
             </div>
         </div>
-        <div ng-if="vm.data.app.type=='ssh'">
+        <div ng-if="applicationCtrl.data.app.type=='ssh'">
             <div class="form-group form-group-sm required">
                 <label for="userName" class="control-label col-sm-3">User Name:</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control input-sm" id="userName" ng-model="vm.data.app.config.userName" placeholder="User Name"
+                    <input type="text" class="form-control input-sm" id="userName" ng-model="applicationCtrl.data.app.config.userName" placeholder="User Name"
                         required />
                 </div>
             </div>
@@ -65,14 +70,14 @@
                 <div class="col-sm-offset-3 col-sm-2">
                     <div class="radio">
                         <label class="control-label">
-                            <input type="radio" name="secret" ng-model="vm.data.app.config.secret.key" value="password" ng-change="vm.data.app.config.secret.pem={}" required>Password</label>
+                            <input type="radio" name="secret" ng-model="applicationCtrl.data.app.config.secret.key" value="password" ng-change="applicationCtrl.data.app.config.secret.pem={}" required>Password</label>
                     </div>
                 </div> 
                 <div class="col-sm-7">
-                    <div class="input-group" ng-if="vm.data.app.config.secret.key=='password'">
-                        <input type="{{vm.showSecret?'text':'password'}}" class="form-control input-sm" id="password" ng-model="vm.data.app.config.secret.password" placeholder="Password" required />
-                        <span class="input-group-addon" ng-click="vm.showSecret=!vm.showSecret">
-                            <i class="fa" ng-class="vm.showSecret?'fa-eye':'fa-eye-slash'"></i>
+                    <div class="input-group" ng-if="applicationCtrl.data.app.config.secret.key=='password'">
+                        <input type="{{applicationCtrl.showSecret?'text':'password'}}" class="form-control input-sm" id="password" ng-model="applicationCtrl.data.app.config.secret.password" placeholder="Password" required />
+                        <span class="input-group-addon" ng-click="applicationCtrl.showSecret=!applicationCtrl.showSecret">
+                            <i class="fa" ng-class="applicationCtrl.showSecret?'fa-eye':'fa-eye-slash'"></i>
                         </span>
                     </div>
                 </div>
@@ -81,52 +86,52 @@
                 <div class="col-sm-offset-3 col-sm-2">
                     <div class="radio">
                         <label class="control-label">
-                            <input type="radio" name="secret" ng-model="vm.data.app.config.secret.key" value="pem" ng-change="vm.data.app.config.secret.password=''" required>PEM</label>
+                            <input type="radio" name="secret" ng-model="applicationCtrl.data.app.config.secret.key" value="pem" ng-change="applicationCtrl.data.app.config.secret.password=''" required>PEM</label>
                     </div>
                 </div>
                 <div class="col-sm-7">
-                    <div ng-if="vm.data.app.config.secret.key=='pem'">
-                        <input type="file" class="form-control input-sm" file-read="vm.data.app.config.secret.pem.file" value="{{vm.data.app.config.secret.pem.file.path}}"
+                    <div ng-if="applicationCtrl.data.app.config.secret.key=='pem'">
+                        <input type="file" class="form-control input-sm" file-read="applicationCtrl.data.app.config.secret.pem.file" value="{{applicationCtrl.data.app.config.secret.pem.file.path}}"
                         />
-                        <span style="color: darkgray;font-family: monospace;word-wrap:break-word">{{vm.data.app.config.secret.pem.file.path}}</span>
+                        <span style="color: darkgray;font-family: monospace;word-wrap:break-word">{{applicationCtrl.data.app.config.secret.pem.file.path}}</span>
                     </div>
                 </div>
             </div>
-            <div class="form-group form-group-sm" ng-if="vm.data.app.config.secret.key=='pem'">
+            <div class="form-group form-group-sm" ng-if="applicationCtrl.data.app.config.secret.key=='pem'">
                 <label for="passphrase" class="control-label col-sm-offset-2 col-sm-3" style="font-weight: normal; padding-right: 3px;">Passphrase</label>
                 <div class="col-sm-7">
-                    <input type="text" class="form-control input-sm" id="passphrase" ng-model="vm.data.app.config.secret.pem.passphrase" placeholder="Passphrase" />
+                    <input type="text" class="form-control input-sm" id="passphrase" ng-model="applicationCtrl.data.app.config.secret.pem.passphrase" placeholder="Passphrase" />
                 </div>
             </div>
             <div class="form-group form-group-sm">
                 <div class="col-sm-offset-3 col-sm-2">
                     <div class="checkbox">
                         <label class="control-label">
-                            <input type="checkbox" name="sudo" ng-model="vm.data.app.config.sudo">sudo</label>
+                            <input type="checkbox" name="sudo" ng-model="applicationCtrl.data.app.config.sudo">sudo</label>
                     </div>
                 </div>
                 <div class="col-sm-7">
-                    <div class="input-group" ng-if="vm.data.app.config.secret.key=='pem'">
-                        <input type="{{vm.showSecretPass?'text':'password'}}" class="form-control input-sm" id="password" ng-model="vm.data.app.config.secret.password"
+                    <div class="input-group" ng-if="applicationCtrl.data.app.config.secret.key=='pem'">
+                        <input type="{{applicationCtrl.showSecretPass?'text':'password'}}" class="form-control input-sm" id="password" ng-model="applicationCtrl.data.app.config.secret.password"
                             placeholder="Password" />
-                        <span class="input-group-addon" ng-click="vm.showSecretPass=!vm.showSecretPass">
-                            <i class="fa" ng-class="vm.showSecretPass?'fa-eye':'fa-eye-slash'"></i>
+                        <span class="input-group-addon" ng-click="applicationCtrl.showSecretPass=!applicationCtrl.showSecretPass">
+                            <i class="fa" ng-class="applicationCtrl.showSecretPass?'fa-eye':'fa-eye-slash'"></i>
                         </span>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="form-group form-group-sm" ng-if="vm.data.app.type!='Docker'">
-            <label for="port" class="control-label col-sm-3">Local Port:</label>
+        <div class="form-group form-group-sm" ng-if="(applicationCtrl.utils.isTerminalType(applicationCtrl.data.app) || applicationCtrl.utils.isDockerType(applicationCtrl.data.app) || !applicationCtrl.utils.isDirectConnection(applicationCtrl.data.instance))">
+            <label for="port" class="control-label col-sm-3">{{(applicationCtrl.utils.isDockerType(applicationCtrl.data.app) || applicationCtrl.utils.isTerminalType(applicationCtrl.data.app))?'Scullog':'Local'}} Port:</label>
             <div class="col-sm-9">
-                <input type="number" class="form-control input-sm" id="port" ng-model="vm.data.app.localPort" placeholder="Port range (0 to 65535), if not defined, take random port"
+                <input type="number" class="form-control input-sm" id="port" ng-model="applicationCtrl.data.app.localPort" placeholder="Port range (0 to 65535), if not defined, take random port"
                     min="0" max="65535" />
             </div>
         </div>
-        <div class="form-group form-group-sm" ng-if="vm.data.app.type=='http'">
+        <div class="form-group form-group-sm" ng-if="applicationCtrl.data.app.type=='http'">
             <label for="path" class="control-label col-sm-3">Default Relative Path:</label>
             <div class="col-sm-9">
-                <input type="text" class="form-control input-sm" id="port" ng-model="vm.data.app.config.relativePath" placeholder="/users"
+                <input type="text" class="form-control input-sm" id="port" ng-model="applicationCtrl.data.app.config.relativePath" placeholder="/users"
                 />
             </div>
         </div>
@@ -134,7 +139,7 @@
     </form>
 </div>
 <div class="modal-footer modal-footer-galaxy">
-    <button type="button" class="btn btn-default btn-sm" ng-click="vm.no()">Cancel</button>
-    <button type="button" class="btn btn-primary btn-sm" ng-disabled="(vm.data.app.config.secret.key=='pem' && !vm.data.app.config.secret.pem.file) || application.$invalid"
-        ng-click="vm.yes(vm.data)">Save</button>
+    <button type="button" class="btn btn-default btn-sm" ng-click="applicationCtrl.no()">Cancel</button>
+    <button type="button" class="btn btn-primary btn-sm" ng-disabled="(applicationCtrl.data.app.config.secret.key=='pem' && !applicationCtrl.data.app.config.secret.pem.file) || application.$invalid"
+        ng-click="applicationCtrl.yes(applicationCtrl.data)">Save</button>
 </div>

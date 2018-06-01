@@ -42,21 +42,25 @@
                     "port": 22,
                     "protocol": [
                         "ssh"
-                    ]
+                    ],
+                    "icon": "fa fa-terminal"
                 },
                 "http": {
                     "label": "HTTP/HTTPS",
                     "port": 80,
                     "protocol": [
                         "http", "https"
-                    ]
+                    ],
+                    "icon": "material-icons icon-browser"
                 },
                 "docker": {
                     "label": "Docker",
-                    "dockerMachineName" : "default"
+                    "dockerMachineName" : "default",
+                    "icon": "fab fa-docker"
                 },
                 "custom": {
-                    "label": "Custom"
+                    "label": "Custom",
+                    "icon": "fa fa-random"
                 }
             }
         }

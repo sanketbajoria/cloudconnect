@@ -95,7 +95,7 @@ function ToolbarCtrl($scope, galaxyModal) {
           controller: 'DownloadController',
           controllerAs: 'downloadCtrl',
           windowClass: 'fullScreen download'
-      });
+      }).catch(angular.noop);
     };
 
     $scope.$on("updateToolbar", (ev, $view, $tab) => {

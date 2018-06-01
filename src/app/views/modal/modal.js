@@ -36,7 +36,7 @@
                 windowClass: 'galaxyModal',
             }, config);
             var ret = $uibModal.open(config);
-            ret.result.catch(() => {});
+            ret.result.catch(angular.noop);
             return ret;
         }
 
