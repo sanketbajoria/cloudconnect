@@ -1,0 +1,79 @@
+<div class="modal-header modal-header-galaxy">
+    <button type="button" class="close" data-dismiss="modal" ng-click="applicationCtrl.no()">&times;</button>
+    <h5>{{!applicationCtrl.data.editMode?'Add':'Edit'}} Application</h5>
+</div>
+<div class="modal-body application">
+    <form name="application" novalidate class="form-horizontal">
+        <div ng-if="applicationCtrl.notValidSSH && applicationCtrl.data.app.type=='docker' ">
+            <div class="alert alert-danger">
+                Unable to access docker. You need to add valid SSH Connection, maybe with sudo access.
+            </div>
+        </div>
+        <div class="form-group form-group-sm required">
+            <label for="applicationType" class="control-label col-sm-3">Type:</label>
+            <div class="col-sm-9">
+                <select class="form-control input-sm" id="applicationType" ng-model="applicationCtrl.data.app.type" ng-options="k as v.label for (k,v) in applicationCtrl.data.applicationTypes"
+                    ng-change="applicationCtrl.data.app.protocol=applicationCtrl.data.applicationTypes[applicationCtrl.data.app.type].protocol[0]; applicationCtrl.data.app.port = applicationCtrl.data.applicationTypes[applicationCtrl.data.app.type].port;"
+                    required>
+                    <option value="">--Select--</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group form-group-sm">
+            <label for="applicationName" class="control-label col-sm-3">Name:</label>
+            <div class="col-sm-9">
+                <input type="text" class="form-control input-sm" id="userName" ng-model="applicationCtrl.data.app.name" placeholder="Custom Name" />
+            </div>
+        </div>
+
+        <div ng-if="applicationCtrl.data.app.type!='docker'">
+            <div class="form-group form-group-sm required">
+                <label for="port" class="control-label col-sm-3">Port:</label>
+                <div class="col-sm-9">
+                    <input type="number" class="form-control input-sm" id="port" ng-model="applicationCtrl.data.app.port" placeholder="Port range (0 to 65535)"
+                        min="0" max="65535" required />
+                </div>
+            </div>
+            <div class="form-group form-group-sm required" ng-if="applicationCtrl.data.app.type=='http'">
+                <label for="protocol" class="control-label col-sm-3">Protocol:</label>
+                <div class="col-sm-9">
+                    <select class="form-control input-sm" id="protocol" ng-model="applicationCtrl.data.app.protocol" ng-options="k for k in applicationCtrl.data.applicationTypes[applicationCtrl.data.app.type].protocol"
+                        required>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+
+
+        <div ng-include="'application/docker.html'"></div>
+
+        <div ng-include="'application/ssh.html'"></div>
+
+        <div ng-include="'application/msctc.html'"></div>
+
+
+
+        <div class="form-group form-group-sm" ng-if="(applicationCtrl.utils.isTerminalType(applicationCtrl.data.app) || applicationCtrl.utils.isDockerType(applicationCtrl.data.app) || !applicationCtrl.utils.isDirectConnection(applicationCtrl.data.instance))">
+            <label for="port" class="control-label col-sm-3">{{(applicationCtrl.utils.isDockerType(applicationCtrl.data.app) || applicationCtrl.utils.isTerminalType(applicationCtrl.data.app))?'Scullog':'Local'}} Port:</label>
+            <div class="col-sm-9">
+                <input type="number" class="form-control input-sm" id="port" ng-model="applicationCtrl.data.app.localPort" placeholder="Port range (0 to 65535), if not defined, take random port"
+                    min="0" max="65535" />
+            </div>
+        </div>
+        <div class="form-group form-group-sm" ng-if="applicationCtrl.data.app.type=='http'">
+            <label for="path" class="control-label col-sm-3">Default Relative Path:</label>
+            <div class="col-sm-9">
+                <input type="text" class="form-control input-sm" id="port" ng-model="applicationCtrl.data.app.config.relativePath" placeholder="/users"
+                />
+            </div>
+        </div>
+        
+
+    </form>
+</div>
+<div class="modal-footer modal-footer-galaxy">
+    <button type="button" class="btn btn-default btn-sm" ng-click="applicationCtrl.no()">Cancel</button>
+    <button type="button" class="btn btn-primary btn-sm" ng-disabled="(applicationCtrl.data.app.config.secret.key=='pem' && !applicationCtrl.data.app.config.secret.pem.file) || application.$invalid"
+        ng-click="applicationCtrl.yes(applicationCtrl.data)">Save</button>
+</div>

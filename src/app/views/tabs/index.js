@@ -94,7 +94,12 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                   }
                 });
               })
+              $webview[0].getWebContents().session.cookies.set({url: $webview[0].getURL(), name: 'dummy', value: 'value'}, function(err, cookies){
+                console.log(cookies);
+              });
             })
+
+            
 
             $webview[0].addEventListener('did-fail-load', (event) => {
               $scope.api.showErrorView($view, event.errorDescription);
@@ -121,6 +126,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
         let defaultSSHFavicon = 'ssh';
         let defaultScullogFavicon = 'scullog';
         let defaultCustomFavicon = 'custom';
+        let defaultMSTSCFavicon = 'mstsc';
 
         let tabTemplate = `
     <div class="-tab">
@@ -733,7 +739,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
             $tab.data('props', props); // Update to new props.
 
             if (props.favicon) {
-              if (props.favicon === defaultLoadingTabFavicon || props.favicon === defaultTabFavicon || props.favicon === defaultSSHFavicon || props.favicon === defaultScullogFavicon || props.favicon === defaultCustomFavicon) {
+              if (props.favicon === defaultLoadingTabFavicon || props.favicon === defaultTabFavicon || props.favicon === defaultSSHFavicon || props.favicon === defaultScullogFavicon || props.favicon === defaultCustomFavicon  || props.favicon === defaultMSTSCFavicon) {
                 $tab.find('> .-favicon').css({ 'background-image': '' }).attr('data-favicon', props.favicon);
               } else {
                 $tab.find('> .-favicon').css({ 'background-image': 'url(\'' + props.favicon + '\')' }).attr('data-favicon', '');
@@ -1056,7 +1062,8 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                       let favicon = props.loadingFavicon;
                       let title = typeof $webview[0].getTitle === 'function' ? $webview[0].getTitle() : '';
                       title = !title && isFirstUrl() ? props.url || props.title : title;
-                      title = !title || utils.isScullogType(props.__app) ? props.title : title;
+                      
+                      title = utils.getTitle(props) || title;
 
                       // Update the tab favicon and title.
                       this.$parentObj._.updateTab($tab, { favicon, title }, 'view::state-change');
@@ -1073,8 +1080,7 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                       // In the case of failure, use fallbacks.
                       let favicon = !_favicon && isFirstUrl() ? props.favicon : _favicon;
                       favicon = !favicon ? this.settings.defaultProps.favicon : favicon;
-                      if(utils.isScullogType(props.__app))
-                        favicon=defaultScullogFavicon;
+                      favicon= utils.getIcon(props.__app) || favicon ;
 
                       // Updating tab favicon.
                       this.$parentObj._.updateTab($tab, { favicon }, 'view::state-change');
@@ -1212,7 +1218,8 @@ angular.module('galaxy').directive('chromeTabs', function ($compile) {
                 }
               }else{
                 let props = $view.data('props');
-                this.$parentObj._.updateTab($tab, { favicon: utils.isTerminalType(props.__app)?defaultSSHFavicon:defaultCustomFavicon, title: props.title }, 'view::state-change');
+                /* favicon: utils.isTerminalType(props.__app)?defaultSSHFavicon:defaultCustomFavicon, */
+                this.$parentObj._.updateTab($tab, { title: props.title }, 'view::state-change');
               }
 
             }

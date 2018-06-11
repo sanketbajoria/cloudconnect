@@ -34,7 +34,7 @@
         vm.editApplication = function(app, idx){
             var editMode = !!app;
             galaxyModal.open({
-                templateUrl: 'instance/application.html',
+                templateUrl: 'application/application.html',
                 controller: 'ApplicationController',
                 controllerAs: 'applicationCtrl',
                 data: {
@@ -69,18 +69,22 @@
         vm.no = function () {
             $uibModalInstance.dismiss('cancel');
         }
+
+        vm.checkLocalHost = function () {
+            utils.isLocalHost(vm.instance).then((isLocalhost) => {
+                vm.instance.isLocalhost = isLocalhost;
+            });
+        }
         
         vm.saveInstance = function () {
             try{
                 if(vm.editMode){
                     db.getMainRepository().updateInstance(vm.instance, profile);
-                    toastr.success("Instance saved", "Success");
-                    $uibModalInstance.close(vm.instance);
                 }else{
                     db.getMainRepository().addInstance(vm.instance, profile);
-                    toastr.success("Instance saved", "Success");
-                    $uibModalInstance.close(vm.instance);
                 }
+                toastr.success("Instance saved", "Success");
+                $uibModalInstance.close(vm.instance);
             }catch(err){
                 toastr.error(err.message, "Error");
             }

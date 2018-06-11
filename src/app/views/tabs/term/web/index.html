@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>GalaxyBot</title>
+  <style>
+    html,
+    body {
+      background-color: #000;
+      height: 100%;
+      margin: 0;
+    }
+
+  </style>
+  <link rel="stylesheet" href="css/fontawesome-all.min.css" />
+  <link rel="stylesheet" href="xterm/dist/xterm.css" />
+  <link rel="stylesheet" href="webssh.css" />
+
+  <script src="socket.io-client/socket.io.js"></script>
+  <script src="xterm/dist/xterm.js"></script>
+  <script src="xterm/dist/addons/fit/fit.js"></script>
+
+</head>
+
+<body>
+  <div class="box">
+    <div id="header"></div>
+    <div id="terminal-container" class="terminal"></div>
+  </div>
+  <script src="webssh.js" defer></script>
+</body>
+
+</html>

@@ -25,6 +25,10 @@ class CloudInstance{
     isTerminated(){
         return this.cloudProfile.isTerminated(this.__instance);
     }
+
+    isWindowsPlatform(){
+        return this.cloudProfile.isTerminated(this.__instance);
+    }
 }
 
 module.exports = CloudInstance;

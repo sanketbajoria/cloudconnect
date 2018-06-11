@@ -64,7 +64,8 @@
                                         <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="single-button">
                                             <li class="dropdown-header">Open App</li>
                                             <li role="menuitem" ng-repeat-start="app in s.applications" ng-click="vm.openApp(s, app)"><a href="javascript:">{{app.name || vm.config.instance.application.types[app.type].label}}</a></li>
-                                            <li role="menuitem" ng-repeat-end ng-if="app.type=='ssh'" ng-click="vm.openApp(s, vm.scullog(app))"><a href="javascript:">{{vm.config.instance.application.types[app.type].label}} via Scullog</a></li>
+                                            <li role="menuitem" ng-if="app.type=='ssh'" ng-click="vm.openApp(s, vm.scullog(app))"><a href="javascript:">{{vm.config.instance.application.types[app.type].label}} via Scullog</a></li>
+                                            <li role="menuitem" ng-repeat-end ng-if="app.type=='ssh'" ng-click="vm.openApp(s, vm.webssh(app))"><a href="javascript:">{{vm.config.instance.application.types[app.type].label}} on Browser</a></li>
                                             <li class="divider"></li>
                                             <li role="menuitem" ng-click="vm.updateInstance(p, s)"><a href="javascript:"><i class="fa fa-edit"></i> Edit Instance Detail</a></li>
                                             <li role="menuitem" ng-click="vm.removeInstance(p, s);"><a href="javascript:"><i class="fa fa-trash"></i> Delete Instance Detail</a></li>

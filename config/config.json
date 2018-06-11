@@ -40,9 +40,6 @@
                 "ssh": {
                     "label": "SSH",
                     "port": 22,
-                    "protocol": [
-                        "ssh"
-                    ],
                     "icon": "fa fa-terminal"
                 },
                 "http": {
@@ -52,6 +49,11 @@
                         "http", "https"
                     ],
                     "icon": "material-icons icon-browser"
+                },
+                "mstsc": {
+                    "label": "MSTSC",
+                    "port": 3389,
+                    "icon": "fab fa-windows"
                 },
                 "docker": {
                     "label": "Docker",

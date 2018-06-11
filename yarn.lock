@@ -3549,6 +3549,10 @@ lodash.templatesettings@^3.0.0:
     lodash._reinterpolate "^3.0.0"
     lodash.escape "^3.0.0"
 
+lodash@3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.3.0.tgz#011ce52d01b14e60eaeea76acb9b8ba42c70581b"
+
 lodash@^4.0.0, lodash@^4.14.0, lodash@^4.3.0, lodash@^4.8.0, lodash@~4.17.4:
   version "4.17.5"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.5.tgz#99a92d65c0272debe8c96b6057bc8fbfa3bed511"
@@ -3916,6 +3920,13 @@ node-pre-gyp@^0.6.39:
     semver "^5.3.0"
     tar "^2.2.1"
     tar-pack "^3.4.0"
+
+node-rdpjs@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/node-rdpjs/-/node-rdpjs-0.3.0.tgz#87e2dc93de1aae69c2c22cbccf0152f617901ced"
+  dependencies:
+    lodash "3.3.0"
+    starttls "^1.0.0"
 
 node-sass@^4.8.3:
   version "4.8.3"
@@ -4931,9 +4942,8 @@ scss-tokenizer@^0.2.3:
     js-base64 "^2.1.8"
     source-map "^0.4.2"
 
-scullog@^0.2.0:
+scullog@../scullog:
   version "0.2.0"
-  resolved "https://registry.yarnpkg.com/scullog/-/scullog-0.2.0.tgz#fa48f8bd7518751e592416b5404d3ad692fb3467"
   dependencies:
     adm-zip "^0.4.7"
     circular-buffer "1.0.1"
@@ -5316,6 +5326,10 @@ sshpk@^1.7.0:
 stack-trace@0.0.x:
   version "0.0.10"
   resolved "https://registry.yarnpkg.com/stack-trace/-/stack-trace-0.0.10.tgz#547c70b347e8d32b4e108ea1a2a159e5fdde19c0"
+
+starttls@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/starttls/-/starttls-1.0.1.tgz#e6081c25de6b178f5a75f8f271c1487449183b42"
 
 stat-mode@^0.2.2:
   version "0.2.2"

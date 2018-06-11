@@ -1,9 +1,10 @@
 var app = angular.module('galaxy');
-var Q = require('q');
 var xTerm = require('../applications/term');
-app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, $timeout, $filter, WorkspaceService, $document, LoaderService) {
+var webssh = require('../applications/webssh');
+var mstsc = require('../applications/mstsc');
+
+app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, $timeout, $filter, WorkspaceService, $document, LoaderService, TabFactory) {
     var vm = this;
-    vm.tabs = {};
     vm.db = db;
     vm.config = config;
     LoaderService.stop();
@@ -11,6 +12,9 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
     $document[0].title = "GalaxyBot" + (WorkspaceService.getWorkspaceName()?" - " + WorkspaceService.getWorkspaceName():'');
     
     cloud.startAutomaticSync(db.getMainRepository());
+    
+    TabFactory.init(vm);
+
     
     $("body").on("keypress keydown keyup", function (e) {
         if(e.which == 6 && (e.ctrlKey || e.metaKey)){
@@ -27,15 +31,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
 
 
     $scope.$on('tabBeingRemoved', (event, $tab) => {
-        let props = $tab.data('props');        
-        if(vm.tabs[props.__id] && vm.tabs[props.__id].ssh){
-            vm.tabs[props.__id].ssh.close();
-        }
-        if(vm.tabs[props.__id] && vm.tabs[props.__id].term){
-            vm.tabs[props.__id].term.close();
-        }
-        delete vm.tabs[props.__id];
-        vm.chromeTabs.toggle(Object.keys(vm.tabs).length!= 0);
+        TabFactory.removeTab($tab);
     });
 
     vm.getInstanceName = function(i){
@@ -49,19 +45,12 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
         return temp;
     }
 
-   function initProfiles(){
-        vm.profiles = db.getMainRepository().findProfiles();
-        vm.profiles.forEach((p) => {
-            p.instances = vm.db.getMainRepository().findInstances({}, p);
-            /* p.instances.forEach((i) => {
-                if(!utils.isGenericType(i)){
-                    i.cloudInstances = cloud.getCloudInstancesBasedOnInstanceId(db.getMainRepository().getProfile(i.cloud.profileId), i.cloud.instanceName);
-                }
-            }); */
-        });
+    vm.webssh = function(app){
+        var temp = angular.copy(app);
+        temp.type = "webssh";
+        temp.protocol = "http";
+        return temp;
     }
-
-    initProfiles();
    
     vm.openApp = function(i, app){
         if(utils.isGenericType(i)){
@@ -83,7 +72,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
             resolve: {
                 "isStarting": false
             }
-        }).catch(angular.noop);
+        }).result.catch(angular.noop);
     }
     
     vm.updateProfile = function(profile){
@@ -142,21 +131,27 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
         }).catch(angular.noop);
     }
 
+    initProfiles();
+
     function openApp(s, app){
         var ssh = utils.getSSH(s, app, db);
-        var $tab = addTab(s, app, ssh); 
+        var $tab = TabFactory.addTab(s, app, ssh); 
         $tab.on('loaderInitialized', function(){
-            Q.when(ssh.connect()).then((sshTunnel) => {
+            $q.when(ssh.connect()).then((sshTunnel) => {
                 if(utils.isTerminalType(app)){
-                    updateTab($tab, s, app, utils.createUrl(s, app));
+                    TabFactory.updateTab($tab, s, app, utils.createUrl(s, app));
                     var view = vm.chromeTabs.getView($tab);
                     var term = new xTerm(view.find('.sshTerminal'), sshTunnel);
-                    vm.tabs[$tab.id].term = term;
                     term.open();
                 }else if(utils.isScullogType(app) || utils.isDockerType(app)){
                     new scullog(sshTunnel, s, app).then(function (p) {
                         s._scullog = {port: p};
-                        updateTab($tab, s, app, utils.createScullogUrl(s));
+                        TabFactory.updateTab($tab, s, app, utils.createScullogUrl(s));
+                    });
+                } else if (utils.isWebSSHType(app)) {
+                    webssh.addIfNotExist(s, app, sshTunnel).then(function (webssh) {
+                        s._webssh = webssh;
+                        TabFactory.updateTab($tab, s, app, utils.createWebSSHUrl(s, app), sshTunnel);
                     });
                 }else {
                     $q.when(utils.isForwardConnection(s) ? sshTunnel.addTunnel({name: utils.getInstanceName(s), remoteAddr: utils.getRemoteAddr(s), remotePort: app.port, localPort: app.localPort}) : '').then(function (t) {
@@ -164,10 +159,15 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
                         if (utils.isCouchDBType(app)) {
                             couchDb.addIfNotExist(s, app).then(function (c) {
                                 s._couch = c;
-                                updateTab($tab, s, app, utils.createCouchUrl(s, app), sshTunnel);
+                                TabFactory.updateTab($tab, s, app, utils.createCouchUrl(s, app), sshTunnel);
                             });
-                        } else {
-                            updateTab($tab, s, app, utils.createUrl(s, app), sshTunnel);
+                        }else if(utils.isMSTSCType(app)){
+                            mstsc.addIfNotExist(s, app).then(function (c) {
+                                s._mstsc = c;
+                                TabFactory.updateTab($tab, s, app, utils.createMSTSCUrl(s, app), sshTunnel);
+                            });
+                        }{
+                            TabFactory.updateTab($tab, s, app, utils.createUrl(s, app), sshTunnel);
                         } 
                     });
                 }
@@ -177,47 +177,10 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
         })
     }
 
-    function addTab(s, app, ssh){
-        vm.chromeTabs.toggle(true);
-        var id = new Date().getTime();
-        var tabConfig = {
-            favicon: 'default',
-            loadingFavicon: 'loading',
-            title: utils.getInstanceName(s), 
-            __server: s,
-            __app: app,
-            __id: id,
-            __ssh: ssh
-        }
-        var $tab = vm.chromeTabs.addTab(tabConfig);
-        $tab.id = id;
-        vm.tabs[$tab.id] = {};
-        vm.tabs[$tab.id].ssh = ssh;
-        return $tab;
-    }
-
-    function updateTab($tab, s, app, url, sshTunnel) {
-        var tabConfig = {
-            url: url,
-            favicon: 'default',
-            loadingFavicon: 'loading',
-            title: utils.getInstanceName(s), 
-            viewAttrs: {
-                disablewebsecurity: true,
-                webpreferences: 'allowDisplayingInsecureContent=true, zoomFactor=1, webSecurity=false',
-                allowpopups: true,
-                partition: url
-            },
-            __server: s,
-            __app: app
-        }
-        
-        $q.when(utils.isSocksConnection(s, app)?sshTunnel.getSocksPort(app.localPort):null).then(function(port){
-            s._socks = port;
-            tabConfig["proxyUrl"] = port?utils.createProxyUrl(port):null;
-            vm.chromeTabs.showMainTab($tab);
-            vm.chromeTabs.updateTab($tab, tabConfig);
+    function initProfiles(){
+        vm.profiles = db.getMainRepository().findProfiles();
+        vm.profiles.forEach((p) => {
+            p.instances = vm.db.getMainRepository().findInstances({}, p);
         });
     }
-
 });

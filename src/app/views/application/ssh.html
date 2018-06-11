@@ -1,0 +1,68 @@
+<div ng-if="applicationCtrl.data.app.type=='ssh'">
+  <div class="form-group form-group-sm required">
+    <label for="userName" class="control-label col-sm-3">User Name:</label>
+    <div class="col-sm-9">
+      <input type="text" class="form-control input-sm" id="userName" ng-model="applicationCtrl.data.app.config.userName" placeholder="User Name"
+        required />
+    </div>
+  </div>
+
+  <div class="form-group form-group-sm required">
+    <div class="col-sm-offset-3 col-sm-2">
+      <div class="radio">
+        <label class="control-label">
+          <input type="radio" name="secret" ng-model="applicationCtrl.data.app.config.secret.key" value="password" ng-change="applicationCtrl.data.app.config.secret.pem={}"
+            required>Password</label>
+      </div>
+    </div>
+    <div class="col-sm-7">
+      <div class="input-group" ng-if="applicationCtrl.data.app.config.secret.key=='password'">
+        <input type="{{applicationCtrl.showSecret?'text':'password'}}" class="form-control input-sm" id="password" ng-model="applicationCtrl.data.app.config.secret.password"
+          placeholder="Password" required />
+        <span class="input-group-addon" ng-click="applicationCtrl.showSecret=!applicationCtrl.showSecret">
+          <i class="fa" ng-class="applicationCtrl.showSecret?'fa-eye':'fa-eye-slash'"></i>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="form-group form-group-sm required">
+    <div class="col-sm-offset-3 col-sm-2">
+      <div class="radio">
+        <label class="control-label">
+          <input type="radio" name="secret" ng-model="applicationCtrl.data.app.config.secret.key" value="pem" ng-change="applicationCtrl.data.app.config.secret.password=''"
+            required>PEM</label>
+      </div>
+    </div>
+    <div class="col-sm-7">
+      <div ng-if="applicationCtrl.data.app.config.secret.key=='pem'">
+        <input type="file" class="form-control input-sm" file-read="applicationCtrl.data.app.config.secret.pem.file" value="{{applicationCtrl.data.app.config.secret.pem.file.path}}"
+        />
+        <span style="color: darkgray;font-family: monospace;word-wrap:break-word">{{applicationCtrl.data.app.config.secret.pem.file.path}}</span>
+      </div>
+    </div>
+  </div>
+  <div class="form-group form-group-sm" ng-if="applicationCtrl.data.app.config.secret.key=='pem'">
+    <label for="passphrase" class="control-label col-sm-offset-2 col-sm-3" style="font-weight: normal; padding-right: 3px;">Passphrase</label>
+    <div class="col-sm-7">
+      <input type="text" class="form-control input-sm" id="passphrase" ng-model="applicationCtrl.data.app.config.secret.pem.passphrase"
+        placeholder="Passphrase" />
+    </div>
+  </div>
+  <div class="form-group form-group-sm">
+    <div class="col-sm-offset-3 col-sm-2">
+      <div class="checkbox">
+        <label class="control-label">
+          <input type="checkbox" name="sudo" ng-model="applicationCtrl.data.app.config.sudo">sudo</label>
+      </div>
+    </div>
+    <div class="col-sm-7">
+      <div class="input-group" ng-if="applicationCtrl.data.app.config.secret.key=='pem'">
+        <input type="{{applicationCtrl.showSecretPass?'text':'password'}}" class="form-control input-sm" id="password" ng-model="applicationCtrl.data.app.config.secret.password"
+          placeholder="Password" />
+        <span class="input-group-addon" ng-click="applicationCtrl.showSecretPass=!applicationCtrl.showSecretPass">
+          <i class="fa" ng-class="applicationCtrl.showSecretPass?'fa-eye':'fa-eye-slash'"></i>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

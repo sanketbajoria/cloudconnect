@@ -1,0 +1,16 @@
+<div ng-if="applicationCtrl.data.app.type=='docker'">
+  <div class="form-group form-group-sm has-feedback required">
+    <label for="dockerName" class="control-label col-sm-3">Machine Name:</label>
+    <div class="col-sm-9">
+      <input type="text" class="form-control input-sm" id="dockerName" ng-model="applicationCtrl.data.app.config.dockerName" uib-typeahead="i for i in applicationCtrl.getDockerNames($viewValue, 12)"
+        typeahead-min-length="0" typeahead-loading="loadingDockers" typeahead-no-results="noResults" placeholder="Type docker name, container id etc.."
+        required />
+      <span class="form-control-feedback" style="margin-top: -2px" ng-show="loadingDockers">
+        <i class="fa fa-spinner fa-spin fa-fw"></i>
+      </span>
+      <div ng-show="noResults" class="alert alert-danger" style="padding: 4px; margin-bottom: 0px;">
+        <i class="glyphicon glyphicon-remove"></i> No Results Found
+      </div>
+    </div>
+  </div>
+</div>

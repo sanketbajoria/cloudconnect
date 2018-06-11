@@ -1,0 +1,29 @@
+<!-- MSTSC form items-->
+<div ng-if="applicationCtrl.utils.isMSTSCType(applicationCtrl.data.app)">
+  <div class="form-group form-group-sm">
+    <label for="domain" class="control-label col-sm-3">Domain:</label>
+    <div class="col-sm-9">
+      <input type="text" class="form-control input-sm" id="domain" ng-model="applicationCtrl.data.app.config.mstsc.domain" placeholder="Domain"
+      />
+    </div>
+  </div>
+  <div class="form-group form-group-sm required">
+    <label for="username" class="control-label col-sm-3">Username:</label>
+    <div class="col-sm-9">
+      <input type="text" class="form-control input-sm" id="username" ng-model="applicationCtrl.data.app.config.mstsc.username"
+        placeholder="Username" required/>
+    </div>
+  </div>
+  <div class="form-group form-group-sm required">
+    <label for="domain" class="control-label col-sm-3">Password:</label>
+    <div class="col-sm-9">
+      <div class="input-group">
+        <input type="{{applicationCtrl.showSecret?'text':'password'}}" class="form-control input-sm" id="password" ng-model="applicationCtrl.data.app.config.mstsc.password"
+          placeholder="Password" required/>
+        <span class="input-group-addon" ng-click="applicationCtrl.showSecret=!applicationCtrl.showSecret">
+          <i class="fa" ng-class="applicationCtrl.showSecret?'fa-eye':'fa-eye-slash'"></i>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,7 +1,7 @@
 <div class="-toolbar">
     <a href="javascript:" ng-show="toolbarCtrl.isWebview" class="-back-btn btn" ng-click="toolbarCtrl.back()"><i class="fa fa-arrow-left"></i></a>
     <a href="javascript:" ng-show="toolbarCtrl.isWebview" class="-forward-btn btn" ng-click="toolbarCtrl.forward()"><i class="fa fa-arrow-right"></i></a>
-    <a href="javascript:" ng-show="toolbarCtrl.isWebview" class="-reload-btn btn" ng-click="toolbarCtrl.reload()"><i class="fa fa-refresh"></i></a>
+    <a href="javascript:" ng-show="toolbarCtrl.isWebview" class="-reload-btn btn" ng-click="toolbarCtrl.reload()"><i class="fa fa-sync"></i></a>
     <input type="text" name="url" class="-url form-control input-sm" ng-model="toolbarCtrl.url" ng-readonly="!toolbarCtrl.isWebview" on-enter-press="toolbarCtrl.changeUrl()"/>
     <a href="javascript:" ng-show="toolbarCtrl.isWebview" class="-search-btn btn" ng-click="api.showSearch=!api.showSearch"><i class="fa fa-search"></i></a>
     <a href="javascript:" ng-show="toolbarCtrl.isWebview" class="-download-btn btn" ng-click="toolbarCtrl.openDownloads()"><i class="fa fa-download"></i></a>

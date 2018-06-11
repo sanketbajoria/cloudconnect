@@ -120,11 +120,12 @@ $views-bg-color: #e6e6e6;
 
           &[data-favicon='ssh']:before {
             content: "\f120";
-            font-family: FontAwesome;
+            font-family: Font Awesome\ 5 Free;
             left: 3px;
             position: absolute;
             top: -2px;
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 600;
           }
 
           &[data-favicon='scullog']:before {
@@ -144,13 +145,23 @@ $views-bg-color: #e6e6e6;
 
           &[data-favicon='custom']:before {
             content: "\f074";
-            font-family: FontAwesome;
+            font-family: Font Awesome\ 5 Free;
             left: 3px;
             position: absolute;
             top: -2px;
             font-size: 14px;
+            font-weight: 600;
           }
-        
+
+          &[data-favicon='mstsc']:before {
+            content: "\f17a";
+            font-family: Font Awesome\ 5 Brands;
+            left: 3px;
+            position: absolute;
+            top: -2px;
+            font-size: 16px;
+            font-weight: 300;
+          }
         }
 
         > .-title {

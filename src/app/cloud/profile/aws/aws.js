@@ -56,6 +56,10 @@ class AWS {
         return `${(tag.length>0?tag[0].Value:"")}`;
     }
 
+    isWindowsPlatform(instance){
+        return instance.Platform == "windows";
+    }
+
 }
 
 module.exports = AWS;
