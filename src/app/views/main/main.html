@@ -20,6 +20,9 @@
                             <li role="menuitem" ng-click="vm.switchWorkspace();"><a href="javascript:"><i class="material-icons">party_mode</i> Switch Workspace</a></li>
                             <li role="menuitem" ng-click="vm.importWorkspace();"><a href="javascript:"><i class="material-icons">party_mode</i> Import Workspace</a></li>
                             <li role="menuitem" ng-click="vm.exportWorkspace();"><a href="javascript:"><i class="material-icons">party_mode</i> Export Workspace</a></li>
+                            <li class="divider"></li>
+                            <li role="menuitem" ng-click="vm.openShare();"><a href="javascript:"><i class="fa fa-share-alt"></i> Share server</a>
+                            </li>
                         </ul>
                     </span>        
                 </div>
@@ -63,7 +66,7 @@
                                         </span>
                                         <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="single-button">
                                             <li class="dropdown-header">Open App</li>
-                                            <li role="menuitem" ng-repeat-start="app in s.applications" ng-click="vm.openApp(s, app)"><a href="javascript:">{{app.name || vm.config.instance.application.types[app.type].label}}</a></li>
+                                            <li role="menuitem" ng-repeat-start="app in s.applications" ng-click="vm.openApp(s, app)"><a href="javascript:">{{vm.getApplicationName(app)}}</a></li>
                                             <li role="menuitem" ng-if="app.type=='ssh'" ng-click="vm.openApp(s, vm.scullog(app))"><a href="javascript:">{{vm.config.instance.application.types[app.type].label}} via Scullog</a></li>
                                             <li role="menuitem" ng-repeat-end ng-if="app.type=='ssh'" ng-click="vm.openApp(s, vm.webssh(app))"><a href="javascript:">{{vm.config.instance.application.types[app.type].label}} on Browser</a></li>
                                             <li class="divider"></li>
@@ -86,7 +89,7 @@
         <div class="col-sm-10 mainview" ng-class="vm.collapsed?'expand':''">
             <chrome-tabs api="vm.chromeTabs" test="adsff" style="display:none"></chrome-tabs>
             <a href="javascript:" class="btn sidebarBtn" ng-class="vm.collapsed?'collapsed':''" ng-click="vm.collapsed=!vm.collapsed">
-            <i class="fa fa-navicon fa-lg"></i>
+            <i class="fa fa-bars fa-lg"></i>
         </a>
         </div>
     </div>

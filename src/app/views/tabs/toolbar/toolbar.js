@@ -12,7 +12,7 @@ angular.module('galaxy').directive('toolbar', function () {
  * Toolbar Controller
  * @constructor
  */
-function ToolbarCtrl($scope, galaxyModal) {
+function ToolbarCtrl($scope, galaxyModal, SharingFactory) {
     var vm = this;
     var $chromeTabViews = $scope.api.$views.data('chromeTabViews');
     vm.back = function () {

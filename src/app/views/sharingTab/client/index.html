@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <title>Authenticate</title>
+        <script src="angular/angular.min.js"></script>
+        <script src="index.js"></script>
+        <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <link href="sharingTab.css" rel="stylesheet" type="text/css" />
+        <style>
+            li{
+                display:block; 
+                list-style: none;
+            }
+        </style>
+    </head>
+    <body ng-app="galaxybot">
+
+        <div class="container" ng-controller="AppController as vm">
+                <form ng-submit="vm.submitToken()">
+                    <div class="form-group">
+                        <label for="name">Comment:</label>
+                        <textarea class="form-control" rows="5" id="name" ng-model="vm.token"></textarea>
+                    </div>
+                    <input type="submit" class="btn btn-primary" value="Submit" />
+                </form>
+                <h3>Select the application</h3>
+                <ul class="tree" style="margin-top: 20px;">
+                    <li ng-repeat="(pId, profile) in vm.profiles">
+                        {{profile.name}}
+                        <ul ng-repeat="(sId, server) in profile.servers">
+                            <li>{{server.name}}
+                                <ul ng-repeat="(aId, application) in server.applications">
+                                    <li>{{application.name}} 
+                                        <button class="btn btn-secondary btn-sm" style="margin-bottom: 6px;" ng-click="vm.selectServer(pId, sId, aId)">Select</button>
+                                    </li>
+                                </ul> 
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+        </div>
+    </body>
+</html>

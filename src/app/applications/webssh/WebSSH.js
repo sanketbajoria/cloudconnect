@@ -25,19 +25,12 @@ class WebSSH {
         this.socket.open(s);
       });
     }
-    open(all) {
+    open(ip) {
       return new Promise((resolve, reject) => {
-        if(all){
-          this.server.listen(this.config.port || this.port || 0, () => {
-            this.port = this.server.address().port;
-            resolve(this.port);
-          });
-        }else{
-          this.server.listen(this.config.port || this.port || 0, "localhost", () => {
-            this.port = this.server.address().port;
-            resolve(this.port);
-          });
-        }
+        this.server.listen({port: 0, host: ip}, () => {
+          this.port = this.server.address().port;
+          resolve(this.port);
+        });
         this.server.on('error', (e) => {
           reject(e);
         });

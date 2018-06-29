@@ -8,10 +8,10 @@ var rdp = require('node-rdpjs');
 module.exports = function (client, config, connect) {
   var rdpClient = null;
   client.on('init', function (infos) {
-    if (infos.cookieValue != 'value') {
+    /* if (infos.cookieValue != 'value') {
       client.emit('authenticationError');
       return;
-    }
+    } */
     if (rdpClient) {
       // clean older connection
       rdpClient.close();

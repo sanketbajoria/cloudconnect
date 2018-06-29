@@ -11,10 +11,10 @@ class Socket {
     socket.on('init', (cols, rows, cookieValue) => {
       this.termCols = cols;
       this.termRows = rows;
-      if(cookieValue != 'value'){
+      /* if(cookieValue != 'value'){
         socket.emit('authenticationError');
         return;
-      }
+      } */
       this.ssh.shell({
         cols: this.termCols,
         rows: this.termRows,

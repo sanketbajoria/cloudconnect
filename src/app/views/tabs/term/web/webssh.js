@@ -46,7 +46,7 @@ socket.on('data', function (data) {
   }
 });
 
-socket.on('authenticationError', function(){
+/* socket.on('authenticationError', function(){
   var token = null
   while(!token || !token.trim()){
     token = prompt("Authentication token: ", "");
@@ -55,7 +55,7 @@ socket.on('authenticationError', function(){
       break;
     }
   }
-});
+}); */
 
 socket.on('connect', function () {
   socket.emit('init', term.cols, term.rows, getCookie('dummy'));

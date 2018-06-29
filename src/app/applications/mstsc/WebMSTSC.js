@@ -2,7 +2,6 @@ var koaStatic = require('koa-static');
 var path = require('path');
 var rdp = require('./rdp');
 var utils = require('../../utils/utils');
-
 class WebMSTSC {
     constructor(instance, app) {
       var koaApp = (require('koa'))();
@@ -19,21 +18,12 @@ class WebMSTSC {
         rdp(s, app.config.mstsc, this.connect);
       });
     }
-    open(all) {
+    open(ip) {
       return new Promise((resolve, reject) => {
-        if(all){
-          this.server.listen(0, () => {
-            this.port = this.server.address().port;
-            console.log(this.port);
-            resolve(this.port);
-          });
-        }else{
-          this.server.listen(0, "localhost", () => {
-            this.port = this.server.address().port;
-            console.log(this.port);
-            resolve(this.port);
-          });
-        }
+        this.server.listen({port: 0, host: ip}, () => {
+          this.port = this.server.address().port;
+          resolve(this.port);
+        });
         this.server.on('error', (e) => {
           reject(e);
         });

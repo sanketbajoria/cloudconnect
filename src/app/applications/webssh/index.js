@@ -1,34 +1,35 @@
-var WebSSH = require('./WebSSH');
 var utils = require('../../utils/utils');
 
 var connections = {};
 
 module.exports = {
-  add: function (s, app, sshTunnel) {
-    var uid = utils.getRemoteAddr(s, app);
-    var server = new WebSSH({}, sshTunnel);
-    return server.open().then((p) => {
+  add: function (s, app, sshTunnel, ip) {
+    var server = new (require('./WebSSH'))({}, sshTunnel);
+    return server.open(ip).then((p) => {
       server.port = p;
-      connections[uid] = server;
+      connections[this.getId(s, app, ip)] = server;
       return server;
     });
   },
-  remove: function (s) {
-    var uid = utils.getRemoteAddr(s);
+  remove: function (s, ip) {
+    var uid = this.getId(s, ip);
     if (connections[uid]) {
       connections[uid].server.close();
       delete connections[uid];
     }
   },
-  get: function (s, app) {
-    return connections[utils.getRemoteAddr(s)];
+  get: function (s, app, ip) {
+    return connections[this.getId(s, app, ip)];
   },
-  addIfNotExist: function (s, app, sshTunnel) {
-    if (this.get(s, app)) {
-      return Q.when(this.get(s, app));
+  addIfNotExist: function (s, app, sshTunnel, ip) {
+    if (this.get(s, app, ip)) {
+      return Q.when(this.get(s, app, ip));
     } else {
-      return this.add(s, app, sshTunnel);
+      return this.add(s, app, sshTunnel, ip);
     }
+  },
+  getId: function(s, app, ip){
+    return `${app.uniqueId || utils.getRemoteAddr(s)}@${!ip?'0.0.0.0':ip}`; 
   }
 }
 

@@ -37,6 +37,15 @@ function DB(path, password, newWorkspace) {
         if (instances === null) {
             instances = db.addCollection("instances");
         }
+        var sharings = db.getCollection("sharings");
+        if(sharings === null){
+            sharings = db.addCollection("sharings");
+        }
+        var configurations = db.getCollection("configurations");
+        if(configurations === null){
+            configurations = db.addCollection("configurations");
+        }
+
         db.saveDatabase();
 
         var ret = {};
@@ -61,6 +70,42 @@ function DB(path, password, newWorkspace) {
             findProfiles: function (query) {
                 query = query || {};
                 return clone(profiles.find(query));
+            },
+
+            //sharing api
+            addSharing: saveDB(function (sharing) {
+                return sharings.insert(sharing);
+            }),
+            updateSharing: saveDB(function (sharing) {
+                return sharings.update(sharing);
+            }),
+            removeSharing: saveDB(function (sharing) {
+                sharings.remove(sharing);
+            }),
+            getSharing: function (id) {
+                return clone(sharings.get(id));
+            },
+            findSharings: function (query) {
+                query = query || {};
+                return clone(sharings.find(query));
+            },
+
+            //configuration api
+            addConfiguration: saveDB(function (configuration) {
+                return configurations.insert(configuration);
+            }),
+            updateConfiguration: saveDB(function (configuration) {
+                return configurations.update(configuration);
+            }),
+            removeConfiguration: saveDB(function (configuration) {
+                configurations.remove(configuration);
+            }),
+            getConfiguration: function (id) {
+                return clone(configurations.get(id));
+            },
+            findConfigurations: function (query) {
+                query = query || {};
+                return clone(configurations.find(query));
             },
 
             //instances api

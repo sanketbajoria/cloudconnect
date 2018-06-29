@@ -1,44 +1,34 @@
-    var Scullog = require('scullog'),
-    utils = require('../../utils/utils.js'),
-    Q = require('q'),
-    getPort = require("get-port"),
-    ShellFileManager = require("./shellFileManager"),
-    RemoteDockerFileManager = require("./remoteDockerFileManager"),
-    LocalDockerFileManager = require("./localDockerFileManager"),
-    LocalTunnel = require("../../tunnel/localTunnel");
-    
+var utils = require('../../utils/utils');
 
-module.exports = function(devTunnel, server, app){
-    return Q.Promise((resolve, reject) => {
-        getPort({port: app.localPort}).then(function(port){
-            var fileManager;
-            utils.isLocalHost(server).then((isLocal) => {
-                if(utils.isDockerType(app)){
-                    if(isLocal){
-                        fileManager = new LocalDockerFileManager(null, new LocalTunnel(), app);
-                    }else{
-                        var sshApp = server.applications.filter(function(a){
-                            return utils.isTerminalType(a);
-                        })[0];
-                        fileManager = new RemoteDockerFileManager(null, devTunnel, app, sshApp);
-                    }
-                }else{
-                    fileManager = new ShellFileManager(null, devTunnel, app);
-                }
-                var scullog = new Scullog({
-                    directory: '/',
-                    port: port,
-                    fileManager: fileManager,
-                    id: utils.getInstanceName(server),
-                    base: "./var/scullog" 
-                })
-                fileManager.scullog = scullog;
-                
-                scullog.initialized().then(function(){
-                    resolve(port);
-                });
-            })
-            
-        })
+var connections = {};
+
+module.exports = {
+  add: function (s, app, sshTunnel, ip) {
+    var server = new (require('./scullog'))(sshTunnel, s, app, ip);
+    return server.then((scullog) => {
+      connections[this.getId(s, app, ip)] = scullog;
+      return scullog;
     });
+  },
+  remove: function (s, ip) {
+    var uid = this.getId(s, ip);
+    if (connections[uid]) {
+      connections[uid].server.close();
+      delete connections[uid];
+    }
+  },
+  get: function (s, app, ip) {
+    return connections[this.getId(s, app, ip)];
+  },
+  addIfNotExist: function (s, app, sshTunnel, ip) {
+    if (this.get(s, app, ip)) {
+      return Q.when(this.get(s, app, ip));
+    } else {
+      return this.add(s, app, sshTunnel, ip);
+    }
+  },
+  getId: function(s, app, ip){
+    return `${app.uniqueId || utils.getRemoteAddr(s)}@${!ip?'0.0.0.0':ip}`; 
+  }
 }
+

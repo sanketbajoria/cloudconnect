@@ -160,7 +160,7 @@
         next(err);
         console.log('[mstsc.js] error : ' + err.code + '(' + err.message + ')');
         self.activeSession = false;
-      }).on('authenticationError', () => {
+      })/* .on('authenticationError', () => {
         var token = null
         while (!token || !token.trim()) {
           token = prompt("Authentication token: ", "");
@@ -169,7 +169,7 @@
             break;
           }
         }
-      }).on('title', function (data) {
+      }) */.on('title', function (data) {
         document.title = data
       });
 	  this.init();

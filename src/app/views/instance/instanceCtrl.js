@@ -38,14 +38,16 @@
                 controller: 'ApplicationController',
                 controllerAs: 'applicationCtrl',
                 data: {
-                    app: app || {config:{secret:{key:'password', pem: {file: "dummy"}}}},
+                    app: angular.copy(app) || {config:{secret:{key:'password', pem: {file: "dummy"}}}},
                     editMode: editMode,
                     instance: vm.instance
                 }
             }).result.then(function(data){
                 if(editMode){
+                    data.app.uniqueId = data.app.uniqueId || (new Date()).getTime();
                     vm.instance.applications.splice(idx, 1, data.app);
                 }else{
+                    data.app.uniqueId = (new Date()).getTime();
                     vm.instance.applications.push(data.app)
                 }
             }).catch(angular.noop);

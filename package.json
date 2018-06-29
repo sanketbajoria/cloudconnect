@@ -49,6 +49,7 @@
     "fs-extra": "^4.0.1",
     "fs-jetpack": "^1.0.0",
     "get-port": "^3.1.0",
+    "http-proxy": "^1.17.0",
     "jquery": "^3.2.1",
     "koa": "^1.0.0",
     "koa-static": "^2.0.0",
@@ -63,7 +64,7 @@
   "devDependencies": {
     "bourbon": "^4.3.4",
     "chai": "^4.1.0",
-    "electron": "1.8.4",
+    "electron": "2.0.3",
     "electron-builder": "^19.16.0",
     "electron-mocha": "^4.0.0",
     "fs-extra": "^4.0.1",

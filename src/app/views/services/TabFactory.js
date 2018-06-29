@@ -1,6 +1,10 @@
 'use strict';
 
 (function () {
+  var xTerm = require('../applications/term');
+  var webssh = require('../applications/webssh');
+  var mstsc = require('../applications/mstsc');
+
   var app = angular.module('galaxy');
   app.factory("TabFactory", function ($q) {
     var tabs = {};
@@ -53,7 +57,7 @@
           __app: app
         }
 
-        $q.when(utils.isSocksConnection(s, app) ? sshTunnel.getSocksPort(app.localPort) : null).then(function (port) {
+        $q.when(utils.isSocksConnection(s, app) ? sshTunnel.getSocksPort(app.localPort) : null).then((port) => {
           s._socks = port;
           tabConfig["proxyUrl"] = port ? utils.createProxyUrl(port) : null;
           main.chromeTabs.showMainTab($tab);
@@ -77,8 +81,60 @@
         } */
         delete tabs[props.__id];
         main.chromeTabs.toggle(Object.keys(tabs).length != 0);
+      },
+
+      /**
+       * Open a app
+       */
+      openLocalApp: function (s, app) {
+        var ip = "localhost";
+        var ssh = utils.getSSH(s, app, main.db);
+        var $tab = this.addTab(s, app, ssh);
+        $tab.on('loaderInitialized', () => {
+          $q.when(ssh.connect()).then((sshTunnel) => {
+            if (utils.isTerminalType(app)) {
+              this.updateTab($tab, s, app, utils.createUrl(s, app));
+              var view = main.chromeTabs.getView($tab);
+              var term = new xTerm(view.find('.sshTerminal'), sshTunnel);
+              term.open();
+            } else if (utils.isScullogType(app) || utils.isDockerType(app)) {
+              scullog.addIfNotExist(s, app, sshTunnel, ip).then((scullog) => {
+                s._scullog = scullog;
+                this.updateTab($tab, s, app, utils.createScullogUrl(s));
+              });
+            } else if (utils.isWebSSHType(app)) {
+              webssh.addIfNotExist(s, app, sshTunnel, ip).then((webssh) => {
+                s._webssh = webssh;
+                this.updateTab($tab, s, app, utils.createWebSSHUrl(s, app), sshTunnel);
+              });
+            } else {
+              $q.when(utils.isForwardConnection(s) ? sshTunnel.addTunnel({
+                name: utils.getInstanceName(s),
+                remoteAddr: utils.getRemoteAddr(s),
+                remotePort: app.port,
+                localPort: app.localPort
+              }) : '').then((t) => {
+                s._tunnel = t;
+                if (utils.isCouchDBType(app)) {
+                  couchDb.addIfNotExist(s, app).then((c) => {
+                    s._couch = c;
+                    this.updateTab($tab, s, app, utils.createCouchUrl(s, app), sshTunnel);
+                  });
+                } else if (utils.isMSTSCType(app)) {
+                  mstsc.addIfNotExist(s, app, ip).then((c) => {
+                    s._mstsc = c;
+                    this.updateTab($tab, s, app, utils.createMSTSCUrl(s, app), sshTunnel);
+                  });
+                } else {
+                  this.updateTab($tab, s, app, utils.createUrl(s, app), sshTunnel);
+                }
+              });
+            }
+          }).catch((err) => {
+            console.log("Error ssh - " + err);
+          });
+        })
       }
     }
   });
 })();
-

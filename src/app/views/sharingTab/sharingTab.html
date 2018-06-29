@@ -1,0 +1,106 @@
+<div class="modal-header modal-header-galaxy">
+  <button type="button" class="close" data-dismiss="modal" ng-click="sharingTabCtrl.no()">&times;</button>
+  <h5>Share</h5>
+</div>
+<div class="modal-body">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="alert alert-info" role="alert" ng-if="sharingTabCtrl.sharingUrl">
+        <strong>URL!</strong>
+        <br/> {{sharingTabCtrl.sharingUrl}}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-3">
+      <form name="serverForm" novalidate>
+        <div class="form-group form-group-sm" style="margin-bottom: 5px;">
+          <input type="number" class="form-control input-sm" id="port" ng-model="sharingTabCtrl.serverPort" placeholder="Port range (0 to 65535)"
+            min="0" max="65535" />
+        </div>
+      </form>
+    </div>
+    <div class="col-sm-7">
+      <button type="button" class="btn btn-primary btn-sm" style="margin-bottom: 15px;" ng-click="sharingTabCtrl.toggleServer()"
+        ng-disabled="serverForm.$invalid || sharingTabCtrl.serverUpdating">{{sharingTabCtrl.serverStatus}} Server</button>
+    </div>
+  </div>
+
+
+  <form name="sharingTab" novalidate>
+    <label>Select the application you wanted to share</label>
+    <ul class="tree" ng-repeat="p in sharingTabCtrl.profiles track by sharingTabCtrl.db.getUniqueId(p)">
+      <li>
+        {{p.name}}
+        <ul ng-repeat="s in p.instances track by sharingTabCtrl.db.getUniqueId(s)">
+          <li>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" ng-model="sharingTabCtrl.tempServer[sharingTabCtrl.db.getUniqueId(s)].enableShare" ng-change="sharingTabCtrl.toggleShare(p, s, sharingTabCtrl.tempServer[sharingTabCtrl.db.getUniqueId(s)].enableShare)">{{sharingTabCtrl.getInstanceName(s)}}</label>
+            </div>
+            <ul ng-repeat="app in s.applications track by app.uniqueId">
+              <li>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" ng-model="sharingTabCtrl.token.sharing[sharingTabCtrl.db.getUniqueId(p)][sharingTabCtrl.db.getUniqueId(s)][app.uniqueId]">{{sharingTabCtrl.getApplicationName(s, app)}}</label>
+                </div>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+
+    <div class="row form-group form-group-sm has-feedback required">
+      <label for="expiresIn" class="control-label col-sm-3" style="margin-top: 6px;">Sharing Token expires in:</label>
+      <div class="col-sm-2">
+        <input type="number" id="expiresIn" min=1 class="form-control input-sm" ng-model="sharingTabCtrl.token.expiresIn" required
+        />
+        <span class="form-control-feedback" style="color: silver; right: 24px;">mts</span>
+      </div>
+    </div>
+  </form>
+
+  <button type="button" class="btn btn-primary btn-sm" ng-click="sharingTabCtrl.saveToken()" ng-disabled="sharingTab.$invalid">Save Token</button>
+
+  <table class="table" style="margin-top:20px; margin-bottom: 10px;">
+    <thead>
+      <tr>
+        <th>Token</th>
+        <th>Created At</th>
+        <th>Expires In</th>
+        <th></th>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="t in sharingTabCtrl.sharingTokens track by sharingTabCtrl.db.getUniqueId(t)">
+        <td style="vertical-align: middle; word-break: break-all;">{{t.value}}</td>
+        <td style="vertical-align: middle;">{{t.createdAt | date : "MMM d, y h:mm a"}}</td>
+        <td style="vertical-align: middle;">{{t.expiresAt | date : "MMM d, y h:mm a"}}</td>
+        <td>
+          <label class="switch">
+            <input type="checkbox" ng-model="t.active" ng-change="sharingTabCtrl.toggleShareToken(t)" />
+            <span class="slider round"></span>
+          </label>
+        </td>
+        <td>
+          <button class="btn btn-primary btn-sm" ng-click="sharingTabCtrl.editToken(t)">
+            <i class="far fa-edit"></i>
+          </button>
+        </td>
+        <td>
+          <button class="btn  btn-danger btn-sm" ng-click="sharingTabCtrl.removeToken(t)">
+            <i class="far fa-trash-alt"></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button type="button" class="btn btn-primary btn-sm" style="margin-top: 4px;" ng-click="sharingTabCtrl.addNewToken()">Add new token</button>
+  </body>
+
+</div>

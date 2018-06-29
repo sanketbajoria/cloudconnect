@@ -3,6 +3,16 @@ var fs = require('fs');
 var checkLocalHost = require('check-localhost');
 var config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 var net = require('net');
+var crypto = require('crypto');
+var jwt = require('jsonwebtoken');
+var Q = require('Q');
+var os = require('os');
+var clone = require('clone');
+var xTerm = require('../applications/term');
+var webssh = require('../applications/webssh');
+var mstsc = require('../applications/mstsc');
+var scullog = require('../applications/scullog');
+
 module.exports = {
   createUrl: function (s, app) {
     var relPath = app.config.relativePath ? `/${this.stripForwardSlash(app.config.relativePath)}` : '';
@@ -57,6 +67,9 @@ module.exports = {
       return i.cloud.instance.getUniqueId();
     }
   },
+  getApplicationName: function (app) {
+    return app.name || config.instance.application.types[app.type].label
+  },
   createCouchUrl: function (s, app) {
     return `http://localhost:${s._couch.port}`;
   },
@@ -68,6 +81,12 @@ module.exports = {
   },
   createScullogUrl: function (s) {
     return `http://localhost:${s._scullog.port}`;
+  },
+  createLocalUrl: function (port) {
+    return `http://localhost:${port}`;
+  },
+  createRemoteUrl: function (ip, port) {
+    return `http://${ip}:${port}`;
   },
   createProxyUrl: function (port) {
     return `socks5://localhost:${port}`;
@@ -233,12 +252,152 @@ module.exports = {
     }
   },
   getTitle: function (props) {
-    if (utils.isScullogType(props.__app) || utils.isWebSSHType(props.__app) || utils.isSSHType(props.__app) || utils.isMSTSCType(props.__app)) {
+    if (utils.isScullogType(props.__app) || utils.isWebSSHType(props.__app) || utils.isTerminalType(props.__app) || utils.isMSTSCType(props.__app)) {
       return props.title
     } else if (utils.isDockerType(props.__app)) {
       return `${props.__app.config.dockerName}@${props.title}`;
     }
+  },
+  createJWTToken: function (data, secret) {
+    return jwt.sign(data, secret, {});
+  },
+  verifyAndExtractToken: function (db, tokenValue) {
+    //exists in database and not expired
+    //decompile with found token secret
+    //tokenId in secret === token databaseId
+    if(tokenValue){
+      try {
+        var token = db.getMainRepository().findSharings({value: tokenValue})[0];
+        if(token && token.active){
+          if(token.expiresAt > new Date().getTime()){
+            var data = jwt.verify(tokenValue, token.secret);
+            if(data.tokenId == db.getUniqueId(token)){
+              return token;
+            }
+          } 
+        }
+      } catch (err) {
+        //Token doesn't got verified
+      }
+    }
+    return false;
+  },
+  verifyAndExtractServer: function (db, tokenValue, server){
+    var token = this.verifyAndExtractToken(db, tokenValue);
+    if(token && server){
+      var port = null;
+      if(typeof server === "string"){
+        var serverVal = jwt.verify(server, token.secret);
+        if(serverVal && serverVal.server){
+          port = serverVal.p;
+          server = serverVal.server
+        }else{
+          return false;
+        }
+      }
+      var profileId = Object.keys(server)[0];
+      if(profileId && token.sharing[profileId]){
+        var instanceId = Object.keys(server[profileId])[0];
+        if(instanceId && token.sharing[profileId][instanceId]){
+          var appId = Object.keys(server[profileId][instanceId])[0];
+          if(appId && token.sharing[profileId][instanceId][appId]){
+            var server = db.getMainRepository().getInstance(instanceId);
+            if(server){
+              var app = utils.getSharingApplications(server.applications).filter(a => a.uniqueId == appId)[0];
+              if(app){
+                return [server, app, port]; 
+              }
+            }
+          }
+        }
+      }
+    }
+    return false;
+  },
+  createSecret: function(len){
+    return crypto.randomBytes(len || 64).toString('hex');
+  },
+  isSharingApp: function(app){
+    return utils.isTerminalType(app) || utils.isWebSSHType(app) || utils.isScullogType(app) || utils.isMSTSCType(app) || utils.isHttpType(app);
+  },
+  getShareServerConfiguration: function(db){
+    return db.getMainRepository().findConfigurations({type: 'shareServer'})[0];
+  },
+  openShareApp: function (s, app, db) {
+    var ip = "localhost";
+    var ssh = utils.getSSH(s, app, db);
+    return Q.when(ssh.connect()).then((sshTunnel) => {
+      if (utils.isTerminalType(app) || utils.isWebSSHType(app)) {
+        return webssh.addIfNotExist(s, app, sshTunnel, ip).then((webssh) => {
+          return webssh.port;
+        });
+      } else if (utils.isScullogType(app) || utils.isDockerType(app)) {
+        return scullog.addIfNotExist(s, app, sshTunnel, ip).then((scullog) => {
+          return scullog.port;
+        });
+      } else {
+        return Q.when(utils.isForwardConnection(s) ? sshTunnel.addTunnel({
+          name: utils.getInstanceName(s),
+          remoteAddr: utils.getRemoteAddr(s),
+          remotePort: app.port
+        }) : '').then((t) => {
+          s._tunnel = t;
+          if (utils.isCouchDBType(app)) {
+            return couchDb.addIfNotExist(s, app).then((c) => {
+              return c.port;
+            });
+          } else if (utils.isMSTSCType(app)) {
+            return mstsc.addIfNotExist(s, app, ip).then((c) => {
+              return c.port;
+            });
+          } else {
+            return app.localPort;
+          }
+        });
+      }
+    });
+  },
+  getExternalIPs: function(){
+    var ifaces = os.networkInterfaces();
+    var ret = [];
+    Object.keys(ifaces).forEach(function (ifname) {
+      ifaces[ifname].forEach(function (iface) {
+        if ('IPv4' !== iface.family || iface.internal !== false) {
+          return;
+        }
+        ret.push(iface.address);
+      });
+    });
+    return ret;
+  },
+  createSharingUrl: function(port){
+    var externalIP = utils.getExternalIPs()[0];
+    if(externalIP){
+      return utils.createRemoteUrl(externalIP, port);
+    }
+  },
+  getSharingApplications: function(applications){
+    return applications.reduce((r, a) => {
+      if (utils.isSharingApp(a)) {
+        if (utils.isTerminalType(a)) {
+          var scullogApp = clone(a);
+          scullogApp.uniqueId += "scullog";
+          scullogApp.type = "scullog";
+          scullogApp.name = "scullog"
+          scullogApp.protocol = "http";
+          r.push(scullogApp);
+          var websshApp = clone(a);
+          websshApp.uniqueId += "webssh";
+          websshApp.type = "webssh";
+          websshApp.name = "ssh";
+          websshApp.protocol = "http";
+          r.push(websshApp);
+        } else {
+          r.push(a);
+        }
+      }
+      return r;
+    }, [])
   }
-
 }
 
