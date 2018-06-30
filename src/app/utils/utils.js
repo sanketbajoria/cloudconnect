@@ -287,11 +287,15 @@ module.exports = {
     if(token && server){
       var port = null;
       if(typeof server === "string"){
-        var serverVal = jwt.verify(server, token.secret);
-        if(serverVal && serverVal.server){
-          port = serverVal.p;
-          server = serverVal.server
-        }else{
+        try{
+          var serverVal = jwt.verify(server, token.secret);
+          if(serverVal && serverVal.server){
+            port = serverVal.p;
+            server = serverVal.server
+          }else{
+            return false;
+          }
+        }catch(err){
           return false;
         }
       }

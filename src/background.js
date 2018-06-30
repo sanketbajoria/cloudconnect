@@ -34,8 +34,8 @@ if (env.name !== 'production') {
 fse.ensureDirSync('workspace');
 function createLoadingScreen() {
   var loadingScreen = createWindow('loading', {
-    width: 200,
-    height: 150,
+    width: 780,
+    height: 396,
     transparent: true,
     frame: false,
     backgroundColor: '#2e353d;',
@@ -58,6 +58,7 @@ function createLoadingScreen() {
 
 app.on('ready', () => {
   var loadingWindow = createLoadingScreen(); 
+  //loadingWindow.openDevTools();
   setApplicationMenu();
 
   const mainWindow = createWindow('main', {

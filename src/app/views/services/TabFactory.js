@@ -5,7 +5,7 @@
   var webssh = require('../applications/webssh');
   var mstsc = require('../applications/mstsc');
 
-  var app = angular.module('galaxy');
+  var app = angular.module('cloudconnect');
   app.factory("TabFactory", function ($q) {
     var tabs = {};
     var main;

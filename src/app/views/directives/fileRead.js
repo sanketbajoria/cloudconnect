@@ -8,7 +8,7 @@ var fs = require('fs');
             content: fs.readFileSync(file.path)
         }
     }
-    var app = angular.module('galaxy');
+    var app = angular.module('cloudconnect');
     app.directive("fileRead", [function () {
         return {
             scope: {

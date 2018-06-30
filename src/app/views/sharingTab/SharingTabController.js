@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-  var app = angular.module('galaxy');
+  var app = angular.module('cloudconnect');
   app.controller("SharingTabController", function (SharingFactory, $uibModalInstance, db, $scope) {
     var vm = this;
     vm.db = db;

@@ -1,4 +1,4 @@
-var app = angular.module('galaxy');
+var app = angular.module('cloudconnect');
 var downloadQueue = require('./download/downloadQueue');
 const {shell} = require('electron')
 

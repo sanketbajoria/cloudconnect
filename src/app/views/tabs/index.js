@@ -1,7 +1,7 @@
 'use strict';
 var downloadQueue = require('./download/downloadQueue');
 var DownloadItem = require("./download/downloadItem");
-angular.module('galaxy').directive('chromeTabs', function ($compile) {
+angular.module('cloudconnect').directive('chromeTabs', function ($compile) {
   return {
     restrict: 'E',
     scope: {

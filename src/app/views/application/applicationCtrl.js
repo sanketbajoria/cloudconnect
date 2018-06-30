@@ -1,6 +1,6 @@
 'use strict';
 (function () {
-    var app = angular.module('galaxy');
+    var app = angular.module('cloudconnect');
     var ShellFileManager = require('../applications/scullog/ShellFileManager');
     app.controller('ApplicationController', function($uibModalInstance, config, $filter, $scope){
         var vm = this;

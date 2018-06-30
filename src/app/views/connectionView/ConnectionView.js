@@ -1,6 +1,6 @@
 'use strict'
 
-var app = angular.module('galaxy');
+var app = angular.module('cloudconnect');
 
 app.factory('ConnectionView', function () {
     return {

@@ -1,6 +1,6 @@
 'use strict';
 (function () {
-    var app = angular.module('galaxy');
+    var app = angular.module('cloudconnect');
     var cloud = require('../cloud');
     app.controller('InstanceController', function ($uibModalInstance, $scope, toastr, profile, instanceId, editMode, galaxyModal, $filter) {
         var vm = this, cloudInstances;

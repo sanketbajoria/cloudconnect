@@ -1,4 +1,4 @@
-angular.module('galaxy').directive('toolbar', function () {
+angular.module('cloudconnect').directive('toolbar', function () {
     return {
         restrict: 'E',
         controller: ToolbarCtrl,

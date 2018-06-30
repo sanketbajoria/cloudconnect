@@ -1,9 +1,9 @@
 'use strict';
 
 (function () {
-  var app = angular.module('galaxy');
+  var app = angular.module('cloudconnect');
   var SharingServer = require('../applications/sharing');
-  app.factory("SharingFactory", function (galaxyModal, TabFactory, JWTService) {
+  app.factory("SharingFactory", function (galaxyModal, TabFactory) {
     var sharingServer;
     return {
       openShareModal: function (db) {

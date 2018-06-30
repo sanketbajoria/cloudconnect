@@ -1,6 +1,6 @@
 'use strict';
 (function () {
-    var app = angular.module('galaxy');
+    var app = angular.module('cloudconnect');
 
     function ModalController($log, $uibModalInstance, config) {
         var vm = this;

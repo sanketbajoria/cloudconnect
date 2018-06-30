@@ -1,18 +1,18 @@
 {
-  "name": "galaxybot",
-  "productName": "GalaxyBot",
+  "name": "cloudconnect",
+  "productName": "Cloud Connect",
   "description": "Powerful cloud-oriented client allow you to connect to various applications via secure (SSH) tunnel",
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sanketbajoria/galaxy.git"
+    "url": "https://github.com/sanketbajoria/cloudconnect.git"
   },
   "author": "Sanket Bajoria <bajoriasanket@gmail.com>",
   "homepage": "http://sanketbajoria.com",
   "license": "MIT",
   "main": "target/background.js",
   "build": {
-    "appId": "com.galaxybot",
+    "appId": "com.cloudconnect",
     "files": [
       "target/**/*"
     ],

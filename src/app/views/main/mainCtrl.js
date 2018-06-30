@@ -1,4 +1,4 @@
-var app = angular.module('galaxy');
+var app = angular.module('cloudconnect');
 
 app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, $timeout, $filter, WorkspaceService, $document, LoaderService, TabFactory, SharingFactory) {
   var vm = this;
@@ -6,7 +6,7 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
   vm.config = config;
   LoaderService.stop();
 
-  $document[0].title = "GalaxyBot" + (WorkspaceService.getWorkspaceName() ? " - " + WorkspaceService.getWorkspaceName() : '');
+  $document[0].title = "Cloud Connect" + (WorkspaceService.getWorkspaceName() ? " - " + WorkspaceService.getWorkspaceName() : '');
 
   cloud.startAutomaticSync(db.getMainRepository());
 

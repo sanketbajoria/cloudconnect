@@ -112,7 +112,7 @@ function deleteCookie(cname) {
   var d = new Date();
   d.setTime(d.getTime() - (7 * 24 * 60 *60*1000));
   var expires = "expires="+ d.toUTCString();
-  return cname + "=null" + ";HttpOnly" + expires + ";";
+  return cname + "=''" + ";HttpOnly" + expires + ";";
 }
 
 
@@ -134,7 +134,7 @@ class Sharing{
           });
           req.on('end', () => {
             var params = JSON.parse(body);
-              if(uri == '/galaxybotToken'){
+              if(uri == '/cloudconnectToken'){
                 var token = params.token;
                 var data = utils.verifyAndExtractToken(this.db, token);
                 if(token && data){
@@ -145,7 +145,7 @@ class Sharing{
                   res.statusCode = 400;
                 }
                 res.end();
-              }else if(uri == '/galaxybotServers'){
+              }else if(uri == '/cloudconnectServers'){
                 var t = utils.verifyAndExtractServer(this.db, cookies.token, params.server);
                 //start a server and 
                 if(params.server && t){
@@ -164,15 +164,15 @@ class Sharing{
           });
         }else if(req.method === 'GET'){
           if(!staticServe(uri, req, res)){
-            if(uri === '/galaxybotLogout'){
+            if(uri === '/cloudconnectLogout'){
               res.setHeader('set-cookie', [deleteCookie("token"), deleteCookie("server")]);
               res.writeHead(302, {'Location': '/'});
               res.end();
-            }else if(uri === '/galaxybotHome'){
+            }else if(uri === '/cloudconnectHome'){
               res.setHeader('set-cookie', [deleteCookie("server")]);
               res.writeHead(302, {'Location': '/'});
               res.end();
-            }else if(uri === '/galaxybotServers'){
+            }else if(uri === '/cloudconnectServers'){
               var data = utils.verifyAndExtractToken(this.db, cookies.token);
               if(data){
                 res.write(JSON.stringify(getServers(this.db, data)));
@@ -186,12 +186,12 @@ class Sharing{
           }
         }   
       }else{
-        if(uri === '/galaxybotLogout'){
+        if(uri === '/cloudconnectLogout'){
           res.setHeader('set-cookie', [deleteCookie("token")]);
           res.setHeader('set-cookie', [deleteCookie("server")]);
           res.writeHead(302, {'Location': '/'});
           res.end();
-        }else if(uri === '/galaxybotHome'){
+        }else if(uri === '/cloudconnectHome'){
           res.setHeader('set-cookie', [deleteCookie("server")]);
           res.writeHead(302, {'Location': '/'});
           res.end();

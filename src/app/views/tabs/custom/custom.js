@@ -1,4 +1,4 @@
-angular.module('galaxy').directive('custom', function () {
+angular.module('cloudconnect').directive('custom', function () {
     return {
         restrict: 'E',
         replace: true,

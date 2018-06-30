@@ -1,4 +1,4 @@
-angular.module('galaxy')
+angular.module('cloudconnect')
     .directive("onEnterPress", function () {
         return function (scope, element, attrs) {
             element.bind("keydown keypress", function (event) {

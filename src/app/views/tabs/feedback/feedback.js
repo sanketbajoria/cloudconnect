@@ -1,4 +1,4 @@
-angular.module('galaxy').directive('feedback', function () {
+angular.module('cloudconnect').directive('feedback', function () {
     return {
         restrict: 'E',
         replace: true,

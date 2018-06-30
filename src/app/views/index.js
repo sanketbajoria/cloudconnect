@@ -1,4 +1,4 @@
-var app = angular.module('galaxy', ['ngRoute', 'ngAnimate', 'ui.bootstrap', 'toastr']).config(function ($routeProvider) {
+var app = angular.module('cloudconnect', ['ngRoute', 'ngAnimate', 'ui.bootstrap', 'toastr']).config(function ($routeProvider) {
     $routeProvider.when('/main', {
         controller: 'MainController',
         controllerAs: 'vm',

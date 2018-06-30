@@ -1,6 +1,6 @@
 'use strict';
 (function () {
-    var app = angular.module('galaxy');
+    var app = angular.module('cloudconnect');
     app.directive("uiLoader", function () {
         return {
             restrict: 'E',
