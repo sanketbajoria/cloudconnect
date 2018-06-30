@@ -22,7 +22,7 @@
     </div>
     <div class="col-sm-7">
       <button type="button" class="btn btn-primary btn-sm" style="margin-bottom: 15px;" ng-click="sharingTabCtrl.toggleServer()"
-        ng-disabled="serverForm.$invalid || sharingTabCtrl.serverUpdating">{{sharingTabCtrl.serverStatus}} Server</button>
+        ng-disabled="serverForm.$invalid || sharingTabCtrl.serverUpdating"><i class="fa fa-circle-notch fa-spin" ng-if="sharingTabCtrl.serverUpdating"></i> {{sharingTabCtrl.serverStatus}} Server</button>
     </div>
   </div>
 

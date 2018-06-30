@@ -24,7 +24,7 @@
 </div>
 <div class="modal-footer modal-footer-galaxy">
     <button type="button" class="btn btn-default btn-sm pull-left" ng-if="!profileCtrl.isTesting && profileCtrl.profile.type && profileCtrl.profile.type != 'generic'" ng-disabled="profile.$invalid" ng-click="profileCtrl.testConnection()">Test Connection</button>
-    <button type="button" class="btn btn-default btn-sm pull-left" ng-if="profileCtrl.isTesting" disabled="true" ><i class="fa fa-circle-o-notch fa-spin"></i> Testing</button>
+    <button type="button" class="btn btn-default btn-sm pull-left" ng-if="profileCtrl.isTesting" disabled="true" ><i class="fa fa-circle-notch fa-spin"></i> Testing</button>
     <button type="button" class="btn btn-default btn-sm" ng-click="profileCtrl.no()">Cancel</button>
     <button type="button" class="btn btn-primary btn-sm" ng-disabled="profile.$invalid" ng-click="profileCtrl.saveProfile()">Save</button>
 </div>
