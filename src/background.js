@@ -86,7 +86,7 @@ app.on('ready', () => {
       loadingWindow.close();
       mainWindow.maximize();
       mainWindow.focus();
-      mainWindow.openDevTools();
+      //mainWindow.openDevTools();
   });
 
   

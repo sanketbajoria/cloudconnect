@@ -2,7 +2,7 @@
     <h5 style="display:inline-block;"><i class="fa fa-arrow-left" data-dismiss="modal" ng-click="instanceCtrl.no()"></i> {{!instanceCtrl.editMode?'Add':'Edit'}}
         Instance Detail</h5>
     <button type="button" class="btn btn-primary pull-right btn-sm" ng-disabled="instanceCtrl.isInvalid()" ng-click="instanceCtrl.saveInstance()">Save</button>
-    <button type="button" class="btn btn-default pull-right btn-sm" ng-click="instanceCtrl.testConnection()">Test Connection</button>
+    <!-- <button type="button" class="btn btn-default pull-right btn-sm" ng-click="instanceCtrl.testConnection()">Test Connection</button> -->
 </div>
 <div class="modal-body">
         <form name="instance" novalidate class="form-horizontal">
@@ -100,7 +100,7 @@
                 </div>
                 <div class="card-footer">
                     <a type="button" class="btn-floating btn-small btn-trash" ng-click="instanceCtrl.instance.applications.splice($index, 1)"><i class="fa fa-trash"></i></a>
-                    <a type="button" class="btn-floating btn-small btn-check" ng-click="instanceCtrl.testApplication(a, $index)"><i class="fa fa-check"></i></a>
+                    <!-- <a type="button" class="btn-floating btn-small btn-check" ng-click="instanceCtrl.testApplication(a, $index)"><i class="fa fa-check"></i></a> -->
                     <a type="button" class="btn-floating btn-edit" ng-click="instanceCtrl.editApplication(a, $index)"><i class="fa fa-edit"></i></a>
                 </div>
             </div>

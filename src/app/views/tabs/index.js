@@ -94,9 +94,9 @@ angular.module('cloudconnect').directive('chromeTabs', function ($compile) {
                   }
                 });
               })
-              $webview[0].getWebContents().session.cookies.set({url: $webview[0].getURL(), name: 'dummy', value: 'value'}, function(err, cookies){
+             /*  $webview[0].getWebContents().session.cookies.set({url: $webview[0].getURL(), name: 'dummy', value: 'value'}, function(err, cookies){
                 console.log(cookies);
-              });
+              }); */
             })
 
             

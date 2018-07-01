@@ -5,11 +5,6 @@ var Socket = require('./Socket');
 class WebSSH {
     constructor(config, sshTunnel) {
       var app = (require('koa'))();
-      app.use(function* (next) {
-        console.log(this.request.url);
-        console.log(this.cookies.get('dummy'));
-        yield* next;
-      });
       app.use(koaStatic(path.join(__dirname, '../../views/tabs/term/web/')));
       app.use(koaStatic(path.join(__dirname, '../../../node_modules/')));
       app.use(koaStatic(path.join(__dirname, '../../icons/')));

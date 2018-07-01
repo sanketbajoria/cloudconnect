@@ -58,7 +58,7 @@ socket.on('data', function (data) {
 }); */
 
 socket.on('connect', function () {
-  socket.emit('init', term.cols, term.rows, getCookie('dummy'));
+  socket.emit('init', term.cols, term.rows);
 })
 
 socket.on('setTerminalOpts', function (data) {

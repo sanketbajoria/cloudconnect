@@ -27,10 +27,6 @@
             }
         }
 
-        vm.getDescription = function(app, idx){
-            return "dummy";
-        }
-
         vm.editApplication = function(app, idx){
             var editMode = !!app;
             galaxyModal.open({
@@ -73,6 +69,9 @@
         }
 
         vm.checkLocalHost = function () {
+            if(!utils.isGenericType(vm.instance)){
+                vm.instance.cloud.instance = cloud.getCloudInstancesBasedOnInstanceId(db.getMainRepository().getProfile(vm.instance.cloud.profileId), vm.instance.cloud.instanceName)[0];
+            }
             utils.isLocalHost(vm.instance).then((isLocalhost) => {
                 vm.instance.isLocalhost = isLocalhost;
             });

@@ -182,8 +182,7 @@
           width: this.canvas.width,
           height: this.canvas.height
         },
-        locale: Mstsc.locale(),
-        cookieValue: cookieValue || getCookie('dummy')
+        locale: Mstsc.locale()
       });
     }
   }

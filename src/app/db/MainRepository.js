@@ -111,10 +111,16 @@ function DB(path, password, newWorkspace) {
             //instances api
             addInstance: saveDB(function (instance, profile) {
                 instance.profile = profile.$loki;
+                if(instance.cloud && instance.cloud.instance){
+                    delete instance.cloud.instance;
+                }
                 return instances.insert(instance);
             }),
             updateInstance: saveDB(function (instance, profile) {
                 instance.profile = profile.$loki;
+                if(instance.cloud && instance.cloud.instance){
+                    delete instance.cloud.instance;
+                }
                 return instances.update(instance);
             }),
             removeInstance: saveDB(function (instance) {

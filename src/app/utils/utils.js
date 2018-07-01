@@ -202,7 +202,8 @@ module.exports = {
       var sshConfig = {
         username: sshApp.config.userName,
         host: this.getRemoteAddr(instance),
-        port: sshApp.port
+        port: sshApp.port,
+        reconnect: false
       };
       if (sshApp.config.secret.key == 'password') {
         sshConfig.password = sshApp.config.secret.password
