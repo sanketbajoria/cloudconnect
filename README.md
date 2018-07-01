@@ -2,7 +2,7 @@
 Powerful cloud-oriented client allow you to connect to various instances and applications via secure (SSH) tunnel & RDP
 
 # Demo
-<img src="https://cloud.githubusercontent.com/assets/2969587/19343848/8d8e405c-9155-11e6-8106-c32896b6be47.jpg" width="720" height="375" title="Basic Demo" />
+<div style="text-align:center"><img src="https://raw.githubusercontent.com/sanketbajoria/cloudconnect/master/example/cloudconnectoptimize.gif" width="850" height="425" title="Basic Demo" /></div>
 
 
 # Features
