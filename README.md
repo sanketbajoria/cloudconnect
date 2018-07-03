@@ -8,6 +8,7 @@ Powerful cloud-oriented client allow you to connect to various instances and app
 <img src="https://github.com/sanketbajoria/cloudconnect/blob/master/example/318.png?raw=true" style="display:inline" width="280" title="ssh" /> <img src="https://github.com/sanketbajoria/cloudconnect/blob/master/example/330.png?raw=true" width="280" title="scullog" /> <img src="https://github.com/sanketbajoria/cloudconnect/blob/master/example/538.png?raw=true" width="280" title="rdp" />
 
 # Features
+- Segregate instances under different profiles and workspaces for better management
 - Ability to connect with AWS
 - Connect to applications such as SSH, Scullog, Docker Machine, RDP & any custom Http/Https application
 - Create a forward and reverse tunnel
