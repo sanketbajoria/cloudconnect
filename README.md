@@ -1,11 +1,12 @@
 # Cloud Connect
-Powerful cloud-oriented client allow you to connect to various instances and applications via secure (SSH) tunnel & RDP
+Powerful cloud aware client allow you to connect to various instances and applications such as SSH, SFTP, RDP and Docker
 
-# Demo
 <div style="text-align:center"><img src="https://raw.githubusercontent.com/sanketbajoria/cloudconnect/master/example/cloudconnectoptimize.gif" width="850" height="425" title="Basic Demo" /></div>
-<br/>
 
-<img src="https://github.com/sanketbajoria/cloudconnect/blob/master/example/318.png?raw=true" style="display:inline" width="280" title="ssh" /> <img src="https://github.com/sanketbajoria/cloudconnect/blob/master/example/330.png?raw=true" width="280" title="scullog" /> <img src="https://github.com/sanketbajoria/cloudconnect/blob/master/example/538.png?raw=true" width="280" title="rdp" />
+It can also share applications with other in secure manner, <b>without revealing real credential</b>
+
+# Motivation
+I really wanted a single client to connect all cloud profiles such as AWS, Google cloud, Azure etc.. And, help to me, connect to any application with a single click.
 
 # Features
 - Segregate instances under different profiles and workspaces for better management
@@ -14,7 +15,6 @@ Powerful cloud-oriented client allow you to connect to various instances and app
 - Create a forward and reverse tunnel
 - Share application safely with other, without sharing any connection detail of real instances
 - Secure workspace with strong encryption
-
 
 # Installation
 Install from dist folder, contains windows build 
