@@ -15,12 +15,12 @@ app.controller('MainController', function ($scope, $q, db, galaxyModal, toastr, 
 
   $("body").on("keypress keydown keyup", function (e) {
     if (e.which == 6 && (e.ctrlKey || e.metaKey)) {
-      $scope.$apply(function () {
+      utils.safeApply($scope, function () {
         vm.chromeTabs.showSearch = true;
       })
     }
     if (e.which == 27) {
-      $scope.$apply(function () {
+      utils.safeApply($scope, function () {
         vm.chromeTabs.showSearch = false;
       })
     }

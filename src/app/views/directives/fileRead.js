@@ -17,7 +17,7 @@ var fs = require('fs');
             },
             link: function (scope, element, attributes) {
                 element.bind("change", function (changeEvent) {
-                    scope.$apply(function () {
+                    utils.safeApply(scope, function () {
                         if(scope.multiple === true || scope.multiple === 'true'){
                             scope.fileRead = [...changeEvent.target.files].map(mapFile);
                         }else{

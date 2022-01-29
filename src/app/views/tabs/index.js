@@ -12,16 +12,18 @@ angular.module('cloudconnect').directive('chromeTabs', function ($compile) {
     controllerAs: 'tabCtrl',
     controller: function ($scope, $element, $attrs, galaxyModal, $timeout) {
       var vm = this;
-      vm.findText = function(findNext, backward){
+      vm.findText = utils.debounce(function(findNext, backward){
         if(vm.getCurrentWebContent()){
           if(vm.searchText){
-            vm.getCurrentWebContent().findInPage(vm.searchText, {forward: !backward, findNext: findNext});
+            //vm.getCurrentWebContent().stopFindInPage('clearSelection');
+            //vm.getCurrentWebContent().findInPage(vm.searchText, {forward: !backward, findNext: findNext});
           }
           else{
-            vm.getCurrentWebContent().stopFindInPage('clearSelection');
+            //vm.getCurrentWebContent().stopFindInPage('clearSelection');
           }
         }
-      }
+      }, 500, false);
+      
 
       vm.getCurrentWebContent = function(){
         var view = $scope.api.$views.data('chromeTabViews').getWebview($scope.api.$views.data('chromeTabViews').$currentView);
@@ -50,12 +52,18 @@ angular.module('cloudconnect').directive('chromeTabs', function ($compile) {
         $scope.api = $chromeTabs.data('chromeTabs');
       
 
+        $scope.$on('viewBeingRemoved',  function (event, $view, i){
+          var $webview = $scope.api.$views.data('chromeTabViews').getWebview($view);
+          if ($webview.is('webview')) {
+            $webview[0].getWebContents().stopFindInPage('clearSelection');
+          }
+        });
         $scope.$on('viewAdded', function (event, $view, i, props) {
           var $webview = $scope.api.$views.data('chromeTabViews').getWebview($view);
           if ($webview.is('webview')) {
             $webview[0].addEventListener('dom-ready', () => {
               $webview[0].getWebContents().on('found-in-page', (event, result) => {
-                $scope.$apply(function () {
+                utils.safeApply($scope, function () {
                   vm.currentMatch = result.activeMatchOrdinal;
                   vm.totalMatch = result.matches;
                 })
